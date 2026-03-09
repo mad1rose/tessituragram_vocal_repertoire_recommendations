@@ -1,0 +1,249 @@
+{
+    "experiment": "alpha_sensitivity",
+    "description": "Sensitivity of RQ1 and RQ2 metrics to the avoid-penalty weight alpha. For each alpha in {0.0, 0.25, 0.5, 0.75, 1.0}, we recompute HR@1, HR@3, HR@5, MRR (RQ1) and Kendall's tau (RQ2) using the same query and baseline selection rules as the main experiments.",
+    "alpha_values": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "parameters": {
+      "alpha_values": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "bootstrap_samples": 10000,
+      "rq1_random_seed": 42,
+      "rq1_n_queries_max": 50,
+      "rq1_min_candidates": 2,
+      "rq2_random_seed": 42,
+      "rq2_n_baselines_target": 5,
+      "rq2_min_candidates": 10,
+      "library_path": "data\\tessituragrams.json"
+    },
+    "rq1_setup": {
+      "valid_query_pool_size": 95,
+      "queries_sampled": 50
+    },
+    "rq2_setup": {
+      "n_baselines": 5
+    },
+    "rq1_metrics": {
+      "0.0": {
+        "HR@1": {
+          "value": 0.88,
+          "ci_95": [
+            0.78,
+            0.96
+          ]
+        },
+        "HR@3": {
+          "value": 1.0,
+          "ci_95": [
+            1.0,
+            1.0
+          ]
+        },
+        "HR@5": {
+          "value": 1.0,
+          "ci_95": [
+            1.0,
+            1.0
+          ]
+        },
+        "MRR": {
+          "value": 0.93,
+          "ci_95": [
+            0.8733,
+            0.9767
+          ]
+        }
+      },
+      "0.25": {
+        "HR@1": {
+          "value": 0.86,
+          "ci_95": [
+            0.76,
+            0.94
+          ]
+        },
+        "HR@3": {
+          "value": 1.0,
+          "ci_95": [
+            1.0,
+            1.0
+          ]
+        },
+        "HR@5": {
+          "value": 1.0,
+          "ci_95": [
+            1.0,
+            1.0
+          ]
+        },
+        "MRR": {
+          "value": 0.92,
+          "ci_95": [
+            0.8633,
+            0.97
+          ]
+        }
+      },
+      "0.5": {
+        "HR@1": {
+          "value": 0.84,
+          "ci_95": [
+            0.74,
+            0.94
+          ]
+        },
+        "HR@3": {
+          "value": 1.0,
+          "ci_95": [
+            1.0,
+            1.0
+          ]
+        },
+        "HR@5": {
+          "value": 1.0,
+          "ci_95": [
+            1.0,
+            1.0
+          ]
+        },
+        "MRR": {
+          "value": 0.9067,
+          "ci_95": [
+            0.8433,
+            0.9633
+          ]
+        }
+      },
+      "0.75": {
+        "HR@1": {
+          "value": 0.84,
+          "ci_95": [
+            0.74,
+            0.94
+          ]
+        },
+        "HR@3": {
+          "value": 1.0,
+          "ci_95": [
+            1.0,
+            1.0
+          ]
+        },
+        "HR@5": {
+          "value": 1.0,
+          "ci_95": [
+            1.0,
+            1.0
+          ]
+        },
+        "MRR": {
+          "value": 0.9067,
+          "ci_95": [
+            0.8433,
+            0.9633
+          ]
+        }
+      },
+      "1.0": {
+        "HR@1": {
+          "value": 0.84,
+          "ci_95": [
+            0.74,
+            0.94
+          ]
+        },
+        "HR@3": {
+          "value": 1.0,
+          "ci_95": [
+            1.0,
+            1.0
+          ]
+        },
+        "HR@5": {
+          "value": 1.0,
+          "ci_95": [
+            1.0,
+            1.0
+          ]
+        },
+        "MRR": {
+          "value": 0.9067,
+          "ci_95": [
+            0.8433,
+            0.9633
+          ]
+        }
+      }
+    },
+    "rq2_metrics": {
+      "0.0": {
+        "mean_tau_overall": 0.8761,
+        "std_tau_overall": 0.1319,
+        "mean_tau_per_baseline": 0.8744,
+        "std_tau_across_baselines": 0.0401,
+        "ci_95_baseline_mean": [
+          0.839,
+          0.9066
+        ],
+        "n_perturbations": 130,
+        "n_baselines": 5
+      },
+      "0.25": {
+        "mean_tau_overall": 0.8629,
+        "std_tau_overall": 0.1245,
+        "mean_tau_per_baseline": 0.8619,
+        "std_tau_across_baselines": 0.0374,
+        "ci_95_baseline_mean": [
+          0.8286,
+          0.8843
+        ],
+        "n_perturbations": 130,
+        "n_baselines": 5
+      },
+      "0.5": {
+        "mean_tau_overall": 0.849,
+        "std_tau_overall": 0.1138,
+        "mean_tau_per_baseline": 0.8481,
+        "std_tau_across_baselines": 0.0435,
+        "ci_95_baseline_mean": [
+          0.8086,
+          0.8758
+        ],
+        "n_perturbations": 130,
+        "n_baselines": 5
+      },
+      "0.75": {
+        "mean_tau_overall": 0.834,
+        "std_tau_overall": 0.1118,
+        "mean_tau_per_baseline": 0.8339,
+        "std_tau_across_baselines": 0.0476,
+        "ci_95_baseline_mean": [
+          0.7991,
+          0.8674
+        ],
+        "n_perturbations": 130,
+        "n_baselines": 5
+      },
+      "1.0": {
+        "mean_tau_overall": 0.8263,
+        "std_tau_overall": 0.1155,
+        "mean_tau_per_baseline": 0.8261,
+        "std_tau_across_baselines": 0.0523,
+        "ci_95_baseline_mean": [
+          0.7842,
+          0.8645
+        ],
+        "n_perturbations": 130,
+        "n_baselines": 5
+      }
+    }
+  }
