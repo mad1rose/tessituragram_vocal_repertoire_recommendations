@@ -248,7 +248,8 @@ def score_profile_vs_part(
     """Score one profile against one song part.
 
     Uses the profile's pre-built ideal vector and per-profile alpha.
-    Returns a detail dict with cosine_similarity, avoid_penalty, etc.
+    The dense vector is built over the *profile's* own range so it
+    matches the ideal vector's dimensionality.
     """
     tess = part.get('tessituragram_data', {})
     ideal_vec = profile['ideal_vec']
@@ -258,13 +259,13 @@ def score_profile_vs_part(
     avoid_midis = profile.get('avoid_midis', [])
     favorite_midis = profile.get('favorite_midis', [])
 
-    dense = build_dense_vector(tess, global_min, global_max)
+    dense = build_dense_vector(tess, min_midi, max_midi)
     normed = normalize_l1(dense)
 
     cos_sim = cosine_similarity(normed, ideal_vec)
 
-    avoid_indices = [m - global_min for m in avoid_midis if global_min <= m <= global_max]
-    fav_indices = [m - global_min for m in favorite_midis if global_min <= m <= global_max]
+    avoid_indices = [m - min_midi for m in avoid_midis if min_midi <= m <= max_midi]
+    fav_indices = [m - min_midi for m in favorite_midis if min_midi <= m <= max_midi]
 
     avoid_penalty = float(sum(normed[i] for i in avoid_indices)) if avoid_indices else 0.0
     fav_overlap = float(sum(normed[i] for i in fav_indices)) if fav_indices else 0.0
@@ -276,7 +277,7 @@ def score_profile_vs_part(
         'favorite_overlap': round(fav_overlap, 4),
         'final_score': round(final_score, 4),
         'normalized_vector': {
-            str(global_min + i): round(float(v), 6)
+            str(min_midi + i): round(float(v), 6)
             for i, v in enumerate(normed)
         },
     }

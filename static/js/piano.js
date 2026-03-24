@@ -55,27 +55,27 @@ function buildPiano() {
     el.dataset.midi = m;
     el.dataset.note = midiToNoteName(m);
 
+    const lbl = document.createElement('span');
+    lbl.className = 'key-label';
+    lbl.textContent = midiToNoteName(m);
+    lbl.style.pointerEvents = 'none';
+
     if (isWhite(m)) {
       el.classList.add('white-key');
       el.style.left = (whitePositions[m] * KEY_W) + 'px';
       el.style.width = KEY_W + 'px';
       el.style.height = KEY_H + 'px';
-
-      if (m % 12 === 0) {
-        const lbl = document.createElement('span');
-        lbl.className = 'key-label';
-        lbl.textContent = midiToNoteName(m);
-        lbl.style.pointerEvents = 'none';
-        el.appendChild(lbl);
-      }
+      el.appendChild(lbl);
     } else {
       el.classList.add('black-key');
+      lbl.classList.add('black-key-label');
       const leftWhite = whitePositions[m - 1];
       if (leftWhite !== undefined) {
         el.style.left = (leftWhite * KEY_W + KEY_W - BK_W / 2) + 'px';
       }
       el.style.width = BK_W + 'px';
       el.style.height = BK_H + 'px';
+      el.appendChild(lbl);
     }
 
     el.title = midiToNoteName(m) + ' (MIDI ' + m + ')';
@@ -114,22 +114,48 @@ function onKeyClick(midi) {
 function handleRangeClick(midi) {
   const s = pianoState;
 
-  if (s.rangeStart === null || s._rangeClicks >= 2) {
+  if (s.rangeStart === null) {
+    // First click — set low note
     s.rangeStart = midi;
     s.rangeEnd = null;
     s._rangeClicks = 1;
     s.favorites.clear();
     s.avoids.clear();
   } else if (s.rangeEnd === null) {
-    if (midi < s.rangeStart) {
+    // Second click — set high note (or re-tap low to restart)
+    if (midi === s.rangeStart) {
+      s.rangeStart = null;
+      s.rangeEnd = null;
+      s._rangeClicks = 0;
+      s.favorites.clear();
+      s.avoids.clear();
+    } else if (midi < s.rangeStart) {
       s.rangeEnd = s.rangeStart;
       s.rangeStart = midi;
-    } else if (midi > s.rangeStart) {
-      s.rangeEnd = midi;
+      s._rangeClicks = 2;
     } else {
-      return;
+      s.rangeEnd = midi;
+      s._rangeClicks = 2;
     }
-    s._rangeClicks = 2;
+  } else {
+    // Range already complete — tap low or high to re-pick that boundary
+    if (midi === s.rangeStart) {
+      s.rangeStart = null;
+      s.rangeEnd = null;
+      s._rangeClicks = 0;
+      s.favorites.clear();
+      s.avoids.clear();
+    } else if (midi === s.rangeEnd) {
+      s.rangeEnd = null;
+      s._rangeClicks = 1;
+    } else {
+      // Clicked a different note — start over
+      s.rangeStart = midi;
+      s.rangeEnd = null;
+      s._rangeClicks = 1;
+      s.favorites.clear();
+      s.avoids.clear();
+    }
   }
 
   refreshKeyStyles();

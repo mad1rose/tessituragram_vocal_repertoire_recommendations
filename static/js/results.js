@@ -43,9 +43,9 @@ function renderChart(el) {
   const colors = [];
   for (let i = 0; i < n; i++) {
     const t = n > 1 ? i / (n - 1) : 0.5;
-    const r = Math.round(68 + t * 100);
-    const g = Math.round(1 + t * 180);
-    const b = Math.round(84 + (1 - t) * 100);
+    const r = Math.round(180 + t * 50);
+    const g = Math.round(120 + t * 60);
+    const b = Math.round(200 + (1 - t) * 40);
     colors.push('rgb(' + r + ',' + g + ',' + b + ')');
   }
 
@@ -63,20 +63,30 @@ function renderChart(el) {
     type: 'scatter',
     mode: 'lines+markers',
     name: 'Ideal vector',
-    line: { color: '#e94560', width: 2 },
+    line: { color: '#d4619b', width: 2.5 },
     marker: { size: 4 },
   };
 
   const layout = {
-    title: { text: title, font: { size: 12, family: 'Poppins', color: '#f5f5f5' } },
+    title: { text: title, font: { size: 13, family: 'Poppins', color: '#3a2d3d' } },
     paper_bgcolor: 'rgba(0,0,0,0)',
-    plot_bgcolor: 'rgba(15,15,26,0.5)',
-    font: { color: '#a0a0b0', size: 9, family: 'Inter' },
-    xaxis: { tickangle: -45, tickfont: { size: 8 } },
-    yaxis: { title: 'Proportion of singing time', titlefont: { size: 10 } },
-    legend: { x: 0.7, y: 1.15, orientation: 'h', font: { size: 9 } },
-    margin: { t: 40, b: 80, l: 50, r: 20 },
-    bargap: 0.15,
+    plot_bgcolor: 'rgba(253,240,247,0.5)',
+    font: { color: '#8a7a8e', size: 9, family: 'Inter' },
+    xaxis: {
+      tickangle: -45,
+      tickfont: { size: 7 },
+      gridcolor: '#ead6e6',
+      automargin: true,
+    },
+    yaxis: {
+      title: 'Proportion of singing time',
+      titlefont: { size: 10 },
+      gridcolor: '#ead6e6',
+      automargin: true,
+    },
+    legend: { x: 0, y: 1.12, orientation: 'h', font: { size: 9 } },
+    margin: { t: 50, b: 100, l: 60, r: 20 },
+    bargap: 0.2,
   };
 
   Plotly.newPlot(el, [barTrace, lineTrace], layout, {

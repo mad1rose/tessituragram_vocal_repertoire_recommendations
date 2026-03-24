@@ -64,7 +64,7 @@
              data-normed='{{ r.normalized_vector | tojson }}'
              data-ideal='{{ prof.get("ideal_vector", {}) | tojson }}'
              data-chart-title="{{ prof.get('name', 'You') }} — score {{ '%.2f'|format(r.final_score) }}"
-             style="width:100%;height:320px;"></div>
+             style="width:100%;height:380px;"></div>
       </div>
     </div>
 
@@ -101,7 +101,7 @@
              data-normed='{{ a.normalized_vector | tojson }}'
              data-ideal='{{ prof.get("ideal_vector", {}) | tojson }}'
              data-chart-title="{{ names[pi] if pi < names|length else 'Profile ' ~ (pi+1) }} → {{ a.part_name or a.part_id }} ({{ '%.2f'|format(a.final_score) }})"
-             style="width:100%;height:320px;"></div>
+             style="width:100%;height:380px;"></div>
       </div>
       {% endfor %}
     </div>

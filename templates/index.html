@@ -10,10 +10,8 @@
   <form method="post" action="{{ url_for('select_ensemble') }}" style="display:contents">
     <input type="hidden" name="num_parts" value="{{ num }}">
     <input type="hidden" name="ensemble_label" value="{{ info.label }}">
-    <button type="submit" class="card card-clickable ensemble-card" style="border:1px solid var(--border);text-align:center;">
-      <div class="ensemble-icon">
-        {% if num == 1 %}&#128100;{% elif num == 2 %}&#128101;{% elif num == 3 %}&#128101;+{% else %}&#127932;{% endif %}
-      </div>
+    <button type="submit" class="card card-clickable ensemble-card">
+      <div class="ensemble-icon">{{ ('&#128100; ' * num) | safe }}</div>
       <div class="ensemble-label">{{ info.label }}</div>
       <div class="ensemble-parts">{{ num }} voice part{{ 's' if num != 1 }}</div>
       <div class="ensemble-count">{{ info.count }} song{{ 's' if info.count != 1 }}</div>
