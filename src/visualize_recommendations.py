@@ -1,5 +1,7 @@
 """Generate a Jupyter notebook visualising ranked song recommendations."""
 
+from __future__ import annotations
+
 import json
 import re
 import sys
@@ -7,7 +9,6 @@ from pathlib import Path
 
 import nbformat
 
-# Standard note names for each pitch class (0–11).
 NOTE_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
 
 
@@ -35,22 +36,19 @@ def _song_label(rec: dict) -> str:
     return f"{title}, {subtitle}\\n{composer}"
 
 
-def _make_plot_code(
+# ── Plot code generators ─────────────────────────────────────────────────────
+
+def _make_solo_plot_code(
     rec: dict,
     ideal_vector: dict,
     min_midi: int,
     max_midi: int,
 ) -> str:
-    """
-    Return Python code that plots:
-      - The song's normalised tessituragram as bars.
-      - The ideal vector as a translucent line overlay.
-    """
+    """Plot code for a solo recommendation (one chart)."""
     normed = rec.get('normalized_vector', {})
     if not normed:
         return f"# Song '{rec.get('filename', '?')}' has no vector data."
 
-    # Build parallel lists over the full pitch space
     all_midis = list(range(min_midi, max_midi + 1))
     labels = [_pretty_pitch(m) for m in all_midis]
     song_values = [normed.get(str(m), 0.0) for m in all_midis]
@@ -91,34 +89,93 @@ def _make_plot_code(
     )
 
 
+def _make_multi_plot_code(
+    rec: dict,
+    assignment_entry: dict,
+    ideal_vector: dict,
+    profile_index: int,
+    global_min: int,
+    global_max: int,
+) -> str:
+    """Plot code for one profile-to-part assignment within a multi-part song."""
+    normed = assignment_entry.get('normalized_vector', {})
+    if not normed:
+        return "# No vector data for this part."
+
+    all_midis = list(range(global_min, global_max + 1))
+    labels = [_pretty_pitch(m) for m in all_midis]
+    song_values = [normed.get(str(m), 0.0) for m in all_midis]
+    ideal_values = [ideal_vector.get(str(m), 0.0) for m in all_midis]
+    num_pitches = len(labels)
+    fig_width = max(8, num_pitches * 0.75)
+
+    rank = rec.get('rank', '?')
+    part_name = assignment_entry.get('part_name', '') or assignment_entry.get('part_id', '?')
+    score = assignment_entry.get('final_score', 0)
+    cos_sim = assignment_entry.get('cosine_similarity', 0)
+    title = rec.get('title', '')
+    composer = rec.get('composer', '')
+
+    chart_title = (
+        f"#{rank}  {title} — Profile {profile_index + 1} → {part_name}\\n"
+        f"{composer}  |  score {score:.2f}  (cos sim {cos_sim:.2f})"
+    )
+
+    return (
+        "import matplotlib.pyplot as plt\n"
+        "import numpy as np\n"
+        "\n"
+        f"labels = {labels!r}\n"
+        f"song_vals = {song_values!r}\n"
+        f"ideal_vals = {ideal_values!r}\n"
+        f"num = {num_pitches}\n"
+        "\n"
+        "x = np.arange(num)\n"
+        f"colors = plt.cm.viridis(np.linspace(0.25, 0.85, num))\n"
+        "\n"
+        f"fig, ax = plt.subplots(figsize=({fig_width:.1f}, 6))\n"
+        "ax.bar(x, song_vals, color=colors, edgecolor='white', linewidth=0.5,\n"
+        "       label='Part (normalised)', zorder=2)\n"
+        "ax.plot(x, ideal_vals, color='red', linewidth=2, marker='o',\n"
+        "        markersize=4, alpha=0.7, label=f'Profile {}"
+        " ideal vector', zorder=3)\n".format(profile_index + 1) +
+        "ax.set_xticks(x)\n"
+        "ax.set_xticklabels(labels, rotation=45, ha='right', fontsize=7)\n"
+        "ax.set_ylabel('Proportion of singing time')\n"
+        "ax.set_xlabel('Pitch — Note Name (MIDI Number)')\n"
+        f"ax.set_title({chart_title!r},\n"
+        "             fontsize=10, fontweight='bold')\n"
+        "ax.legend(fontsize=8)\n"
+        "fig.tight_layout()\n"
+        "plt.show()\n"
+    )
+
+
+# ── Notebook generation ──────────────────────────────────────────────────────
+
 def generate_notebook(
     json_path: str = 'data/recommendations.json',
     output_path: str = 'recommendations.ipynb',
 ) -> None:
-    """
-    Read recommendation JSON and write a Jupyter notebook with one
-    histogram per recommended song, overlaid with the ideal vector.
-    """
+    """Read recommendation JSON and write a Jupyter notebook with charts
+    comparing each song's tessituragram(s) to the ideal vector(s)."""
     src = Path(json_path)
     if not src.exists():
         print(f"Error: {json_path} not found.")
-        print("Run  python -m src.run_recommendations  first to generate recommendations.")
+        print("Run  python -m src.run_recommendations  first.")
         sys.exit(1)
 
     with open(src, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    prefs = data.get('user_preferences', {})
-    ideal_vector = data.get('ideal_vector', {})
+    profiles = data.get('profiles', [])
     recs = data.get('recommendations', [])
+    ensemble_type = data.get('ensemble_type', 'Solo')
+    num_profiles = data.get('num_profiles', 1)
 
     if not recs:
         print("No recommendations found in data file.")
         sys.exit(1)
-
-    rng = prefs.get('range', {})
-    min_midi = rng.get('low_midi', 0)
-    max_midi = rng.get('high_midi', 127)
 
     nb = nbformat.v4.new_notebook()
     nb.metadata['kernelspec'] = {
@@ -128,38 +185,105 @@ def generate_notebook(
     }
 
     # ── Title / summary cell ─────────────────────────────────────────────
-    fav_str = ', '.join(prefs.get('favorite_notes', [])) or '(none)'
-    avoid_str = ', '.join(prefs.get('avoid_notes', [])) or '(none)'
-
-    summary = (
-        "# Recommended Songs — Tessituragram Comparison\n\n"
-        f"**Your range:** {rng.get('low', '?')} – {rng.get('high', '?')}  \n"
-        f"**Favorite notes:** {fav_str}  \n"
-        f"**Avoid notes:** {avoid_str}  \n"
-        f"**Songs evaluated:** {len(recs)}  \n\n"
-        "Each chart below shows the song's normalised tessituragram (bars) "
-        "overlaid with the **ideal vector** (red line).  \n"
-        "Songs are ordered from best match (#1) to worst match.\n\n"
-        "Run **Cell \u2192 Run All** (or **Ctrl+Shift+Enter**) to render all charts."
-    )
-    nb.cells.append(nbformat.v4.new_markdown_cell(summary))
-
-    # ── One markdown + code cell per recommendation ──────────────────────
-    for rec in recs:
-        rank = rec.get('rank', '?')
-        title = rec.get('title', '')
-        composer = rec.get('composer', '')
-        explanation = rec.get('explanation', '')
-
-        md = (
-            f"### #{rank}  {title}\n"
-            f"**{composer}**  \n"
-            f"{explanation}"
+    summary_lines = [
+        "# Recommended Songs — Tessituragram Comparison\n",
+        f"**Ensemble type:** {ensemble_type}  ",
+        f"**Number of profiles:** {num_profiles}  \n",
+    ]
+    for idx, prof in enumerate(profiles):
+        rng = prof.get('range', {})
+        fav_str = ', '.join(prof.get('favorite_notes', [])) or '(none)'
+        avoid_str = ', '.join(prof.get('avoid_notes', [])) or '(none)'
+        alpha = prof.get('alpha', 0.0)
+        summary_lines.append(
+            f"**Profile {idx + 1}:** "
+            f"{rng.get('low', '?')} – {rng.get('high', '?')}  |  "
+            f"Favorites: {fav_str}  |  Avoid: {avoid_str}  |  "
+            f"Alpha: {alpha}  "
         )
-        nb.cells.append(nbformat.v4.new_markdown_cell(md))
 
-        code = _make_plot_code(rec, ideal_vector, min_midi, max_midi)
-        nb.cells.append(nbformat.v4.new_code_cell(code))
+    summary_lines.append(f"\n**Songs evaluated:** {len(recs)}  \n")
+    summary_lines.append(
+        "Each chart shows a part's normalised tessituragram (bars) "
+        "overlaid with the **matched profile's ideal vector** (red line).  \n"
+        "Songs are ordered from best match (#1) to worst.\n\n"
+        "Run **Cell → Run All** (or **Ctrl+Shift+Enter**) to render all charts."
+    )
+    nb.cells.append(nbformat.v4.new_markdown_cell('\n'.join(summary_lines)))
+
+    # ── Charts ───────────────────────────────────────────────────────────
+    is_solo = num_profiles == 1
+
+    if is_solo:
+        ideal_vector = profiles[0].get('ideal_vector', {}) if profiles else {}
+        rng = profiles[0].get('range', {}) if profiles else {}
+        min_midi = rng.get('low_midi', 0)
+        max_midi = rng.get('high_midi', 127)
+
+        for rec in recs:
+            rank = rec.get('rank', '?')
+            title = rec.get('title', '')
+            composer = rec.get('composer', '')
+            explanation = rec.get('explanation', '')
+
+            md = (
+                f"### #{rank}  {title}\n"
+                f"**{composer}**  \n"
+                f"{explanation}"
+            )
+            nb.cells.append(nbformat.v4.new_markdown_cell(md))
+            code = _make_solo_plot_code(rec, ideal_vector, min_midi, max_midi)
+            nb.cells.append(nbformat.v4.new_code_cell(code))
+
+    else:
+        global_min = min(
+            (p.get('range', {}).get('low_midi', 127) for p in profiles),
+            default=0,
+        )
+        global_max = max(
+            (p.get('range', {}).get('high_midi', 0) for p in profiles),
+            default=127,
+        )
+
+        for rec in recs:
+            rank = rec.get('rank', '?')
+            title = rec.get('title', '')
+            composer = rec.get('composer', '')
+            avg = rec.get('average_score', 0)
+
+            header_parts = [
+                f"### #{rank}  {title}  ({ensemble_type})",
+                f"**{composer}**  ",
+                f"**Average score:** {avg:.2f}  \n",
+            ]
+
+            for a in rec.get('assignment', []):
+                pi = a['profile_index']
+                pname = a.get('part_name', '') or a.get('part_id', '')
+                header_parts.append(
+                    f"- Profile {pi + 1} → {pname} "
+                    f"(score {a['final_score']:.2f}, "
+                    f"cos sim {a['cosine_similarity']:.2f})"
+                )
+
+            for i, j in rec.get('interchangeable_profiles', []):
+                header_parts.append(
+                    f"\n*Profiles {i + 1} and {j + 1} are interchangeable "
+                    f"for their assigned parts.*"
+                )
+
+            nb.cells.append(nbformat.v4.new_markdown_cell('\n'.join(header_parts)))
+
+            for a in rec.get('assignment', []):
+                pi = a['profile_index']
+                ideal_vec = {}
+                if pi < len(profiles):
+                    ideal_vec = profiles[pi].get('ideal_vector', {})
+
+                code = _make_multi_plot_code(
+                    rec, a, ideal_vec, pi, global_min, global_max,
+                )
+                nb.cells.append(nbformat.v4.new_code_cell(code))
 
     dest = Path(output_path)
     with open(dest, 'w', encoding='utf-8') as f:

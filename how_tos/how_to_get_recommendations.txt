@@ -12,7 +12,15 @@ WHAT IS THIS?
 --------------------------------------------------------------------------------
 
 This tool looks at every song in your library and figures out which ones are
-the best fit for your voice.  You tell it three things:
+the best fit for your voice — or for a group of singers performing together.
+
+You start by choosing the TYPE of piece you are looking for:
+  Solo   (1 voice part)
+  Duet   (2 voice parts)
+  Trio   (3 voice parts)
+  Quartet, Quintet, etc.
+
+Then, for each singer, you enter three things:
 
   1. Your vocal range  (the lowest and highest notes you can comfortably sing)
   2. Your favorite notes  (notes you love singing — optional; can use ranges
@@ -20,9 +28,12 @@ the best fit for your voice.  You tell it three things:
   3. Notes to avoid  (notes you'd rather not sing — optional; same range format)
 
 The tool then:
-  - Filters out any song whose range goes outside yours
-  - Builds an "ideal" pitch profile from your preferences
-  - Compares every remaining song to that ideal profile
+  - Filters out songs that do not match your chosen ensemble type
+  - For SOLO songs: filters by range, builds an ideal profile, scores, and
+    ranks all remaining songs
+  - For MULTI-PART songs: finds the best assignment of singers to vocal lines,
+    so that the average fit across all singers is maximised.  A song is only
+    considered if EVERY vocal line can be sung by exactly one of the singers.
   - Ranks the songs from best match to worst match
   - Explains why each song ranked where it did
 
@@ -34,7 +45,7 @@ WHAT YOU WILL NEED
 1. A computer (Windows, Mac, or Linux)
 2. Python installed (version 3.10 or newer)
 3. The project's required libraries installed
-4. A populated song library (data/tessituragrams.json)
+4. A populated song library (data/all_tessituragrams.json)
 
 If you have already followed "how_to_create_tessituragrams.txt", you have
 everything you need.  If not, please follow that guide first — it covers
@@ -77,13 +88,13 @@ contains the "src" folder, "data" folder, and "requirements.txt".
 STEP 2: MAKE SURE YOUR SONG LIBRARY EXISTS
 ================================================================================
 
-The recommender reads from "data/tessituragrams.json".  This file is created
-when you run the tessituragram generation program.
+The recommender reads from "data/all_tessituragrams.json".  This file contains
+tessituragrams for all songs, including songs with multiple voice parts.
 
   TO CHECK:
   1. Open the project folder in File Explorer (Windows) or Finder (Mac).
   2. Open the "data" folder inside it.
-  3. You should see a file called "tessituragrams.json".
+  3. You should see a file called "all_tessituragrams.json".
 
   IF YOU DO NOT SEE THIS FILE:
   You need to generate it first.  Run:
@@ -107,31 +118,80 @@ If "python" does not work, try:
 
     python3 -m src.run_recommendations
 
-The program will display a welcome banner and then guide you through three
-simple prompts.  Each prompt is explained below.
+The program will display a welcome banner and then guide you through the
+following prompts.
 
 
 ================================================================================
-STEP 4: ENTER YOUR VOCAL RANGE
+STEP 4: CHOOSE YOUR ENSEMBLE TYPE
 ================================================================================
 
-The program will ask:
+The program will display a list of the types of song in your library, e.g.:
 
-    Lowest note in your range:
-    Highest note in your range:
+    STEP 1: What type of song are you looking for?
 
-Type a note name followed by an octave number.  Here are some examples:
+      1) Solo  (1 voice part) — 42 song(s)
+      2) Duet  (2 voice parts) — 18 song(s)
+      3) Trio  (3 voice parts) — 7 song(s)
+      4) Quartet  (4 voice parts) — 5 song(s)
+
+    Enter the number for your choice:
+
+Type the number that matches what you want and press Enter.
+
+  - If you pick "Solo", you will be asked for ONE vocal profile.
+  - If you pick "Duet", you will be asked for TWO vocal profiles (one per
+    singer), and so on.
+
+The order you enter the profiles in DOES NOT MATTER.  The system
+automatically finds the best assignment of singers to parts.
+
+
+================================================================================
+STEP 5: ENTER VOCAL PROFILE(S)
+================================================================================
+
+For each singer, you will be prompted to enter:
+
+  a) Your vocal range (lowest and highest notes)
+  b) Your favorite notes (optional)
+  c) Notes to avoid (optional)
+
+If you chose "Duet", for example, you will go through this process twice:
+
+    === Voice Profile 1 of 2 ===
+
+    Enter your vocal range
+      Lowest note: C4
+      → C4 (MIDI 60)
+      Highest note: A5
+      → A5 (MIDI 81)
+      Range: C4 – A5  (MIDI 60–81)
+
+    Favorite notes (optional)
+      ...
+
+    Notes to avoid (optional)
+      ...
+
+    === Voice Profile 2 of 2 ===
+
+    Enter your vocal range
+      ...
+
+Each singer's range, favorites, and avoid notes are independent.
+
+TYPE A NOTE NAME followed by an octave number.  Examples:
 
     C4   = middle C
     D4   = D above middle C
     Bb3  = B-flat below middle C
     F#4  = F-sharp above middle C
     Eb5  = E-flat an octave above middle C
-    G5   = G an octave and a half above middle C
 
 TIPS FOR CHOOSING YOUR RANGE:
   - Think about the lowest and highest notes you can sing comfortably.
-  - If you are unsure, a good starting range for many voices is:
+  - If you are unsure, here are rough starting points:
       Soprano:  C4 to C6
       Mezzo:    A3 to A5
       Tenor:    C3 to C5
@@ -139,84 +199,25 @@ TIPS FOR CHOOSING YOUR RANGE:
       Bass:     E2 to E4
   - You can always run the recommender again with a different range.
 
-After you type each note and press Enter, the program will confirm what it
-understood.  For example:
-
-    Lowest note in your range: C4
-      → C4 (MIDI 60)
-
-If you make a typo, the program will tell you it is invalid and let you
-try again — you cannot break anything.
+FAVORITE NOTES and AVOID NOTES use the same format as before:
+  Single notes:   A4, D5
+  Ranges:         D4-E4  (D4, E4, and every note in between)
+  Mix:            A4, D4-E4, F5
+  Press Enter to skip.
 
 
 ================================================================================
-STEP 5: ENTER YOUR FAVORITE NOTES (OPTIONAL)
+STEP 6: VIEW YOUR RESULTS
 ================================================================================
 
-The program will ask:
+After all profiles are entered, the program will:
 
-    Favorite notes (comma-separated; use D4-E4 for ranges; Enter to skip):
+  1. Score every song (assigning profiles to parts optimally for multi-part)
+  2. Exclude songs where any part cannot be covered by a singer
+  3. Rank from best average score to worst
+  4. Print the results
 
-These are notes you especially enjoy singing.  Songs that spend a lot of
-time on these notes will rank higher.
-
-  HOW TO ENTER THEM:
-  You can enter single notes, ranges, or both — separated by commas.
-
-  Single notes:   A4, D5, F5
-
-  Ranges:  D4-E4  means D4, E4, and every pitched note in between.
-           The format is LOW-HIGH (low note, hyphen, high note).
-           Examples:  C4-G4, Bb3-D4, A4-C5
-
-  Mix both:  A4, D4-E4, F5  (A4, plus every note from D4 through E4, plus F5)
-
-  TO SKIP:
-  If you have no preference, just press Enter without typing anything.
-
-  EXAMPLES:
-    Favorite notes (...): A4, D5
-      → A4 (MIDI 69), D5 (MIDI 74)
-
-    Favorite notes (...): D4-E4
-      → D4 (MIDI 62), Eb4 (MIDI 63), E4 (MIDI 64)
-
-
-================================================================================
-STEP 6: ENTER NOTES TO AVOID (OPTIONAL)
-================================================================================
-
-The program will ask:
-
-    Notes to avoid (comma-separated; use D4-E4 for ranges; Enter to skip):
-
-Songs that spend a lot of time on these notes will be ranked lower.
-
-  HOW TO ENTER THEM:
-  Same format as favorite notes — single notes or ranges, comma-separated.
-  For example:
-
-      C4, G5           (single notes)
-      C4-D4            (range: C4, C#4, D4)
-      C4, G4-G5        (C4 plus every note from G4 through G5)
-
-  TO SKIP:
-  Just press Enter without typing anything.
-
-
-================================================================================
-STEP 7: VIEW YOUR RESULTS
-================================================================================
-
-After you enter your preferences, the program will:
-
-  1. Load the song library
-  2. Filter out songs whose range does not fit inside yours
-  3. Score and rank the remaining songs
-  4. Print the ranked results to your terminal
-
-  WHAT YOU WILL SEE:
-  Something like this:
+  WHAT YOU WILL SEE — SOLO EXAMPLE:
 
       ================================================================
          RANKED RECOMMENDATIONS (best fit → worst fit)
@@ -226,35 +227,44 @@ After you enter your preferences, the program will:
             Composer: Clara Schumann
             File:     schumann-clara-6-lieder-op13-no4-der-mond-kommt...
             Final score: 0.82 (cosine similarity 0.85)  Strong overlap
-            with your favorite notes (A4, D5): 31% of singing time.
-            Minimal presence of avoid notes (C4): 0.0% of singing time.
+            with your favorite notes (A4, D5): 31%.
 
-        #2  Liederkreis, Op.39
-            Composer: Robert Schumann
-            ...
+  WHAT YOU WILL SEE — DUET EXAMPLE:
+
+        #1  Les langueurs  (Duet)
+            Composer: Sophie Gail
+            File:     lc6604179.mxl
+            Average score: 0.78
+
+            Profile 1 → 2d Dessus (Voice 2)
+              Cosine similarity: 0.88  |  Avoid penalty: 0.03  |  Fav overlap: 35%
+            Profile 2 → 1er Dessus (Voice 1)
+              Cosine similarity: 0.74  |  Avoid penalty: 0.02  |  Fav overlap: 20%
 
   HOW TO READ THE RESULTS:
   - #1 is the best match, #2 is second best, and so on.
-  - "Final score" is the overall fit score (higher is better).
-  - "Cosine similarity" measures how closely the song's pitch profile
-    matches your ideal profile (1.0 = perfect match).
-  - The explanation tells you how much time the song spends on your
-    favorite notes and avoid notes.
+  - For solo songs, "Final score" is the overall fit (higher = better).
+  - For multi-part songs, "Average score" is the mean of all profiles'
+    scores — higher means the song is a better fit for the entire group.
+  - "Cosine similarity" measures how closely the vocal line's pitch
+    profile matches the singer's ideal profile (1.0 = perfect match).
+  - "Profile X → Part Name" shows which singer was assigned to which
+    vocal line.  The system picks the assignment that maximises the
+    overall fit.
+  - If two singers have identical preferences, the system will note that
+    they are interchangeable for their assigned parts.
 
   The results are also saved to:
 
       data/recommendations.json
 
-  You can open this file in any text editor if you want to look at the
-  raw data.
-
 
 ================================================================================
-STEP 8: VISUALISE THE RECOMMENDATIONS (OPTIONAL)
+STEP 7: VISUALISE THE RECOMMENDATIONS (OPTIONAL)
 ================================================================================
 
-If you want to see charts comparing each recommended song to your ideal
-pitch profile, you can generate a Jupyter notebook.
+If you want to see charts comparing each recommended song to the ideal
+pitch profile(s), you can generate a Jupyter notebook.
 
   In your terminal, type:
 
@@ -280,12 +290,12 @@ pitch profile, you can generate a Jupyter notebook.
   to render all the charts.
 
   WHAT THE CHARTS SHOW:
-  Each chart has:
-  - Coloured bars showing the song's normalised pitch distribution
-    (how much time the singer spends on each pitch, as a proportion)
-  - A red line showing YOUR ideal vector (what a perfect song would
-    look like based on your preferences)
-  - The song's rank, score, title, and composer
+  - For SOLO: each chart has coloured bars (the song's pitch distribution)
+    and a red line (your ideal vector).
+  - For MULTI-PART: each song gets one chart per assigned part, showing
+    that part's pitch distribution overlaid with the assigned singer's
+    ideal vector.  Charts are grouped under the song title with the
+    average score.
 
   The closer the bars match the red line, the better the fit.
 
@@ -301,7 +311,7 @@ Just run:
 
     python -m src.run_recommendations
 
-and enter your new range / favorite notes / avoid notes.
+and enter your new ensemble type / profiles.
 
 If you add new .mxl files to "songs/mxl_songs/" and want them included,
 remember to re-run  python -m src.main  first to update the library.
@@ -325,14 +335,14 @@ TROUBLESHOOTING
   SOLUTION: Run:
       pip install -r requirements.txt
 
-  PROBLEM: "Error: Library not found at data/tessituragrams.json"
+  PROBLEM: "Error: Library not found at data/all_tessituragrams.json"
   SOLUTION: You need to generate the library first.  Run:
       python -m src.main
   See "how_to_create_tessituragrams.txt" for full instructions.
 
-  PROBLEM: "No songs match your range."
-  SOLUTION: Your range may be too narrow for any songs in the library.
-  Try widening it (use a lower low note or a higher high note).
+  PROBLEM: "No songs match your range." or "No songs have a valid assignment"
+  SOLUTION: Your range(s) may be too narrow.  Try widening one or more
+  singers' ranges (use a lower low note or a higher high note).
 
   PROBLEM: "Error: data/recommendations.json not found" (when visualising)
   SOLUTION: You need to run the recommender first:
