@@ -46,7 +46,13 @@ The core use cases are:
 
 - **`songs/mxl_songs/`** – Collection of **MusicXML (`.mxl`) vocal scores** used as input to build tessituragrams and to run experiments.
 
-- **`requirements.txt`** – Python dependencies (numpy, scipy, matplotlib, music21, nbformat) needed to run the library, experiments, and visualizations.
+- **`app.py`** – **Flask web application**. Run `python app.py` and open [http://localhost:5000](http://localhost:5000) to use the interactive web UI for browsing recommendations.
+
+- **`templates/`** – HTML templates for the web UI (Jinja2).
+
+- **`static/`** – CSS, JavaScript, and images for the web UI (includes the interactive piano keyboard component).
+
+- **`requirements.txt`** – Python dependencies (numpy, scipy, matplotlib, music21, nbformat, flask) needed to run the library, web UI, experiments, and visualizations.
 
 ### Getting started (quick)
 
@@ -54,21 +60,33 @@ The core use cases are:
    ```bash
    pip install -r requirements.txt
    ```
-2. **Create tessituragrams from the provided songs**
+
+2. **Launch the web UI** (recommended)
    ```bash
-   python -m src.main --input-dir songs/mxl_songs --output data/tessituragrams.json
+   python app.py
    ```
-3. **Get song recommendations**
+   Then open **[http://localhost:5000](http://localhost:5000)** in your browser.
+
+   The UI walks you through everything — pick an ensemble type (solo, duet, trio, …), name your singers, set each singer's vocal range / favorite notes / notes to avoid using an interactive piano keyboard, and browse ranked recommendations with visual tessituragram comparisons.
+
+3. **Or use the command-line interface**
    ```bash
    python -m src.run_recommendations
    ```
-   The interactive CLI will ask you to pick an ensemble type (solo, duet, trio, …), then enter one vocal profile per singer (range, favorite notes, avoid notes). Results are printed to the terminal and saved to `data/recommendations.json`.
-4. **Visualise recommendations**
+   The interactive CLI will ask you to pick an ensemble type, then enter one vocal profile per singer (range, favorite notes, avoid notes). Results are printed to the terminal and saved to `data/recommendations.json`.
+
+4. **Create tessituragrams from your own songs** (optional — the repo already includes pre-built data)
+   ```bash
+   python -m src.main --input-dir songs/mxl_songs --output data/tessituragrams.json
+   ```
+
+5. **Visualise recommendations** (CLI results only)
    ```bash
    python -m src.visualize_recommendations
    ```
    Opens the results as a Jupyter notebook with bar-chart comparisons of each song against the ideal profile(s).
-5. **Run experiments**
+
+6. **Run experiments**
    - Use the scripts in `experiment/` (see the matching how‑to in `how_tos/` for copy‑pasteable commands).
 
 For more detailed, non‑CS‑heavy walkthroughs, open the files in `how_tos/`. They are intended as the primary entry point for new users.
