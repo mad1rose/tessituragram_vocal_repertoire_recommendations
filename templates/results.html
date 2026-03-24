@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Recommendations{% endblock %}
+
+{% block head %}
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="results-header">
+  <div>
+    <h1 class="page-title" style="margin-bottom:.25rem;">Recommendations</h1>
+    <p class="results-summary">
+      <strong>{{ total_results }}</strong> {{ ensemble_label|lower }}{{ 's' if total_results != 1 }} ranked
+      out of {{ total_songs }} evaluated
+    </p>
+  </div>
+  <a href="{{ url_for('summary') }}" class="btn btn-secondary">&larr; Edit Profiles</a>
+</div>
+
+{% if not results %}
+<div class="card" style="text-align:center;padding:3rem;">
+  <h2 style="margin-bottom:.5rem;">No matches found</h2>
+  <p class="page-subtitle" style="margin-bottom:1rem;">
+    {% if num_parts == 1 %}
+      No songs fit within your vocal range. Try widening it.
+    {% else %}
+      No songs have a valid assignment for all singers. Try widening one or more ranges.
+    {% endif %}
+  </p>
+  <a href="{{ url_for('summary') }}" class="btn btn-primary">Edit Profiles</a>
+</div>
+{% endif %}
+
+{% for r in results %}
+<div class="card result-card" id="result-{{ r.rank }}">
+  <div class="result-card-header" onclick="toggleCard('result-{{ r.rank }}')">
+    <div class="result-rank">#{{ r.rank }}</div>
+    <div class="result-info">
+      <div class="result-title">{{ r.title }}</div>
+      <div class="result-meta">{{ r.composer }} &middot; {{ r.filename }}</div>
+    </div>
+    <div class="result-score">
+      {% if num_parts == 1 %}
+        {{ '%.2f'|format(r.final_score) }}
+      {% else %}
+        {{ '%.2f'|format(r.average_score) }}
+      {% endif %}
+    </div>
+    <span class="expand-icon">&#9660;</span>
+  </div>
+
+  <div class="result-detail">
+    {% if num_parts == 1 %}
+    <!-- Solo detail -->
+    <div class="assignment-summary">
+      <span class="assignment-item"><strong>Cosine sim:</strong> {{ '%.2f'|format(r.cosine_similarity) }}</span>
+      <span class="assignment-item"><strong>Avoid penalty:</strong> {{ '%.2f'|format(r.avoid_penalty) }}</span>
+      <span class="assignment-item"><strong>Fav overlap:</strong> {{ '%.0f'|format(r.favorite_overlap * 100) }}%</span>
+    </div>
+    <div class="charts-row">
+      <div class="chart-container">
+        {% set prof = profiles[0] if profiles else {} %}
+        <div class="plotly-chart"
+             data-normed='{{ r.normalized_vector | tojson }}'
+             data-ideal='{{ prof.get("ideal_vector", {}) | tojson }}'
+             data-chart-title="{{ prof.get('name', 'You') }} — score {{ '%.2f'|format(r.final_score) }}"
+             style="width:100%;height:320px;"></div>
+      </div>
+    </div>
+
+    {% else %}
+    <!-- Multi-part detail -->
+    <div class="assignment-summary">
+      {% for a in r.assignment %}
+      <span class="assignment-item">
+        <strong>{{ names[a.profile_index] if a.profile_index < names|length else 'Profile ' ~ (a.profile_index+1) }}</strong>
+        &rarr; {{ a.part_name or a.part_id }}
+        ({{ '%.2f'|format(a.cosine_similarity) }})
+      </span>
+      {% endfor %}
+    </div>
+
+    {% for i, j in r.get('interchangeable_profiles', []) %}
+    <p class="interchangeable-note">
+      {{ names[i] if i < names|length else 'Profile ' ~ (i+1) }} and
+      {{ names[j] if j < names|length else 'Profile ' ~ (j+1) }}
+      are interchangeable for their assigned parts.
+    </p>
+    {% endfor %}
+
+    <div class="charts-row">
+      {% for a in r.assignment %}
+      <div class="chart-container">
+        {% set pi = a.profile_index %}
+        {% set prof = profiles[pi] if pi < profiles|length else {} %}
+        <div class="chart-title">
+          {{ names[pi] if pi < names|length else 'Profile ' ~ (pi+1) }}
+          &rarr; {{ a.part_name or a.part_id }}
+        </div>
+        <div class="plotly-chart"
+             data-normed='{{ a.normalized_vector | tojson }}'
+             data-ideal='{{ prof.get("ideal_vector", {}) | tojson }}'
+             data-chart-title="{{ names[pi] if pi < names|length else 'Profile ' ~ (pi+1) }} → {{ a.part_name or a.part_id }} ({{ '%.2f'|format(a.final_score) }})"
+             style="width:100%;height:320px;"></div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+
+{% if total_pages > 1 %}
+<div class="pagination">
+  <a href="{{ url_for('results', page=page-1) }}"
+     class="page-btn {% if page <= 1 %}disabled{% endif %}"
+     {% if page <= 1 %}onclick="return false" style="pointer-events:none;opacity:.3;"{% endif %}>
+    &larr; Prev
+  </a>
+
+  {% for p in range(1, total_pages + 1) %}
+    {% if p == page %}
+    <span class="page-btn active">{{ p }}</span>
+    {% elif (p - page)|abs <= 2 or p == 1 or p == total_pages %}
+    <a href="{{ url_for('results', page=p) }}" class="page-btn">{{ p }}</a>
+    {% elif (p - page)|abs == 3 %}
+    <span class="page-btn" style="border:none;cursor:default;">&hellip;</span>
+    {% endif %}
+  {% endfor %}
+
+  <a href="{{ url_for('results', page=page+1) }}"
+     class="page-btn {% if page >= total_pages %}disabled{% endif %}"
+     {% if page >= total_pages %}onclick="return false" style="pointer-events:none;opacity:.3;"{% endif %}>
+    Next &rarr;
+  </a>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/results.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}{{ name }}'s Profile{% endblock %}
+
+{% block content %}
+{% if num_parts > 1 %}
+<p class="step-indicator">Profile {{ index + 1 }} of {{ num_parts }}</p>
+{% endif %}
+<h1 class="page-title">{{ name }}'s Profile</h1>
+<p class="page-subtitle">Click the piano to set your range, then mark favorite and avoid notes.</p>
+
+<!-- Piano keyboard -->
+<div class="piano-section">
+  <div class="piano-scroll" id="piano-scroll">
+    <div class="piano" id="piano"></div>
+  </div>
+
+  <div class="piano-controls">
+    <button class="mode-btn mode-range active" id="mode-range" onclick="setMode('range')">
+      &#127929; Set Range
+    </button>
+    <button class="mode-btn mode-favorites" id="mode-favorites" onclick="setMode('favorites')">
+      &#9733; Mark Favorites
+    </button>
+    <button class="mode-btn mode-avoids" id="mode-avoids" onclick="setMode('avoids')">
+      &#10007; Mark Avoids
+    </button>
+    <button class="btn btn-ghost" onclick="resetRange()" style="font-size:.85rem;">Reset</button>
+  </div>
+
+  <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.75rem;">
+    <div class="piano-readout" id="range-readout">
+      <strong>Range:</strong> <span class="note-list">Click two keys to set your range</span>
+    </div>
+    <div class="piano-readout" id="favorites-readout">
+      <strong>Favorites:</strong> <span class="note-list">None</span>
+    </div>
+    <div class="piano-readout" id="avoids-readout">
+      <strong>Avoid:</strong> <span class="note-list">None</span>
+    </div>
+  </div>
+</div>
+
+<!-- Alpha slider -->
+<div class="slider-section">
+  <label class="form-label">Avoid Penalty Strength</label>
+  <div class="slider-group">
+    <span class="slider-label" style="color:var(--text-dim);font-size:.85rem;">No penalty</span>
+    <input type="range" id="alpha-slider" min="0" max="1" step="0.05" value="{{ existing.get('alpha', 0.0) }}">
+    <span class="slider-label" style="color:var(--text-dim);font-size:.85rem;">Strong</span>
+    <span class="slider-value" id="alpha-value">{{ '%.2f'|format(existing.get('alpha', 0.0)) }}</span>
+  </div>
+  <p class="form-hint">Slide right to penalise songs that use your avoid notes more heavily. Default is 0 (no penalty).</p>
+</div>
+
+<!-- Nav -->
+<div class="nav-bar">
+  <button class="btn btn-ghost" id="btn-back">
+    &larr; {% if index == 0 %}Names{% else %}{{ prev_name }}'s Profile{% endif %}
+  </button>
+  <button class="btn btn-primary" id="btn-next" disabled>
+    {% if is_last %}Review Profiles &rarr;{% else %}{{ next_label }}'s Profile &rarr;{% endif %}
+  </button>
+</div>
+
+<script>
+  const PROFILE_INDEX = {{ index }};
+  const EXISTING = {{ existing | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/piano.js') }}"></script>
+<script>
+  const alphaSlider = document.getElementById('alpha-slider');
+  const alphaValue = document.getElementById('alpha-value');
+  alphaSlider.addEventListener('input', () => {
+    alphaValue.textContent = parseFloat(alphaSlider.value).toFixed(2);
+  });
+
+  function gatherProfileData() {
+    return {
+      min_midi: pianoState.rangeStart,
+      max_midi: pianoState.rangeEnd,
+      favorite_midis: Array.from(pianoState.favorites).sort((a, b) => a - b),
+      avoid_midis: Array.from(pianoState.avoids).sort((a, b) => a - b),
+      alpha: parseFloat(alphaSlider.value),
+    };
+  }
+
+  async function saveAndNavigate(url) {
+    if (pianoState.rangeStart !== null && pianoState.rangeEnd !== null) {
+      const data = gatherProfileData();
+      await fetch('/api/save-profile/' + PROFILE_INDEX, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    }
+    window.location.href = url;
+  }
+
+  document.getElementById('btn-back').addEventListener('click', () => {
+    {% if index == 0 %}
+    saveAndNavigate('{{ url_for("names") }}');
+    {% else %}
+    saveAndNavigate('{{ url_for("profile", index=index - 1) }}');
+    {% endif %}
+  });
+
+  document.getElementById('btn-next').addEventListener('click', () => {
+    {% if is_last %}
+    saveAndNavigate('{{ url_for("summary") }}');
+    {% else %}
+    saveAndNavigate('{{ url_for("profile", index=index + 1) }}');
+    {% endif %}
+  });
+
+  function updateNextButton() {
+    document.getElementById('btn-next').disabled =
+      pianoState.rangeStart === null || pianoState.rangeEnd === null;
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Profile Summary{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Profile Summary</h1>
+<p class="page-subtitle">Review your vocal profiles before getting recommendations. Click a profile to edit it.</p>
+
+<div class="grid-2">
+  {% for p in profiles %}
+  <a href="{{ url_for('profile', index=p.index) }}" class="card summary-card {% if not p.complete %}incomplete{% endif %}" style="text-decoration:none;color:inherit;">
+    <div class="summary-name">{{ p.name }}'s Profile</div>
+    {% if p.complete %}
+    <div class="summary-detail"><strong>Range:</strong> {{ p.range_low }} – {{ p.range_high }}</div>
+    <div class="summary-detail"><strong>Favorites:</strong> {{ p.favorites|join(', ') or 'None' }}</div>
+    <div class="summary-detail"><strong>Avoid:</strong> {{ p.avoids|join(', ') or 'None' }}</div>
+    <div class="summary-detail"><strong>Avoid penalty:</strong> {{ '%.2f'|format(p.alpha) }}</div>
+    <span class="edit-link btn btn-ghost" style="font-size:.8rem;padding:.3rem .7rem;">Edit</span>
+    {% else %}
+    <div class="summary-detail" style="color:var(--accent);">Not yet completed</div>
+    <span class="edit-link btn btn-primary" style="font-size:.8rem;padding:.3rem .7rem;">Set up</span>
+    {% endif %}
+  </a>
+  {% endfor %}
+</div>
+
+<div class="nav-bar">
+  <a href="{{ url_for('names') }}" class="btn btn-ghost">&larr; Edit Names</a>
+  {% if all_complete %}
+  <form method="post" action="{{ url_for('find_recommendations') }}">
+    <button type="submit" class="btn btn-primary" style="font-size:1.05rem;padding:.75rem 2rem;">
+      &#127932; Find Recommendations
+    </button>
+  </form>
+  {% else %}
+  <button class="btn btn-primary" disabled style="font-size:1.05rem;padding:.75rem 2rem;">
+    Complete all profiles first
+  </button>
+  {% endif %}
+</div>
+{% endblock %}

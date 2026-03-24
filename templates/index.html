@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Tessituragram Recommender{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Find the perfect songs for your voice</h1>
+<p class="page-subtitle">Choose the type of piece you're looking for.</p>
+
+<div class="grid-2">
+  {% for num, info in types.items()|sort %}
+  <form method="post" action="{{ url_for('select_ensemble') }}" style="display:contents">
+    <input type="hidden" name="num_parts" value="{{ num }}">
+    <input type="hidden" name="ensemble_label" value="{{ info.label }}">
+    <button type="submit" class="card card-clickable ensemble-card" style="border:1px solid var(--border);text-align:center;">
+      <div class="ensemble-icon">
+        {% if num == 1 %}&#128100;{% elif num == 2 %}&#128101;{% elif num == 3 %}&#128101;+{% else %}&#127932;{% endif %}
+      </div>
+      <div class="ensemble-label">{{ info.label }}</div>
+      <div class="ensemble-parts">{{ num }} voice part{{ 's' if num != 1 }}</div>
+      <div class="ensemble-count">{{ info.count }} song{{ 's' if info.count != 1 }}</div>
+    </button>
+  </form>
+  {% endfor %}
+</div>
+{% endblock %}

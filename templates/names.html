@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Name Your Singers{% endblock %}
+
+{% block content %}
+<h1 class="page-title">
+  {% if num_parts == 1 %}What should we call you?{% else %}Name your singers{% endif %}
+</h1>
+<p class="page-subtitle">
+  {% if num_parts == 1 %}
+    This name labels your profile throughout the app.
+  {% else %}
+    These names are just for labeling — use first names, nicknames, or voice parts.
+  {% endif %}
+</p>
+
+<form method="post" action="{{ url_for('save_names') }}">
+  {% for i in range(num_parts) %}
+  <div class="form-group">
+    <label class="form-label" for="name_{{ i }}">
+      {% if num_parts == 1 %}Your name{% else %}Singer {{ i + 1 }}{% endif %}
+    </label>
+    <input
+      class="form-input"
+      type="text"
+      id="name_{{ i }}"
+      name="name_{{ i }}"
+      placeholder="{% if num_parts == 1 %}e.g. Maddie{% else %}e.g. {{ ['Maddie','Jake','Sam','Alex','Jordan','Taylor','Riley','Casey'][i] }}{% endif %}"
+      value="{{ existing_names[i] or '' }}"
+      autocomplete="off"
+      maxlength="30"
+    >
+  </div>
+  {% endfor %}
+
+  <div class="nav-bar">
+    <a href="{{ url_for('index') }}" class="btn btn-ghost">&larr; Back</a>
+    <button type="submit" class="btn btn-primary">Continue &rarr;</button>
+  </div>
+</form>
+{% endblock %}
