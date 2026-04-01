@@ -2,6 +2,8 @@
 
 This repository contains code and data for generating **tessituragrams** from vocal scores and using them to build and evaluate **vocal repertoire recommendation** methods.
 
+<img width="2047" height="1220" alt="image" src="https://github.com/user-attachments/assets/752ba34a-d35e-45b6-8531-81efbad021b4" />
+
 The core use cases are:
 - **Create tessituragrams** from MusicXML songs.
 - **Run recommendation experiments** (RQ1–RQ3, baselines, alpha-sensitivity).
