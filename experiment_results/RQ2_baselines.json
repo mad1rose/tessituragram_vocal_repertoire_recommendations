@@ -1,101 +1,210 @@
 {
-    "experiment": "RQ2_baselines",
-    "description": "Baselines for RQ2 ranking stability: full model (range + cosine − α×avoid), cosine-only (α = 0), and range-only + random rankings (null). Uses the same random baseline selection rule as run_rq2_experiment.py.",
-    "parameters": {
-      "alpha_full": 0.5,
-      "bootstrap_samples": 10000,
-      "random_seed_baselines": 42,
-      "min_candidates": 10,
-      "n_baselines_target": 5,
-      "library_path": "data\\tessituragrams.json"
+  "experiment": "RQ2_baselines",
+  "description": "Baselines for RQ2 ranking stability: full model (range + cosine − α×avoid), cosine-only (α = 0), and range-only + random rankings (null). Uses the same random baseline selection rule as run_rq2_experiment.py.",
+  "parameters": {
+    "alpha_full": 0.5,
+    "bootstrap_samples": 10000,
+    "random_seed_baselines": 42,
+    "min_candidates": 10,
+    "n_baselines_target": 20,
+    "library_path": "data\\all_tessituragrams.json"
+  },
+  "data_summary": {
+    "total_flat_lines": 1655,
+    "n_unique_works": 1419,
+    "n_multi_part_lines": 342,
+    "n_baselines": 20,
+    "n_unique_works_in_baselines": 20,
+    "bootstrap_method": "cluster (work-level)"
+  },
+  "models": [
+    "full",
+    "null_random",
+    "cosine_only"
+  ],
+  "model_descriptions": {
+    "full": "Range filter + cosine similarity − α×avoid_penalty (α = 0.5).",
+    "null_random": "Range filter only, then random rankings compared against a random reference ordering (null τ distribution).",
+    "cosine_only": "Range filter + cosine similarity only (α = 0.0; avoid list ignored in scoring)."
+  },
+  "metrics": {
+    "full": {
+      "mean_tau_overall": 0.8402,
+      "std_tau_overall": 0.0992,
+      "mean_tau_per_baseline": 0.837,
+      "std_tau_across_baselines": 0.0335,
+      "ci_95_baseline_mean": [
+        0.8222,
+        0.851
+      ],
+      "n_perturbations": 580,
+      "n_baselines": 20
     },
-    "data_summary": {
-      "total_songs_in_library": 101,
-      "n_baselines": 5
+    "cosine_only": {
+      "mean_tau_overall": 0.869,
+      "std_tau_overall": 0.1207,
+      "mean_tau_per_baseline": 0.8662,
+      "std_tau_across_baselines": 0.0252,
+      "ci_95_baseline_mean": [
+        0.8552,
+        0.8769
+      ],
+      "n_perturbations": 580,
+      "n_baselines": 20
     },
-    "models": [
-      "full",
-      "null_random",
-      "cosine_only"
-    ],
-    "model_descriptions": {
-      "full": "Range filter + cosine similarity − α×avoid_penalty (α = 0.5).",
-      "null_random": "Range filter only, then random rankings compared against a random reference ordering (null τ distribution).",
-      "cosine_only": "Range filter + cosine similarity only (α = 0.0; avoid list ignored in scoring)."
+    "null_random": {
+      "mean_tau_overall": 0.0019,
+      "std_tau_overall": 0.0619,
+      "mean_tau_per_baseline": 0.0022,
+      "std_tau_across_baselines": 0.0111,
+      "ci_95_baseline_mean": [
+        -0.0024,
+        0.0071
+      ],
+      "n_perturbations": 580,
+      "n_baselines": 20
+    }
+  },
+  "baseline_profiles": [
+    {
+      "source_song": "lc6620571.mxl__part_P2",
+      "composer": "Louisa Gray",
+      "n_perturbations_full": 26,
+      "n_perturbations_cosine_only": 26,
+      "n_samples_random": 26
     },
-    "metrics": {
-      "full": {
-        "mean_tau_overall": 0.849,
-        "std_tau_overall": 0.1138,
-        "mean_tau_per_baseline": 0.8481,
-        "std_tau_across_baselines": 0.0435,
-        "ci_95_baseline_mean": [
-          0.808,
-          0.8751
-        ],
-        "n_perturbations": 130,
-        "n_baselines": 5
-      },
-      "cosine_only": {
-        "mean_tau_overall": 0.8761,
-        "std_tau_overall": 0.1319,
-        "mean_tau_per_baseline": 0.8744,
-        "std_tau_across_baselines": 0.0401,
-        "ci_95_baseline_mean": [
-          0.839,
-          0.9066
-        ],
-        "n_perturbations": 130,
-        "n_baselines": 5
-      },
-      "null_random": {
-        "mean_tau_overall": -0.0363,
-        "std_tau_overall": 0.1816,
-        "mean_tau_per_baseline": -0.0373,
-        "std_tau_across_baselines": 0.0192,
-        "ci_95_baseline_mean": [
-          -0.053,
-          -0.0223
-        ],
-        "n_perturbations": 130,
-        "n_baselines": 5
-      }
+    {
+      "source_song": "lc8712648.mxl__part_P3",
+      "composer": "Johannes Brahms",
+      "n_perturbations_full": 24,
+      "n_perturbations_cosine_only": 24,
+      "n_samples_random": 24
     },
-    "baseline_profiles": [
-      {
-        "source_song": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl",
-        "composer": "Claude Debussy",
-        "n_perturbations_full": 28,
-        "n_perturbations_cosine_only": 28,
-        "n_samples_random": 28
-      },
-      {
-        "source_song": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl",
-        "composer": "Clara Schumann",
-        "n_perturbations_full": 24,
-        "n_perturbations_cosine_only": 24,
-        "n_samples_random": 24
-      },
-      {
-        "source_song": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl",
-        "composer": "Franz Schubert",
-        "n_perturbations_full": 30,
-        "n_perturbations_cosine_only": 30,
-        "n_samples_random": 30
-      },
-      {
-        "source_song": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl",
-        "composer": "Franz Schubert",
-        "n_perturbations_full": 24,
-        "n_perturbations_cosine_only": 24,
-        "n_samples_random": 24
-      },
-      {
-        "source_song": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl",
-        "composer": "Franz Schubert",
-        "n_perturbations_full": 24,
-        "n_perturbations_cosine_only": 24,
-        "n_samples_random": 24
-      }
-    ]
-  }
+    {
+      "source_song": "lc6681689.mxl__part_P6",
+      "composer": "Charles Villiers Stanford",
+      "n_perturbations_full": 32,
+      "n_perturbations_cosine_only": 32,
+      "n_samples_random": 32
+    },
+    {
+      "source_song": "lc6217099.mxl",
+      "composer": "Marie Jaëll",
+      "n_perturbations_full": 36,
+      "n_perturbations_cosine_only": 36,
+      "n_samples_random": 36
+    },
+    {
+      "source_song": "lc5134987.mxl",
+      "composer": "Clara Schumann",
+      "n_perturbations_full": 22,
+      "n_perturbations_cosine_only": 22,
+      "n_samples_random": 22
+    },
+    {
+      "source_song": "lc6573515.mxl__part_P2",
+      "composer": "Liza Lehmann",
+      "n_perturbations_full": 30,
+      "n_perturbations_cosine_only": 30,
+      "n_samples_random": 30
+    },
+    {
+      "source_song": "lc5062156.mxl",
+      "composer": "Peter Cornelius",
+      "n_perturbations_full": 30,
+      "n_perturbations_cosine_only": 30,
+      "n_samples_random": 30
+    },
+    {
+      "source_song": "lc5155459.mxl",
+      "composer": "Johannes Brahms",
+      "n_perturbations_full": 28,
+      "n_perturbations_cosine_only": 28,
+      "n_samples_random": 28
+    },
+    {
+      "source_song": "lc6772652.mxl",
+      "composer": "Gabriel Fauré",
+      "n_perturbations_full": 30,
+      "n_perturbations_cosine_only": 30,
+      "n_samples_random": 30
+    },
+    {
+      "source_song": "lc5071629.mxl",
+      "composer": "Johannes Brahms",
+      "n_perturbations_full": 24,
+      "n_perturbations_cosine_only": 24,
+      "n_samples_random": 24
+    },
+    {
+      "source_song": "lc6451773.mxl",
+      "composer": "Frank Bridge",
+      "n_perturbations_full": 20,
+      "n_perturbations_cosine_only": 20,
+      "n_samples_random": 20
+    },
+    {
+      "source_song": "lc6623145.mxl",
+      "composer": "Charlotte Alington Barnard [published as \"Claribel\"]",
+      "n_perturbations_full": 32,
+      "n_perturbations_cosine_only": 32,
+      "n_samples_random": 32
+    },
+    {
+      "source_song": "lc4978398.mxl",
+      "composer": "Robert Schumann",
+      "n_perturbations_full": 38,
+      "n_perturbations_cosine_only": 38,
+      "n_samples_random": 38
+    },
+    {
+      "source_song": "lc6179021.mxl",
+      "composer": "Johanna Kinkel (originally published under the name J. Mathieux)",
+      "n_perturbations_full": 30,
+      "n_perturbations_cosine_only": 30,
+      "n_samples_random": 30
+    },
+    {
+      "source_song": "lc5986508.mxl",
+      "composer": "Holmès, Augusta Mary Anne",
+      "n_perturbations_full": 30,
+      "n_perturbations_cosine_only": 30,
+      "n_samples_random": 30
+    },
+    {
+      "source_song": "lc6785268.mxl__part_P2",
+      "composer": "Charles Villiers Stanford",
+      "n_perturbations_full": 34,
+      "n_perturbations_cosine_only": 34,
+      "n_samples_random": 34
+    },
+    {
+      "source_song": "lc6683117.mxl__part_P2",
+      "composer": "Frederick Bridge",
+      "n_perturbations_full": 30,
+      "n_perturbations_cosine_only": 30,
+      "n_samples_random": 30
+    },
+    {
+      "source_song": "lc6684909.mxl__part_P4",
+      "composer": "Arthur Murray Goodhart",
+      "n_perturbations_full": 34,
+      "n_perturbations_cosine_only": 34,
+      "n_samples_random": 34
+    },
+    {
+      "source_song": "lc7346348.mxl",
+      "composer": "Émile Paladilhe",
+      "n_perturbations_full": 26,
+      "n_perturbations_cosine_only": 26,
+      "n_samples_random": 26
+    },
+    {
+      "source_song": "lc7006959.mxl",
+      "composer": "Peter Cornelius",
+      "n_perturbations_full": 24,
+      "n_perturbations_cosine_only": 24,
+      "n_samples_random": 24
+    }
+  ]
+}

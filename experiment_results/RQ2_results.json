@@ -1,978 +1,4222 @@
 {
-    "experiment": "RQ2_ranking_stability",
-    "description": "When we change favourites or avoids by one note, how similar is the new ranking to the original? (Kendall's τ; random baselines, baseline-level bootstrap, song-aware perturbations)",
-    "parameters": {
-      "alpha": 0.5,
-      "top_n_favorite": 4,
-      "bottom_n_avoid": 2,
-      "min_candidates": 10,
-      "n_baselines_target": 5,
-      "bootstrap_samples": 10000,
-      "random_seed": 42,
-      "library_path": "data\\tessituragrams.json"
+  "experiment": "RQ2_ranking_stability",
+  "description": "When we change favourites or avoids by one note, how similar is the new ranking to the original? (Kendall's τ; random baselines, baseline-level bootstrap, song-aware perturbations)",
+  "parameters": {
+    "alpha": 0.5,
+    "top_n_favorite": 4,
+    "bottom_n_avoid": 2,
+    "min_candidates": 10,
+    "n_baselines_target": 20,
+    "bootstrap_samples": 10000,
+    "random_seed": 42,
+    "library_path": "data\\all_tessituragrams.json"
+  },
+  "baseline_profiles": [
+    {
+      "source_song": "lc6620571.mxl__part_P2",
+      "composer": "Louisa Gray",
+      "n_perturbations": 26,
+      "mean_tau": 0.8481
     },
-    "baseline_profiles": [
-      {
-        "source_song": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl",
-        "composer": "Claude Debussy",
-        "n_perturbations": 28,
-        "mean_tau": 0.8571
-      },
-      {
-        "source_song": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl",
-        "composer": "Clara Schumann",
-        "n_perturbations": 24,
-        "mean_tau": 0.886
-      },
-      {
-        "source_song": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl",
-        "composer": "Franz Schubert",
-        "n_perturbations": 30,
-        "mean_tau": 0.8606
-      },
-      {
-        "source_song": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl",
-        "composer": "Franz Schubert",
-        "n_perturbations": 24,
-        "mean_tau": 0.8639
-      },
-      {
-        "source_song": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl",
-        "composer": "Franz Schubert",
-        "n_perturbations": 24,
-        "mean_tau": 0.7729
-      }
-    ],
-    "data_summary": {
-      "total_songs_in_library": 101,
-      "n_baselines": 5,
-      "total_perturbations": 130
+    {
+      "source_song": "lc8712648.mxl__part_P3",
+      "composer": "Johannes Brahms",
+      "n_perturbations": 24,
+      "mean_tau": 0.757
     },
-    "metrics": {
-      "mean_tau_overall": 0.849,
-      "std_tau_overall": 0.1138,
-      "mean_tau_per_baseline": 0.8481,
-      "std_tau_across_baselines": 0.0435,
-      "ci_95_baseline_mean": [
-        0.808,
-        0.8751
-      ]
+    {
+      "source_song": "lc6681689.mxl__part_P6",
+      "composer": "Charles Villiers Stanford",
+      "n_perturbations": 32,
+      "mean_tau": 0.895
     },
-    "interpretation": {
-      "tau_gt_0.7": "strong agreement (rankings very similar)",
-      "tau_0.3_to_0.7": "moderate agreement",
-      "tau_lt_0.3": "weak agreement"
+    {
+      "source_song": "lc6217099.mxl",
+      "composer": "Marie Jaëll",
+      "n_perturbations": 36,
+      "mean_tau": 0.8265
     },
-    "per_perturbation": [
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 64,
-        "note_changed": "E4",
-        "tau": 0.7818,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 67,
-        "note_changed": "G4",
-        "tau": 0.9273,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 70,
-        "note_changed": "Bb4",
-        "tau": 0.7091,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 71,
-        "note_changed": "B4",
-        "tau": 0.7091,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 72,
-        "note_changed": "C5",
-        "tau": 0.8545,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 73,
-        "note_changed": "C#5",
-        "tau": 0.6727,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 74,
-        "note_changed": "D5",
-        "tau": 0.7818,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 75,
-        "note_changed": "Eb5",
-        "tau": 0.9273,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 59,
-        "note_changed": "B3",
-        "tau": 1.0,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 60,
-        "note_changed": "C4",
-        "tau": 0.8909,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 61,
-        "note_changed": "C#4",
-        "tau": 0.9636,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 63,
-        "note_changed": "Eb4",
-        "tau": 0.7818,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 65,
-        "note_changed": "F4",
-        "tau": 0.7818,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 66,
-        "note_changed": "F#4",
-        "tau": 0.9273,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 68,
-        "note_changed": "Ab4",
-        "tau": 0.8909,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 64,
-        "note_changed": "E4",
-        "tau": 0.7818,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 67,
-        "note_changed": "G4",
-        "tau": 0.7818,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 70,
-        "note_changed": "Bb4",
-        "tau": 0.7455,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 71,
-        "note_changed": "B4",
-        "tau": 0.8909,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 72,
-        "note_changed": "C5",
-        "tau": 0.8545,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 73,
-        "note_changed": "C#5",
-        "tau": 0.9636,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 74,
-        "note_changed": "D5",
-        "tau": 0.8545,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 75,
-        "note_changed": "Eb5",
-        "tau": 0.8909,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 59,
-        "note_changed": "B3",
-        "tau": 1.0,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 60,
-        "note_changed": "C4",
-        "tau": 0.9273,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 61,
-        "note_changed": "C#4",
-        "tau": 0.8909,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "remove_avoid",
-        "midi_changed": 69,
-        "note_changed": "A4",
-        "tau": 0.8909,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "remove_avoid",
-        "midi_changed": 62,
-        "note_changed": "D4",
-        "tau": 0.9273,
-        "baseline_source": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 65,
-        "note_changed": "F4",
-        "tau": 0.9158,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 66,
-        "note_changed": "F#4",
-        "tau": 0.8737,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 67,
-        "note_changed": "G4",
-        "tau": 0.8421,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 69,
-        "note_changed": "A4",
-        "tau": 0.8211,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 74,
-        "note_changed": "D5",
-        "tau": 0.8421,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 75,
-        "note_changed": "Eb5",
-        "tau": 0.9684,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 76,
-        "note_changed": "E5",
-        "tau": 0.8737,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 77,
-        "note_changed": "F5",
-        "tau": 0.9053,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 63,
-        "note_changed": "Eb4",
-        "tau": 1.0,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 68,
-        "note_changed": "Ab4",
-        "tau": 0.8211,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 72,
-        "note_changed": "C5",
-        "tau": 0.7474,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 73,
-        "note_changed": "C#5",
-        "tau": 0.8105,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 70,
-        "note_changed": "Bb4",
-        "tau": 0.6632,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 65,
-        "note_changed": "F4",
-        "tau": 0.9263,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 66,
-        "note_changed": "F#4",
-        "tau": 0.9263,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 67,
-        "note_changed": "G4",
-        "tau": 0.9053,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 69,
-        "note_changed": "A4",
-        "tau": 0.9053,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 74,
-        "note_changed": "D5",
-        "tau": 0.9263,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 75,
-        "note_changed": "Eb5",
-        "tau": 0.9158,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 76,
-        "note_changed": "E5",
-        "tau": 0.9579,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 77,
-        "note_changed": "F5",
-        "tau": 0.9368,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 63,
-        "note_changed": "Eb4",
-        "tau": 0.9684,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "remove_avoid",
-        "midi_changed": 71,
-        "note_changed": "B4",
-        "tau": 0.8737,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "remove_avoid",
-        "midi_changed": 64,
-        "note_changed": "E4",
-        "tau": 0.9368,
-        "baseline_source": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 64,
-        "note_changed": "E4",
-        "tau": 0.8864,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 65,
-        "note_changed": "F4",
-        "tau": 0.947,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 66,
-        "note_changed": "F#4",
-        "tau": 0.803,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 67,
-        "note_changed": "G4",
-        "tau": 0.75,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 68,
-        "note_changed": "Ab4",
-        "tau": 0.803,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 72,
-        "note_changed": "C5",
-        "tau": 0.6477,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 75,
-        "note_changed": "Eb5",
-        "tau": 0.8939,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 76,
-        "note_changed": "E5",
-        "tau": 0.8144,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 77,
-        "note_changed": "F5",
-        "tau": 0.8902,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 78,
-        "note_changed": "F#5",
-        "tau": 0.8902,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 80,
-        "note_changed": "Ab5",
-        "tau": 0.9848,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 81,
-        "note_changed": "A5",
-        "tau": 0.9773,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 71,
-        "note_changed": "B4",
-        "tau": 0.7045,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 73,
-        "note_changed": "C#5",
-        "tau": 0.5795,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 74,
-        "note_changed": "D5",
-        "tau": 0.7121,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 69,
-        "note_changed": "A4",
-        "tau": 0.6932,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 64,
-        "note_changed": "E4",
-        "tau": 0.9394,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 65,
-        "note_changed": "F4",
-        "tau": 0.9621,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 66,
-        "note_changed": "F#4",
-        "tau": 0.8864,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 67,
-        "note_changed": "G4",
-        "tau": 0.8409,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 68,
-        "note_changed": "Ab4",
-        "tau": 0.8788,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 72,
-        "note_changed": "C5",
-        "tau": 0.8674,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 75,
-        "note_changed": "Eb5",
-        "tau": 0.8939,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 76,
-        "note_changed": "E5",
-        "tau": 0.8598,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 77,
-        "note_changed": "F5",
-        "tau": 0.9242,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 78,
-        "note_changed": "F#5",
-        "tau": 0.9167,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 80,
-        "note_changed": "Ab5",
-        "tau": 0.9924,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 81,
-        "note_changed": "A5",
-        "tau": 0.9924,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "remove_avoid",
-        "midi_changed": 79,
-        "note_changed": "G5",
-        "tau": 0.9811,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "remove_avoid",
-        "midi_changed": 70,
-        "note_changed": "Bb4",
-        "tau": 0.9053,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 66,
-        "note_changed": "F#4",
-        "tau": 0.8333,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 68,
-        "note_changed": "Ab4",
-        "tau": 0.8833,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 69,
-        "note_changed": "A4",
-        "tau": 0.7667,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 70,
-        "note_changed": "Bb4",
-        "tau": 0.7333,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 73,
-        "note_changed": "C#5",
-        "tau": 0.65,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 75,
-        "note_changed": "Eb5",
-        "tau": 0.9167,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 76,
-        "note_changed": "E5",
-        "tau": 0.9333,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 77,
-        "note_changed": "F5",
-        "tau": 0.9667,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 78,
-        "note_changed": "F#5",
-        "tau": 0.9333,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 74,
-        "note_changed": "D5",
-        "tau": 0.7,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 72,
-        "note_changed": "C5",
-        "tau": 0.7333,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 71,
-        "note_changed": "B4",
-        "tau": 0.7333,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 67,
-        "note_changed": "G4",
-        "tau": 0.6833,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 66,
-        "note_changed": "F#4",
-        "tau": 0.95,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 68,
-        "note_changed": "Ab4",
-        "tau": 0.9667,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 69,
-        "note_changed": "A4",
-        "tau": 0.85,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 70,
-        "note_changed": "Bb4",
-        "tau": 0.85,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 73,
-        "note_changed": "C#5",
-        "tau": 0.9167,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 75,
-        "note_changed": "Eb5",
-        "tau": 0.9333,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 76,
-        "note_changed": "E5",
-        "tau": 0.9167,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 77,
-        "note_changed": "F5",
-        "tau": 0.9833,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 78,
-        "note_changed": "F#5",
-        "tau": 0.9667,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "remove_avoid",
-        "midi_changed": 65,
-        "note_changed": "F4",
-        "tau": 0.9333,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "remove_avoid",
-        "midi_changed": 79,
-        "note_changed": "G5",
-        "tau": 1.0,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 66,
-        "note_changed": "F#4",
-        "tau": 0.6923,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 67,
-        "note_changed": "G4",
-        "tau": 0.6044,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 69,
-        "note_changed": "A4",
-        "tau": 0.6923,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 70,
-        "note_changed": "Bb4",
-        "tau": 0.7143,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 74,
-        "note_changed": "D5",
-        "tau": 0.4945,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 75,
-        "note_changed": "Eb5",
-        "tau": 0.9341,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 77,
-        "note_changed": "F5",
-        "tau": 0.7802,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 78,
-        "note_changed": "F#5",
-        "tau": 0.8462,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_fav",
-        "midi_changed": 79,
-        "note_changed": "G5",
-        "tau": 0.978,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 71,
-        "note_changed": "B4",
-        "tau": 0.6923,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 76,
-        "note_changed": "E5",
-        "tau": 0.7143,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 73,
-        "note_changed": "C#5",
-        "tau": 0.3626,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "remove_fav",
-        "midi_changed": 72,
-        "note_changed": "C5",
-        "tau": 0.7363,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 66,
-        "note_changed": "F#4",
-        "tau": 0.7802,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 67,
-        "note_changed": "G4",
-        "tau": 0.7363,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 69,
-        "note_changed": "A4",
-        "tau": 0.7363,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 70,
-        "note_changed": "Bb4",
-        "tau": 1.0,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 74,
-        "note_changed": "D5",
-        "tau": 0.6923,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 75,
-        "note_changed": "Eb5",
-        "tau": 0.9121,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 77,
-        "note_changed": "F5",
-        "tau": 0.9121,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 78,
-        "note_changed": "F#5",
-        "tau": 0.8462,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "add_avoid",
-        "midi_changed": 79,
-        "note_changed": "G5",
-        "tau": 0.8901,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "remove_avoid",
-        "midi_changed": 80,
-        "note_changed": "Ab5",
-        "tau": 0.956,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      },
-      {
-        "perturbation_type": "remove_avoid",
-        "midi_changed": 68,
-        "note_changed": "Ab4",
-        "tau": 0.8462,
-        "baseline_source": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl"
-      }
+    {
+      "source_song": "lc5134987.mxl",
+      "composer": "Clara Schumann",
+      "n_perturbations": 22,
+      "mean_tau": 0.8314
+    },
+    {
+      "source_song": "lc6573515.mxl__part_P2",
+      "composer": "Liza Lehmann",
+      "n_perturbations": 30,
+      "mean_tau": 0.8193
+    },
+    {
+      "source_song": "lc5062156.mxl",
+      "composer": "Peter Cornelius",
+      "n_perturbations": 30,
+      "mean_tau": 0.8505
+    },
+    {
+      "source_song": "lc5155459.mxl",
+      "composer": "Johannes Brahms",
+      "n_perturbations": 28,
+      "mean_tau": 0.8317
+    },
+    {
+      "source_song": "lc6772652.mxl",
+      "composer": "Gabriel Fauré",
+      "n_perturbations": 30,
+      "mean_tau": 0.8362
+    },
+    {
+      "source_song": "lc5071629.mxl",
+      "composer": "Johannes Brahms",
+      "n_perturbations": 24,
+      "mean_tau": 0.7975
+    },
+    {
+      "source_song": "lc6451773.mxl",
+      "composer": "Frank Bridge",
+      "n_perturbations": 20,
+      "mean_tau": 0.7754
+    },
+    {
+      "source_song": "lc6623145.mxl",
+      "composer": "Charlotte Alington Barnard [published as \"Claribel\"]",
+      "n_perturbations": 32,
+      "mean_tau": 0.8231
+    },
+    {
+      "source_song": "lc4978398.mxl",
+      "composer": "Robert Schumann",
+      "n_perturbations": 38,
+      "mean_tau": 0.8748
+    },
+    {
+      "source_song": "lc6179021.mxl",
+      "composer": "Johanna Kinkel (originally published under the name J. Mathieux)",
+      "n_perturbations": 30,
+      "mean_tau": 0.8541
+    },
+    {
+      "source_song": "lc5986508.mxl",
+      "composer": "Holmès, Augusta Mary Anne",
+      "n_perturbations": 30,
+      "mean_tau": 0.8299
+    },
+    {
+      "source_song": "lc6785268.mxl__part_P2",
+      "composer": "Charles Villiers Stanford",
+      "n_perturbations": 34,
+      "mean_tau": 0.8631
+    },
+    {
+      "source_song": "lc6683117.mxl__part_P2",
+      "composer": "Frederick Bridge",
+      "n_perturbations": 30,
+      "mean_tau": 0.8406
+    },
+    {
+      "source_song": "lc6684909.mxl__part_P4",
+      "composer": "Arthur Murray Goodhart",
+      "n_perturbations": 34,
+      "mean_tau": 0.8851
+    },
+    {
+      "source_song": "lc7346348.mxl",
+      "composer": "Émile Paladilhe",
+      "n_perturbations": 26,
+      "mean_tau": 0.8566
+    },
+    {
+      "source_song": "lc7006959.mxl",
+      "composer": "Peter Cornelius",
+      "n_perturbations": 24,
+      "mean_tau": 0.8447
+    }
+  ],
+  "data_summary": {
+    "total_flat_lines": 1655,
+    "n_unique_works": 1419,
+    "n_multi_part_lines": 342,
+    "n_baselines": 20,
+    "n_unique_works_in_baselines": 20,
+    "total_perturbations": 580,
+    "bootstrap_method": "cluster (work-level)"
+  },
+  "metrics": {
+    "mean_tau_overall": 0.8402,
+    "std_tau_overall": 0.0992,
+    "mean_tau_per_baseline": 0.837,
+    "std_tau_across_baselines": 0.0335,
+    "ci_95_baseline_mean": [
+      0.8222,
+      0.851
     ]
-  }
+  },
+  "interpretation": {
+    "tau_gt_0.7": "strong agreement (rankings very similar)",
+    "tau_0.3_to_0.7": "moderate agreement",
+    "tau_lt_0.3": "weak agreement"
+  },
+  "per_perturbation": [
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8782,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8794,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.87,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.7579,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.771,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.654,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.809,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.868,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9165,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9245,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.708,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.7488,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.7396,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.6474,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.9178,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.9455,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.9087,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8662,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.9051,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.8461,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8594,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.9322,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9387,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9597,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.9045,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.894,
+      "baseline_source": "lc6620571.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.6,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.7789,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.9053,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8842,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 54,
+      "note_changed": "F#3",
+      "tau": 0.9684,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 55,
+      "note_changed": "G3",
+      "tau": 0.7684,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 56,
+      "note_changed": "Ab3",
+      "tau": 0.7368,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.4737,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.6526,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 58,
+      "note_changed": "Bb3",
+      "tau": 0.5263,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.6211,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 60,
+      "note_changed": "C4",
+      "tau": 0.4211,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 57,
+      "note_changed": "A3",
+      "tau": 0.6105,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.7579,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8211,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.9263,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8526,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 54,
+      "note_changed": "F#3",
+      "tau": 0.9895,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 55,
+      "note_changed": "G3",
+      "tau": 0.7684,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 56,
+      "note_changed": "Ab3",
+      "tau": 0.8421,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.7895,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.7684,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 59,
+      "note_changed": "B3",
+      "tau": 0.7158,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.9895,
+      "baseline_source": "lc8712648.mxl__part_P3"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 47,
+      "note_changed": "B2",
+      "tau": 0.974,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 48,
+      "note_changed": "C3",
+      "tau": 0.8961,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 49,
+      "note_changed": "C#3",
+      "tau": 0.9827,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 50,
+      "note_changed": "D3",
+      "tau": 0.8355,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 52,
+      "note_changed": "E3",
+      "tau": 0.8788,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 53,
+      "note_changed": "F3",
+      "tau": 0.7749,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 54,
+      "note_changed": "F#3",
+      "tau": 0.9134,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 56,
+      "note_changed": "Ab3",
+      "tau": 0.8874,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 59,
+      "note_changed": "B3",
+      "tau": 0.8095,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.8961,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.8528,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9567,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.9654,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 55,
+      "note_changed": "G3",
+      "tau": 0.6797,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 58,
+      "note_changed": "Bb3",
+      "tau": 0.7403,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 60,
+      "note_changed": "C4",
+      "tau": 0.697,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 57,
+      "note_changed": "A3",
+      "tau": 0.8268,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 47,
+      "note_changed": "B2",
+      "tau": 0.9654,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 48,
+      "note_changed": "C3",
+      "tau": 0.9481,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 49,
+      "note_changed": "C#3",
+      "tau": 0.974,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 50,
+      "note_changed": "D3",
+      "tau": 0.9307,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 52,
+      "note_changed": "E3",
+      "tau": 0.9481,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 53,
+      "note_changed": "F3",
+      "tau": 0.8615,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 54,
+      "note_changed": "F#3",
+      "tau": 0.9567,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 56,
+      "note_changed": "Ab3",
+      "tau": 0.8615,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 59,
+      "note_changed": "B3",
+      "tau": 0.8961,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.9307,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.9567,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9567,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 1.0,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 46,
+      "note_changed": "Bb2",
+      "tau": 0.9913,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 51,
+      "note_changed": "Eb3",
+      "tau": 0.8961,
+      "baseline_source": "lc6681689.mxl__part_P6"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 60,
+      "note_changed": "C4",
+      "tau": 0.9295,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.9541,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.8529,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.745,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8215,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.6598,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.6435,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.6729,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.6165,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.8005,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.6918,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8124,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8167,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.8659,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.929,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.7847,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.596,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.7127,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.8709,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 60,
+      "note_changed": "C4",
+      "tau": 0.9558,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.9665,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.904,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8561,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8393,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8067,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.7773,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.8205,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.818,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.8262,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.8415,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8737,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8673,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.9266,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9529,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9603,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 59,
+      "note_changed": "B3",
+      "tau": 0.9838,
+      "baseline_source": "lc6217099.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8508,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8029,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8417,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.6332,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.7374,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8683,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8554,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.8995,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.6933,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.7314,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.6385,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.8706,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.9193,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8828,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8524,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.8653,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.863,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8896,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.9406,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9467,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.8067,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.9011,
+      "baseline_source": "lc5134987.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8481,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.798,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.7578,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.702,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.6064,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.7259,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.7251,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.7814,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.7718,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.8673,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9186,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9088,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.6427,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8085,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.6817,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.6316,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.9021,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8931,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8676,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7837,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.8097,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.8898,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.8049,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8782,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8731,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.9089,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9607,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9398,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.9351,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9565,
+      "baseline_source": "lc6573515.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8684,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8638,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8349,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.7702,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8143,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.6764,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.6605,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.7655,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8031,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.9166,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9224,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9462,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.6991,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.7365,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7179,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8331,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.9401,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8938,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.9237,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8284,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8774,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.8482,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.8591,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.873,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8851,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.931,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9568,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9658,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.9522,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9528,
+      "baseline_source": "lc5062156.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8819,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8559,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8525,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.7674,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.7076,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.7269,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.725,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8121,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.8341,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.8789,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 80,
+      "note_changed": "Ab5",
+      "tau": 0.9744,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.5802,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.7291,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.7719,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.6782,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.9098,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.9261,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8948,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8443,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.7912,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.8142,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.841,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8818,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.8999,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9225,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 80,
+      "note_changed": "Ab5",
+      "tau": 0.9857,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.8522,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9475,
+      "baseline_source": "lc5155459.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8604,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8301,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8337,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.7175,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.7796,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.7057,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.6704,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.6738,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.7938,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9413,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9426,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9117,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.6261,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.7155,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8098,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8116,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.9069,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.9222,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8855,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8327,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8824,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.7885,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.8524,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.8201,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.8385,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9595,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9599,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.955,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.9476,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.9108,
+      "baseline_source": "lc6772652.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.7963,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8686,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.7448,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.7756,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.6649,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.6855,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.5882,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.7661,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.7686,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.5879,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.7917,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9164,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8407,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.9219,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8825,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8603,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8463,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.7612,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.8621,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.8057,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.7704,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.8178,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.9123,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.9031,
+      "baseline_source": "lc5071629.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.746,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.7621,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8468,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7379,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.5605,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.871,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.875,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.4718,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.6694,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.7863,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.6129,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8266,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8065,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8952,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7782,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.8185,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8669,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9556,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.7661,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.8548,
+      "baseline_source": "lc6451773.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.836,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.7977,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.7903,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.7332,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.713,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.6481,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.6708,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.7187,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.7901,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8104,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.8605,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9392,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.6104,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.6876,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.6801,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.8979,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9452,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8904,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8892,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8578,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.892,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.7608,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.826,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.7919,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.8551,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.886,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8596,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.9162,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9609,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.9774,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9468,
+      "baseline_source": "lc6623145.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 59,
+      "note_changed": "B3",
+      "tau": 0.978,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 60,
+      "note_changed": "C4",
+      "tau": 0.947,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.888,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8544,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8101,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.7404,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.7231,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7392,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.7162,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.7681,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8375,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8588,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.8817,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9448,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9429,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 80,
+      "note_changed": "Ab5",
+      "tau": 0.9788,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.7194,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.8156,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.7758,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8236,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 59,
+      "note_changed": "B3",
+      "tau": 0.9869,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 60,
+      "note_changed": "C4",
+      "tau": 0.9722,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.9329,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8933,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.9061,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8673,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.8233,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.8594,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.8599,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.8644,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8865,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.894,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.9288,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9618,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9662,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 80,
+      "note_changed": "Ab5",
+      "tau": 0.9889,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.9741,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9329,
+      "baseline_source": "lc4978398.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8737,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8419,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8053,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.6941,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.6612,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.7859,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8452,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8059,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.8894,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9434,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.9187,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.922,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.7239,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7056,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.748,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.7169,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.9349,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.9194,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8871,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.8254,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.854,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.906,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8837,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8931,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.9219,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.963,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.9495,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9487,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8936,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9628,
+      "baseline_source": "lc6179021.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8114,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.7164,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.7547,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.6389,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7515,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.7055,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.8176,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.7665,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8728,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.9143,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.8637,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.8712,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.6732,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.7217,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 60,
+      "note_changed": "C4",
+      "tau": 0.9172,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8256,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.9221,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8006,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8239,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.8044,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7864,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.8694,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.8877,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.8452,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.9234,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.9299,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.9207,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9092,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8839,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.9676,
+      "baseline_source": "lc5986508.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 56,
+      "note_changed": "Ab3",
+      "tau": 0.9851,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 57,
+      "note_changed": "A3",
+      "tau": 0.9788,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 58,
+      "note_changed": "Bb3",
+      "tau": 0.9549,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 59,
+      "note_changed": "B3",
+      "tau": 0.9427,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 60,
+      "note_changed": "C4",
+      "tau": 0.8654,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.9121,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.7768,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.6958,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.6716,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7349,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.8117,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.7717,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.9058,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.8518,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.7686,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.776,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.7159,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.7468,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 56,
+      "note_changed": "Ab3",
+      "tau": 0.9919,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 57,
+      "note_changed": "A3",
+      "tau": 0.99,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 58,
+      "note_changed": "Bb3",
+      "tau": 0.9695,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 59,
+      "note_changed": "B3",
+      "tau": 0.9604,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 60,
+      "note_changed": "C4",
+      "tau": 0.8979,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.9407,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8527,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8163,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.8378,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7984,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.8928,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.8603,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.9406,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.9228,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.8652,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.9405,
+      "baseline_source": "lc6785268.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.771,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.6872,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.7523,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.6728,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7754,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.7969,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.8982,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.8914,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 58,
+      "note_changed": "Bb3",
+      "tau": 0.9525,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 59,
+      "note_changed": "B3",
+      "tau": 0.931,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 60,
+      "note_changed": "C4",
+      "tau": 0.8382,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.7827,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.7001,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.7404,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.7089,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.8951,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8253,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8242,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8542,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.7848,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.8707,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.8655,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.9504,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.9199,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 58,
+      "note_changed": "Bb3",
+      "tau": 0.9693,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 59,
+      "note_changed": "B3",
+      "tau": 0.9485,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 60,
+      "note_changed": "C4",
+      "tau": 0.8959,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.8522,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 57,
+      "note_changed": "A3",
+      "tau": 0.9902,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.8726,
+      "baseline_source": "lc6683117.mxl__part_P2"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 49,
+      "note_changed": "C#3",
+      "tau": 0.9764,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 50,
+      "note_changed": "D3",
+      "tau": 0.957,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 51,
+      "note_changed": "Eb3",
+      "tau": 0.9447,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 52,
+      "note_changed": "E3",
+      "tau": 0.9396,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 53,
+      "note_changed": "F3",
+      "tau": 0.9263,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 54,
+      "note_changed": "F#3",
+      "tau": 0.8914,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 55,
+      "note_changed": "G3",
+      "tau": 0.8003,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 56,
+      "note_changed": "Ab3",
+      "tau": 0.8925,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 57,
+      "note_changed": "A3",
+      "tau": 0.7645,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 59,
+      "note_changed": "B3",
+      "tau": 0.7245,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.7092,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8116,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.9222,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.9222,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 60,
+      "note_changed": "C4",
+      "tau": 0.6774,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 58,
+      "note_changed": "Bb3",
+      "tau": 0.7235,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.744,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 61,
+      "note_changed": "C#4",
+      "tau": 0.8003,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 49,
+      "note_changed": "C#3",
+      "tau": 0.9877,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 50,
+      "note_changed": "D3",
+      "tau": 0.9949,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 51,
+      "note_changed": "Eb3",
+      "tau": 0.9744,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 52,
+      "note_changed": "E3",
+      "tau": 0.958,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 53,
+      "note_changed": "F3",
+      "tau": 0.9283,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 54,
+      "note_changed": "F#3",
+      "tau": 0.9539,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 55,
+      "note_changed": "G3",
+      "tau": 0.8812,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 56,
+      "note_changed": "Ab3",
+      "tau": 0.8945,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 57,
+      "note_changed": "A3",
+      "tau": 0.9007,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 59,
+      "note_changed": "B3",
+      "tau": 0.9007,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.8781,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8935,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.9334,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.9457,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.9549,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.9867,
+      "baseline_source": "lc6684909.mxl__part_P4"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.9012,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.8787,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.9037,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.7978,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8481,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.745,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7785,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.7036,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.7747,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9411,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.7804,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.7139,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.8618,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.8033,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.9291,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.9412,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.9214,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8867,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8876,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.8272,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.8871,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.868,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.8558,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 78,
+      "note_changed": "F#5",
+      "tau": 0.9591,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 77,
+      "note_changed": "F5",
+      "tau": 0.9199,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 79,
+      "note_changed": "G5",
+      "tau": 0.9577,
+      "baseline_source": "lc7346348.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.7949,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.7423,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8016,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.7329,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.815,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.9031,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.9068,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.8789,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_fav",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9279,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 69,
+      "note_changed": "A4",
+      "tau": 0.6862,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 71,
+      "note_changed": "B4",
+      "tau": 0.6832,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 74,
+      "note_changed": "D5",
+      "tau": 0.793,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "remove_fav",
+      "midi_changed": 72,
+      "note_changed": "C5",
+      "tau": 0.7262,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 66,
+      "note_changed": "F#4",
+      "tau": 0.8572,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 67,
+      "note_changed": "G4",
+      "tau": 0.8052,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 68,
+      "note_changed": "Ab4",
+      "tau": 0.8986,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 70,
+      "note_changed": "Bb4",
+      "tau": 0.8765,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 73,
+      "note_changed": "C#5",
+      "tau": 0.8958,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 75,
+      "note_changed": "Eb5",
+      "tau": 0.9409,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 76,
+      "note_changed": "E5",
+      "tau": 0.9283,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 62,
+      "note_changed": "D4",
+      "tau": 0.9196,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "add_avoid",
+      "midi_changed": 63,
+      "note_changed": "Eb4",
+      "tau": 0.9638,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 64,
+      "note_changed": "E4",
+      "tau": 0.8836,
+      "baseline_source": "lc7006959.mxl"
+    },
+    {
+      "perturbation_type": "remove_avoid",
+      "midi_changed": 65,
+      "note_changed": "F4",
+      "tau": 0.9121,
+      "baseline_source": "lc7006959.mxl"
+    }
+  ]
+}

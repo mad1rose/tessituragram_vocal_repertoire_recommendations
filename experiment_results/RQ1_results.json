@@ -1,558 +1,2062 @@
 {
-    "experiment": "RQ1_self_retrieval_accuracy",
-    "description": "When a synthetic user profile is derived from one song, does the system rank that song at position 1 or in the top 3/5?",
-    "parameters": {
-      "alpha": 0.5,
-      "top_n_favorite": 4,
-      "bottom_n_avoid": 2,
-      "min_candidates": 2,
-      "n_queries_max": 50,
-      "bootstrap_samples": 10000,
-      "random_seed": 42,
-      "library_path": "data\\tessituragrams.json"
+  "experiment": "RQ1_self_retrieval_accuracy",
+  "description": "When a synthetic user profile is derived from one song, does the system rank that song at position 1 or in the top 3/5?",
+  "parameters": {
+    "alpha": 0.5,
+    "top_n_favorite": 4,
+    "bottom_n_avoid": 2,
+    "min_candidates": 2,
+    "n_queries_max": 200,
+    "bootstrap_samples": 10000,
+    "random_seed": 42,
+    "library_path": "data\\all_tessituragrams.json"
+  },
+  "data_summary": {
+    "total_flat_lines": 1655,
+    "n_unique_works": 1419,
+    "n_multi_part_lines": 342,
+    "valid_query_pool_size": 1647,
+    "queries_sampled": 200,
+    "n_unique_works_in_queries": 192,
+    "random_sampling": true,
+    "bootstrap_method": "cluster (work-level)"
+  },
+  "metrics": {
+    "HR@1": {
+      "value": 0.55,
+      "ci_95": [
+        0.4806,
+        0.6173
+      ]
     },
-    "data_summary": {
-      "total_songs_in_library": 101,
-      "valid_query_pool_size": 95,
-      "queries_sampled": 50,
-      "random_sampling": true
+    "HR@3": {
+      "value": 0.8,
+      "ci_95": [
+        0.7413,
+        0.8537
+      ]
     },
-    "metrics": {
-      "HR@1": {
-        "value": 0.84,
-        "ci_95": [
-          0.72,
-          0.94
-        ]
-      },
-      "HR@3": {
-        "value": 1.0,
-        "ci_95": [
-          1.0,
-          1.0
-        ]
-      },
-      "HR@5": {
-        "value": 1.0,
-        "ci_95": [
-          1.0,
-          1.0
-        ]
-      },
-      "MRR": {
-        "value": 0.9067,
-        "ci_95": [
-          0.8433,
-          0.9633
-        ]
-      }
+    "HR@5": {
+      "value": 0.86,
+      "ci_95": [
+        0.8109,
+        0.9059
+      ]
     },
-    "formulas": {
-      "HR@1": "fraction of queries where the query song was ranked 1",
-      "HR@3": "fraction of queries where the query song was in top 3",
-      "HR@5": "fraction of queries where the query song was in top 5",
-      "MRR": "mean of 1/rank across queries (1 = best, rewards higher ranks)"
+    "MRR": {
+      "value": 0.6853,
+      "ci_95": [
+        0.6347,
+        0.7356
+      ]
+    }
+  },
+  "formulas": {
+    "HR@1": "fraction of queries where the query song was ranked 1",
+    "HR@3": "fraction of queries where the query song was in top 3",
+    "HR@5": "fraction of queries where the query song was in top 5",
+    "MRR": "mean of 1/rank across queries (1 = best, rewards higher ranks)"
+  },
+  "per_query": [
+    {
+      "filename": "lc5884544.mxl",
+      "composer": "Lili Boulanger",
+      "title": "Les lilas qui avaient fleuri",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
     },
-    "per_query": [
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no3-die-rose-die-lilie-die-taube.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 3 Die Rose Die Lilie Die Taube",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no6-schone-fremde.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis, Op.39 — No. 6 Schone Fremde",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-clara-6-lieder-op13-no4-der-mond-kommt-still-gegangen.mxl",
-        "composer": "Clara Schumann",
-        "title": "6 Lieder, Op.13 — No. 4 Der Mond Kommt Still Gegangen",
-        "rank": 3,
-        "hit@1": 0,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 0.3333333333333333
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no17-die-bose-farbe.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin (D.795) — No. 17 Die Bose Farbe",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no13-mit-dem-grunen-lautenbande.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin (D.795) — No. 13 Mit Dem Grunen Lautenbande",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no10-tranenregen.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin, Op.25 — No. 10 Tranenregen",
-        "rank": 2,
-        "hit@1": 0,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 0.5
-      },
-      {
-        "filename": "debussy-claude-3-chansons-de-france-no1-rondel-le-temps-a-laisse-son-manteau.mxl",
-        "composer": "Claude Debussy",
-        "title": "3 Chansons de France — No. 1 Rondel Le Temps A Laisse Son Manteau",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no5-mondnacht.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis, Op.39 — No. 5 Mondnacht",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no9-das-ist-ein-floten-und-geigen.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 9 Das Ist Ein Floten Und Geigen",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no8-ruckblick.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 8 Ruckblick",
-        "rank": 3,
-        "hit@1": 0,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 0.3333333333333333
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no3-waldesgesprach.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis, Op.39 — No. 3 Waldesgesprach",
-        "rank": 2,
-        "hit@1": 0,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 0.5
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no11-ein-jungling-liebt-ein-madchen.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 11 Ein Jungling Liebt Ein Madchen",
-        "rank": 3,
-        "hit@1": 0,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 0.3333333333333333
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no15-die-krahe.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 15 Die Krahe",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl",
-        "composer": "Clara Schumann",
-        "title": "6 Lieder, Op.13 — No. 5 Ich Hab In Deinem Auge",
-        "rank": 2,
-        "hit@1": 0,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 0.5
-      },
-      {
-        "filename": "schumann-robert-frauenliebe-und-leben-op42-no6-susser-freund-du-blickest.mxl",
-        "composer": "Robert Schumann",
-        "title": "Frauenliebe und Leben, Op.42 — No. 6 Susser Freund Du Blickest",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no7-ich-grolle-nicht.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 7 Ich Grolle Nicht",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no1-das-wandern.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin (D.795) — No. 1 Das Wandern",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no11-mein.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin (D.795) — No. 11 Mein",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no3-gefrorne-tranen.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 3 Gefrorne Tranen",
-        "rank": 3,
-        "hit@1": 0,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 0.3333333333333333
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no16-die-alten-bosen-lieder.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 16 Die Alten Bosen Lieder",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-clara-lieder-op12-no11-warum-willst-du-andre-fragen.mxl",
-        "composer": "Clara Schumann",
-        "title": "Lieder, Op.12 — No. 11 Warum Willst Du Andre Fragen",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "faure-gabriel-cinq-melodies-op58-no3-green.mxl",
-        "composer": "Fauré, Gabriel",
-        "title": "Cinq Mélodies, Op.58 — No. 3 Green",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no8-und-wusstens-die-blumen.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 8 Und Wusstens Die Blumen",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no14-der-greise-kopf.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 14 Der Greise Kopf",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-frauenliebe-und-leben-op42-no3-ich-kanns-nicht-fassen-nicht-glauben.mxl",
-        "composer": "Robert Schumann",
-        "title": "Frauenliebe und Leben — No. 3 Ich Kanns Nicht Fassen Nicht Glauben",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no18-der-sturmische-morgen.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 18 Der Sturmische Morgen",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-frauenliebe-und-leben-op42-no5-helft-mir-ihr-schwestern.mxl",
-        "composer": "Robert Schumann",
-        "title": "Frauenliebe und Leben, Op.42 — No. 5 Helft Mir Ihr Schwestern",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-clara-6-lieder-op13-no1-ich-stand-in-dunklen-traumen.mxl",
-        "composer": "Clara Schumann",
-        "title": "6 Lieder, Op.13 — No. 1 Ich Stand In Dunklen Traumen",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "debussy-claude-trois-chansons-de-bilitis-no2-la-chevelure.mxl",
-        "composer": "Claude Debussy",
-        "title": "Trois Chansons de Bilitis — No. 2 La Chevelure",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no4-wenn-ich-in-deine-augen-seh.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 4 Wenn Ich In Deine Augen Seh",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no6-der-neugierige.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin — No. 6 Der Neugierige",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no7-auf-dem-flusse.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 7 Auf Dem Flusse",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no12-fruhlingsnacht.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis, Op.39 — No. 12 Fruhlingsnacht",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-frauenliebe-und-leben-op42-no1-seit-ich-ihn-gesehen.mxl",
-        "composer": "Robert Schumann",
-        "title": "Frauenliebe und Leben, Op.42 — No. 1 Seit Ich Ihn Gesehen",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no1-gute-nacht.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 1 Gute Nacht",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "debussy-claude-trois-chansons-de-bilitis-no3-le-tombeau-des-naiades.mxl",
-        "composer": "Claude Debussy",
-        "title": "Trois Chansons de Bilitis — No. 3 Le Tombeau Des Naiades",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no1-in-der-fremde-i.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis, Op.39 — No. 1 In Der Fremde I",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-clara-6-lieder-op13-no6-die-stille-lotosblume.mxl",
-        "composer": "Clara Schumann",
-        "title": "6 Lieder, Op.13 — No. 6 Die Stille Lotosblume",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "faure-gabriel-cinq-melodies-op58-no2-en-sourdine.mxl",
-        "composer": "Gabriel Fauré",
-        "title": "Cinq Mélodies, Op.58 — No. 2 En Sourdine",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no19-tauschung.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 19 Tauschung",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "faure-gabriel-cinq-melodies-op-58-no4-a-clymene.mxl",
-        "composer": "Gabriel Fauré",
-        "title": "Cinq Mélodies Op. 58 — No. 4 A Clymene",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no4-erstarrung.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 4 Erstarrung",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no2-wohin.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin — No. 2 Wohin",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no9-wehmuth.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis, Op.39 — No. 9 Wehmuth",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-clara-6-lieder-op13-no3-liebeszauber.mxl",
-        "composer": "Clara Schumann",
-        "title": "6 Lieder, Op.13 — No. 3 Liebeszauber",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no9-des-mullers-blumen.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin (D.795) — No. 9 Des Mullers Blumen",
-        "rank": 2,
-        "hit@1": 0,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 0.5
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no13-ich-hab-im-traum-geweinet.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 13 Ich Hab Im Traum Geweinet",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no16-die-liebe-farbe.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin (D.795) — No. 16 Die Liebe Farbe",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no10-zwielicht.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis — No. 10 Zwielicht",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no17-im-dorfe.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 17 Im Dorfe",
-        "rank": 1,
-        "hit@1": 1,
-        "hit@3": 1,
-        "hit@5": 1,
-        "1/rank": 1.0
-      }
-    ]
-  }
+    {
+      "filename": "lc8712405.mxl__part_P1",
+      "composer": "Johannes Brahms",
+      "title": "Der Jäger",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6681689.mxl__part_P3",
+      "composer": "Charles Villiers Stanford",
+      "title": "Out in the windy West",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6569855.mxl",
+      "composer": "Clara Mathilda Faisst",
+      "title": "Reiterlied",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5060932.mxl",
+      "composer": "Claude Debussy",
+      "title": "Paysages belges. Chevaux de bois",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6409323.mxl",
+      "composer": "Charles Hubert Hastings Parry",
+      "title": "The Maid of Elsinore",
+      "rank": 6,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.16666666666666666
+    },
+    {
+      "filename": "lc7018964.mxl",
+      "composer": "Peter Cornelius",
+      "title": "Simeon",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5659823.mxl",
+      "composer": "Johannes Brahms",
+      "title": "O liebliche Wangen",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6179275.mxl",
+      "composer": "Clara Faisst",
+      "title": "Auf den grünen Auen",
+      "rank": 9,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.1111111111111111
+    },
+    {
+      "filename": "lc5705564.mxl",
+      "composer": "Johannes Brahms",
+      "title": "Gold überwiegt die Liebe",
+      "rank": 11,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.09090909090909091
+    },
+    {
+      "filename": "lc6994157.mxl",
+      "composer": "Erik Satie",
+      "title": "La grenouille américaine",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6260167.mxl",
+      "composer": "Clara Faisst",
+      "title": "Letzter Wunsch",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6915685.mxl",
+      "composer": "Robert Schumann",
+      "title": "Zum Schluss",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5988112.mxl",
+      "composer": "Johanna Kinkel",
+      "title": "Die Mandoline",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6586980.mxl",
+      "composer": "Carrie Jacobs-Bond",
+      "title": "Nothing But a Wild Rose",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6645396.mxl",
+      "composer": "Amelia Lehmann",
+      "title": "Wisdom and Love",
+      "rank": 31,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.03225806451612903
+    },
+    {
+      "filename": "lc6684909.mxl__part_P5",
+      "composer": "Arthur Murray Goodhart",
+      "title": "Lady on the Silver Throne",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6684909.mxl__part_P1",
+      "composer": "Arthur Murray Goodhart",
+      "title": "Lady on the Silver Throne",
+      "rank": 7,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.14285714285714285
+    },
+    {
+      "filename": "lc5026092.mxl",
+      "composer": "Richard Wagner",
+      "title": "Träume",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6910483.mxl__part_P4",
+      "composer": "Alice Tegnér",
+      "title": "Walzer (“Wechsellied zum Tanze”)",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5124429.mxl",
+      "composer": "Peter Cornelius",
+      "title": "Denkst du an mich?",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5015378.mxl",
+      "composer": "Franz Schubert",
+      "title": "Gute Nacht",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6018965.mxl__part_P1",
+      "composer": "Augusta Holmès",
+      "title": "Dans les bois",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6681689.mxl__part_P6",
+      "composer": "Charles Villiers Stanford",
+      "title": "Out in the windy West",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc4978395.mxl",
+      "composer": "Robert Schumann",
+      "title": "Am leuchtenden Sommermorgen",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6236150.mxl",
+      "composer": "Edward Elgar",
+      "title": "Queen Mary's Song",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6626192.mxl",
+      "composer": "Clémence de Grandval",
+      "title": "Les lucioles",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6905092.mxl",
+      "composer": "Georges Bizet",
+      "title": "Je n’en dirai rien!",
+      "rank": 9,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.1111111111111111
+    },
+    {
+      "filename": "lc6451405.mxl",
+      "composer": "Frank Bridge",
+      "title": "Adoration, H.57",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6801402.mxl",
+      "composer": "Robert Franz",
+      "title": "Weisst du noch?",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc5043586.mxl",
+      "composer": "Peter Cornelius",
+      "title": "Angedenken",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc31208321.mxl__part_P3",
+      "composer": "Charles Villiers Stanford",
+      "title": "The Song of the Sou’wester",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6189628.mxl",
+      "composer": "Samuel Coleridge-Taylor",
+      "title": "She sat and sang alway",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc5130351.mxl",
+      "composer": "Clara Schumann",
+      "title": "Ich hab' in Deinem Auge",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6488630.mxl",
+      "composer": "Ludwig van Beethoven",
+      "title": "Urians Reise um die Welt",
+      "rank": 8,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.125
+    },
+    {
+      "filename": "lc6661632.mxl",
+      "composer": "Laura Netzel (originally published as “Lago”)",
+      "title": "Rêve encore!",
+      "rank": 20,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.05
+    },
+    {
+      "filename": "lc5649214.mxl",
+      "composer": "Johannes Brahms",
+      "title": "Treue Liebe",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc29585942.mxl",
+      "composer": "Frank Bridge",
+      "title": "Lament",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6644591.mxl",
+      "composer": "Amelia Lehmann",
+      "title": "Bouton de Rose (To Rosa)",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6202660.mxl",
+      "composer": "Maude Valérie White",
+      "title": "Let UsForget",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc5667944.mxl",
+      "composer": "Johannes Brahms",
+      "title": "An ein Veilchen",
+      "rank": 6,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.16666666666666666
+    },
+    {
+      "filename": "lc6649053.mxl",
+      "composer": "Ann Mounsey Bartholomew",
+      "title": "Song of the Summer Winds",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc7346606.mxl",
+      "composer": "Gabriel Fauré",
+      "title": "Adieu",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc29381987.mxl",
+      "composer": "Francesco Paolo Tosti",
+      "title": "Ideale",
+      "rank": 4,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "1/rank": 0.25
+    },
+    {
+      "filename": "lc5026068.mxl",
+      "composer": "Richard Wagner",
+      "title": "Der Engel",
+      "rank": 4,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "1/rank": 0.25
+    },
+    {
+      "filename": "lc5004632.mxl",
+      "composer": "Fanny (Mendelssohn) Hensel",
+      "title": "Wanderlied",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6320420.mxl",
+      "composer": "Johannes Brahms (1833-1897)",
+      "title": "Geisliches Wiegenlied",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc5987937.mxl",
+      "composer": "Fanny (Mendelssohn) Hensel",
+      "title": "Du bist die Ruh",
+      "rank": 4,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "1/rank": 0.25
+    },
+    {
+      "filename": "lc7076589.mxl__part_P2",
+      "composer": "Felix Mendelssohn-Bartholdy (1809 - 1847)",
+      "title": "Abschiedslied der Zugvögel",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5995173.mxl",
+      "composer": "Augusta Holmès",
+      "title": "Parmi les meules",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6753345.mxl",
+      "composer": "Liza Lehmann",
+      "title": "My sister Nell",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6682890.mxl__part_P1",
+      "composer": "Henry Walford Davies",
+      "title": "Hark! The world is full of thy praise",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6218743.mxl__part_P4",
+      "composer": "Walford Davies",
+      "title": "O My Little Sixpence",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6062682.mxl",
+      "composer": "Josephine Lang",
+      "title": "Der Herbst",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc4982491.mxl",
+      "composer": "Franz Schubert",
+      "title": "Lachen und Weinen",
+      "rank": 4,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "1/rank": 0.25
+    },
+    {
+      "filename": "lc5098732.mxl",
+      "composer": "Johannes Brahms",
+      "title": "Wie die Wolke nach der Sonne",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5101299.mxl",
+      "composer": "Fanny (Mendelssohn) Hensel",
+      "title": "Mayenlied",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6572043.mxl",
+      "composer": "Johanna Kinkel (published as J. Mathieux)",
+      "title": "Abschied von Italien",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6834588.mxl",
+      "composer": "Robert Schumann",
+      "title": "Rätsel",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc4999602.mxl",
+      "composer": "Cécile Chaminade",
+      "title": "Les Rêves",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5903060.mxl__part_P2",
+      "composer": "Holmès, Augusta",
+      "title": "L'Aubépine de St. Patrick",
+      "rank": 12,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.08333333333333333
+    },
+    {
+      "filename": "lc6169445.mxl",
+      "composer": "Augusta Holmès",
+      "title": "Ton nom",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6022316.mxl",
+      "composer": "Fanny (Mendelssohn) Hensel",
+      "title": "Das Heimweh",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6379527.mxl",
+      "composer": "George Butterworth",
+      "title": "On the Idle Hill of Summer",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5067337.mxl",
+      "composer": "Hugo Wolf",
+      "title": "Erwartung",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6641589.mxl",
+      "composer": "Pauline Viardot",
+      "title": "Havanaise  (VWV 1019)",
+      "rank": 10,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.1
+    },
+    {
+      "filename": "lc6248307.mxl",
+      "composer": "Johanna Kinkel",
+      "title": "Die Geister haben's vernommen",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6679725.mxl__part_P2",
+      "composer": "Alexander Mackenzie",
+      "title": "With wisdom, goodness, grace",
+      "rank": 4,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "1/rank": 0.25
+    },
+    {
+      "filename": "lc6205297.mxl__part_P4",
+      "composer": "Arthur Sullivan",
+      "title": "The Long Day Closes",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5051353.mxl",
+      "composer": "Peter Cornelius",
+      "title": "Auf eine Unbekannte",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5906774.mxl",
+      "composer": "Marie Jaëll",
+      "title": "Vœu",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6293357.mxl",
+      "composer": "Cécile Chaminade",
+      "title": "Chanson Groënlandaise",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6573275.mxl",
+      "composer": "Johanna Kinkel (publsihed as J. Mathieux)",
+      "title": "Klage",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5936324.mxl",
+      "composer": "Johannes Brahms",
+      "title": "Heimweh I",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc31240310.mxl__part_P4",
+      "composer": "Charles Villiers Stanford",
+      "title": "Fare Well",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5983850.mxl",
+      "composer": "Lili Boulanger",
+      "title": "Attente",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5000467.mxl",
+      "composer": "Fanny (Mendelssohn) Hensel",
+      "title": "Nach Süden",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6267935.mxl",
+      "composer": "Luise Greger",
+      "title": "Min Schatz is en Jäger (Op.33)",
+      "rank": 5,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "1/rank": 0.2
+    },
+    {
+      "filename": "lc6023075.mxl__part_P2",
+      "composer": "Fanny (Mendelssohn) Hensel",
+      "title": "Schöne Fremde",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6598368.mxl",
+      "composer": "Louise Farrenc",
+      "title": "Le berger fidèle",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6472842.mxl",
+      "composer": "Joseph Haydn",
+      "title": "The Mermaid’s Song, Hob.XXVIa:25",
+      "rank": 8,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.125
+    },
+    {
+      "filename": "lc6196720.mxl",
+      "composer": "Peter Warlock",
+      "title": "There is a lady sweet and kind",
+      "rank": 13,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.07692307692307693
+    },
+    {
+      "filename": "lc6753337.mxl",
+      "composer": "Liza Lehmann",
+      "title": "This beautiful world",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6474919.mxl",
+      "composer": "Frank Bridge",
+      "title": "Come to Me in my Dreams, H.71",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6481218.mxl",
+      "composer": "Erik Satie",
+      "title": "Portrait de Socrate",
+      "rank": 6,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.16666666666666666
+    },
+    {
+      "filename": "lc6895220.mxl",
+      "composer": "Georges Bizet",
+      "title": "Vous ne priez pas",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6141796.mxl",
+      "composer": "Johanna Kinkel (originally published under the name Johanna Mathieux)",
+      "title": "Abreise",
+      "rank": 23,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.043478260869565216
+    },
+    {
+      "filename": "lc6147489.mxl",
+      "composer": "Holmès, Augusta",
+      "title": "Le fil des cœurs",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5983777.mxl",
+      "composer": "Lili Boulanger",
+      "title": "Dans l'immense tristesse",
+      "rank": 6,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.16666666666666666
+    },
+    {
+      "filename": "lc6165185.mxl",
+      "composer": "Mathilde Kralik (Mathilde Aloisia Kralik von Meyrswalden)",
+      "title": "Himmelschlüssel",
+      "rank": 9,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.1111111111111111
+    },
+    {
+      "filename": "lc4985935.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die liebe Farbe",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6218743.mxl__part_P3",
+      "composer": "Walford Davies",
+      "title": "O My Little Sixpence",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6267936.mxl",
+      "composer": "Luise Greger",
+      "title": "Still, keiner darw dat weiten! (Op.34)",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6012390.mxl",
+      "composer": "Josephine Lang",
+      "title": "Herz, mein Herz, so schweig auch du!",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5004640.mxl",
+      "composer": "Fanny (Mendelssohn) Hensel",
+      "title": "Warum sind denn die Rosen so blass?",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5060972.mxl",
+      "composer": "Claude Debussy",
+      "title": "Le Jet d'Eau",
+      "rank": 47,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.02127659574468085
+    },
+    {
+      "filename": "lc5901950.mxl",
+      "composer": "Lili Boulanger",
+      "title": "Je garde une médaille d'elle",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6610193.mxl",
+      "composer": "Chiquinha Gonzaga [published as Francisca Gonzaga]",
+      "title": "Dona Adelaide",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc4978494.mxl",
+      "composer": "Robert Schumann",
+      "title": "Süsser Freund, du blickest",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5043569.mxl",
+      "composer": "Peter Cornelius",
+      "title": "An den Traum",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6611657.mxl",
+      "composer": "Chiquinha Gonzaga [published as Francisca Gonzaga]",
+      "title": "Manhã de amor",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5001870.mxl",
+      "composer": "Louise Reichardt",
+      "title": "Vaters Klage",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6623221.mxl__part_P1",
+      "composer": "Charlotte Alington Barnard [published as \"Claribel\"]",
+      "title": "Farewell to Erin",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6153748.mxl",
+      "composer": "Marie Jaëll",
+      "title": "Quatre heures du matin",
+      "rank": 5,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "1/rank": 0.2
+    },
+    {
+      "filename": "lc9134607.mxl",
+      "composer": "Arnold Schoenberg",
+      "title": "Als Neuling trat ich ein in dein Gehege",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5820797.mxl",
+      "composer": "Peter Cornelius",
+      "title": "Dein Bildnis",
+      "rank": 4,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "1/rank": 0.25
+    },
+    {
+      "filename": "lc5001994.mxl",
+      "composer": "Louise Reichardt",
+      "title": "Wachtelwacht",
+      "rank": 18,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.05555555555555555
+    },
+    {
+      "filename": "lc6808938.mxl",
+      "composer": "Robert Franz",
+      "title": "Stille Sicherheit",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc8832018.mxl",
+      "composer": "Claude Debussy",
+      "title": "La Grotte: Auprès de cette grotte sombre",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6425416.mxl",
+      "composer": "Charles Hubert Hastings Parry",
+      "title": "Where shall the lover rest",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6465778.mxl",
+      "composer": "Joseph Haydn",
+      "title": "A Pastoral Song, Hob.XXVIa:27",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc4987633.mxl",
+      "composer": "Robert Schumann",
+      "title": "Die Stille",
+      "rank": 5,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "1/rank": 0.2
+    },
+    {
+      "filename": "lc6615501.mxl",
+      "composer": "Clémence de Grandval",
+      "title": "Chrysa",
+      "rank": 4,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "1/rank": 0.25
+    },
+    {
+      "filename": "lc5062143.mxl__part_P1",
+      "composer": "Louise Reichardt",
+      "title": "Duettino",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6646781.mxl__part_P2",
+      "composer": "Ann Mounsey Bartholomew",
+      "title": "Song of the Summer Winds  (arranged for three voices)",
+      "rank": 8,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.125
+    },
+    {
+      "filename": "lc6898141.mxl",
+      "composer": "Georges Bizet",
+      "title": "Sérénade",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5009833.mxl",
+      "composer": "Franz Schubert",
+      "title": "Täuschung",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6609481.mxl__part_P4",
+      "composer": "Maria Lindsay [Mrs J. W. Bliss]",
+      "title": "Good night, good night beloved",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc29092718.mxl",
+      "composer": "Roger Quilter",
+      "title": "The Maiden Blush",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6060726.mxl",
+      "composer": "Josephine Lang",
+      "title": "Nachts",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc5071694.mxl",
+      "composer": "Johannes Brahms",
+      "title": "Strahlt zuweilen auch ein mildes Licht",
+      "rank": 9,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.1111111111111111
+    },
+    {
+      "filename": "lc6753355.mxl",
+      "composer": "Liza Lehmann",
+      "title": "Good-night little stars",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6170065.mxl",
+      "composer": "Ivor Gurney",
+      "title": "Orpheus",
+      "rank": 4,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "1/rank": 0.25
+    },
+    {
+      "filename": "lc6575466.mxl",
+      "composer": "Clara Mathilda Faisst",
+      "title": "Das Brünnlein",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6828018.mxl",
+      "composer": "Robert Schumann",
+      "title": "Schlusslied des Narren",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6766368.mxl__part_P1",
+      "composer": "Liza Lehmann",
+      "title": "Love Enthroned",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6260377.mxl",
+      "composer": "Clara Faisst",
+      "title": "Niederländisches Wiegenlied",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6446003.mxl",
+      "composer": "Henry Rowley Bishop",
+      "title": "Sappho at her Loom",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6789660.mxl__part_P1",
+      "composer": "Charles Villiers Stanford",
+      "title": "The splendour falls",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6199578.mxl",
+      "composer": "Richard Strauss",
+      "title": "Morgen",
+      "rank": 6,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.16666666666666666
+    },
+    {
+      "filename": "lc6812991.mxl",
+      "composer": "Robert Franz",
+      "title": "Kommt fein’s Liebchen heut?",
+      "rank": 10,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.1
+    },
+    {
+      "filename": "lc6022185.mxl",
+      "composer": "Fanny (Mendelssohn) Hensel",
+      "title": "Italien",
+      "rank": 40,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.025
+    },
+    {
+      "filename": "lc5098672.mxl",
+      "composer": "Johannes Brahms",
+      "title": "In der Fremde",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc5093803.mxl",
+      "composer": "Franz Schubert",
+      "title": "Lied der Mignon (Nur wer die Sehnsucht kennt)",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6182149.mxl__part_P2",
+      "composer": "Franz Schubert",
+      "title": "Coronach, D.836",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6177442.mxl",
+      "composer": "Johanna Kinkel (originally published under the name J. Mathieux)",
+      "title": "Wiegenlied",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6655859.mxl",
+      "composer": "Helena Munktell",
+      "title": "La dernière berceuse",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5842033.mxl",
+      "composer": "Maria Theresia von Paradis",
+      "title": "An das Klavier",
+      "rank": 9,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.1111111111111111
+    },
+    {
+      "filename": "lc8702982.mxl__part_P1",
+      "composer": "Johannes Brahms",
+      "title": "Magdalena",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5087729.mxl",
+      "composer": "Johannes Brahms",
+      "title": "Agnes",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc5905808.mxl",
+      "composer": "Augusta Holmès",
+      "title": "Les moutons des anges",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5098625.mxl",
+      "composer": "Johannes Brahms",
+      "title": "Die Trauernde",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6050301.mxl",
+      "composer": "Corona Elisabeth Wilhelmine Schröter",
+      "title": "Der Erlkönig",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6987889.mxl",
+      "composer": "Erik Satie",
+      "title": "L’omnibus automobile",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6017382.mxl__part_P1",
+      "composer": "Augusta Holmès",
+      "title": "Un rêve",
+      "rank": 15,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.06666666666666667
+    },
+    {
+      "filename": "lc6210474.mxl__part_P2",
+      "composer": "Charles Hubert Hastings Parry",
+      "title": "There Rolls the Deep",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc29161331.mxl__part_P2",
+      "composer": "Thomas Arne",
+      "title": "A Favorite Glee",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6013106.mxl",
+      "composer": "Fanny (Mendelssohn) Hensel",
+      "title": "Verlust",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6007917.mxl",
+      "composer": "Augusta Holmès",
+      "title": "Chanson du chamelier",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6577426.mxl",
+      "composer": "Josephine Lang",
+      "title": "Abschied",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc5026236.mxl",
+      "composer": "Franz Schubert",
+      "title": "Eifersucht und Stolz",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6421627.mxl",
+      "composer": "Liza Lehmann",
+      "title": "The Starling",
+      "rank": 49,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.02040816326530612
+    },
+    {
+      "filename": "lc6925763.mxl",
+      "composer": "Robert Schumann",
+      "title": "Aus den hebräischen Gesängen (Mein Herz ist schwer)",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6715306.mxl",
+      "composer": "Anton Webern",
+      "title": "Dies ist ein Lied für dich allein",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6218728.mxl__part_P1",
+      "composer": "Walford Davies",
+      "title": "A Tragedy",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc8712648.mxl__part_P3",
+      "composer": "Johannes Brahms",
+      "title": "Ruf zur Maria",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6988229.mxl",
+      "composer": "Erik Satie",
+      "title": "Elégies",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc4981984.mxl",
+      "composer": "Franz Schubert",
+      "title": "Dass sie hier gewesen",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6652787.mxl__part_P1",
+      "composer": "Helena Munktell",
+      "title": "Österns natt",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6623221.mxl__part_P2",
+      "composer": "Charlotte Alington Barnard [published as \"Claribel\"]",
+      "title": "Farewell to Erin",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5864837.mxl",
+      "composer": "Lili Boulanger",
+      "title": "Vous m'avez regardé avec toute votre âme",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5000363.mxl",
+      "composer": "Cécile Chaminade",
+      "title": "Sur la plage",
+      "rank": 5,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 1,
+      "1/rank": 0.2
+    },
+    {
+      "filename": "lc6788555.mxl__part_P2",
+      "composer": "Charles Villiers Stanford",
+      "title": "Tears, idle tears",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5653497.mxl",
+      "composer": "Johannes Brahms",
+      "title": "Heimkehr",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc31240310.mxl__part_P5",
+      "composer": "Charles Villiers Stanford",
+      "title": "Fare Well",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6583966.mxl",
+      "composer": "Harriett Abrams",
+      "title": "The Orphan’s Prayer",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6218728.mxl__part_P4",
+      "composer": "Walford Davies",
+      "title": "A Tragedy",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6613355.mxl",
+      "composer": "Clémence de Grandval (1828 - 1907)",
+      "title": "Les clochettes",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6766368.mxl__part_P2",
+      "composer": "Liza Lehmann",
+      "title": "Love Enthroned",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5016466.mxl",
+      "composer": "Franz Schubert",
+      "title": "Der Lindenbaum",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc5612951.mxl",
+      "composer": "Gabriel Fauré",
+      "title": "A Clymène",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6162666.mxl",
+      "composer": "Emilie Zumsteeg",
+      "title": "An meine Zither",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc5007178.mxl",
+      "composer": "Franz Schubert",
+      "title": "Der greise Kopf",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc5069048.mxl",
+      "composer": "Johannes Brahms",
+      "title": "Der Strom, der neben mir verrauschte",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5879039.mxl",
+      "composer": "Holmès, Augusta Mary Anne",
+      "title": "L'Or",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6260992.mxl",
+      "composer": "Cécile Chaminade",
+      "title": "Alleluia",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc5852737.mxl",
+      "composer": "Lili Boulanger",
+      "title": "Elle était descendue au bas de la prairie",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6022950.mxl__part_P1",
+      "composer": "Fanny (Mendelssohn) Hensel",
+      "title": "Hörst du nicht die Bäume rauschen",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5605080.mxl",
+      "composer": "Gabriel Fauré",
+      "title": "C'est l’extase",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6173951.mxl",
+      "composer": "Luise Greger",
+      "title": "Dein, Op.122",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6826352.mxl",
+      "composer": "Robert Schumann",
+      "title": "Sängers Trost",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5837811.mxl",
+      "composer": "Marie Jaëll",
+      "title": "Eternel amour",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc5025985.mxl",
+      "composer": "Franz Schubert",
+      "title": "Tränenregen",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6604179.mxl__part_P2",
+      "composer": "Sophie Gail",
+      "title": "Les langueurs",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6010916.mxl",
+      "composer": "Augusta Holmès",
+      "title": "L'opprimée",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5087973.mxl",
+      "composer": "Louise Reichardt",
+      "title": "Daphne am Bach",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6212196.mxl__part_P2",
+      "composer": "Amy Marcy Beach",
+      "title": "The Year's at the Spring",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6688176.mxl__part_P1",
+      "composer": "Charles Harford Lloyd",
+      "title": "A thousand years, by sea and land",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc8712405.mxl__part_P2",
+      "composer": "Johannes Brahms",
+      "title": "Der Jäger",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6022146.mxl__part_P2",
+      "composer": "Fanny (Mendelssohn) Hensel",
+      "title": "Suleika und Hatem",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc5092560.mxl",
+      "composer": "Louise Reichardt",
+      "title": "Geistliches Lied",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc5077645.mxl",
+      "composer": "Ernest Chausson",
+      "title": "Nanny",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc9134397.mxl",
+      "composer": "Arnold Schoenberg",
+      "title": "Hain in diesen Paradiesen",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6414608.mxl",
+      "composer": "Arthur Goring Thomas",
+      "title": "To Welcome You",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6150402.mxl",
+      "composer": "Johanna Kinkel (originally published under the name J. Mathieux)",
+      "title": "Wunsch",
+      "rank": 3,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.3333333333333333
+    },
+    {
+      "filename": "lc6218732.mxl__part_P4",
+      "composer": "Walford Davies",
+      "title": "A Little Old Man",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    },
+    {
+      "filename": "lc6564816.mxl",
+      "composer": "Amy Beach (Mrs. H.H.A. Beach)",
+      "title": "Fairy Lullaby",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6248304.mxl",
+      "composer": "Johanna Kinkel",
+      "title": "Verlornes Glück",
+      "rank": 2,
+      "hit@1": 0,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 0.5
+    },
+    {
+      "filename": "lc6661586.mxl",
+      "composer": "Laura Netzel (originally published as “Lago”)",
+      "title": "Malgré-moi!",
+      "rank": 12,
+      "hit@1": 0,
+      "hit@3": 0,
+      "hit@5": 0,
+      "1/rank": 0.08333333333333333
+    },
+    {
+      "filename": "lc5025982.mxl",
+      "composer": "Franz Schubert",
+      "title": "Morgengruß",
+      "rank": 1,
+      "hit@1": 1,
+      "hit@3": 1,
+      "hit@5": 1,
+      "1/rank": 1.0
+    }
+  ]
+}
