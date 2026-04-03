@@ -33,7 +33,7 @@ def _song_label(rec: dict) -> str:
 
     title = rec.get('title', '')
     composer = rec.get('composer', 'Unknown')
-    return f"{title}, {subtitle}\\n{composer}"
+    return f"{title}, {subtitle}\n{composer}"
 
 
 # ── Plot code generators ─────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ def _make_multi_plot_code(
     composer = rec.get('composer', '')
 
     chart_title = (
-        f"#{rank}  {title} — Profile {profile_index + 1} → {part_name}\\n"
+        f"#{rank}  {title} — Profile {profile_index + 1} → {part_name}\n"
         f"{composer}  |  score {score:.2f}  (cos sim {cos_sim:.2f})"
     )
 
@@ -210,6 +210,7 @@ def generate_notebook(
         "Run **Cell → Run All** (or **Ctrl+Shift+Enter**) to render all charts."
     )
     nb.cells.append(nbformat.v4.new_markdown_cell('\n'.join(summary_lines)))
+    nb.cells.append(nbformat.v4.new_code_cell('%matplotlib inline'))
 
     # ── Charts ───────────────────────────────────────────────────────────
     is_solo = num_profiles == 1

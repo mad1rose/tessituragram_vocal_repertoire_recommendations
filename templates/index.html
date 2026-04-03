@@ -7,7 +7,7 @@
 
 <div class="grid-2">
   {% for num, info in types.items()|sort %}
-  <form method="post" action="{{ url_for('select_ensemble') }}" style="display:contents">
+  <form method="post" action="{{ url_for('select_ensemble') }}" class="ensemble-form">
     <input type="hidden" name="num_parts" value="{{ num }}">
     <input type="hidden" name="ensemble_label" value="{{ info.label }}">
     <button type="submit" class="card card-clickable ensemble-card">

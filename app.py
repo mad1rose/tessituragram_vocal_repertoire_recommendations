@@ -293,4 +293,18 @@ def results():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    import os
+
+    # PORT / FLASK_HOST: override if 5000 is taken or you need LAN access (e.g. FLASK_HOST=0.0.0.0).
+    port = int(os.environ.get("PORT", "5000"))
+    host = os.environ.get("FLASK_HOST", "127.0.0.1")
+    # Debug reloader spawns a second process; on Windows + synced folders it often breaks binding.
+    open_url = "127.0.0.1" if host in ("0.0.0.0", "::") else host
+    print(f"\n  Tessituragram UI - open: http://{open_url}:{port}/\n", flush=True)
+    app.run(
+        debug=True,
+        host=host,
+        port=port,
+        use_reloader=False,
+        load_dotenv=False,
+    )

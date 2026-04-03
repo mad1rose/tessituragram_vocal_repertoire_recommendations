@@ -132,18 +132,29 @@ a:hover { text-decoration: underline; }
 .grid-3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
 
 /* ── Ensemble type cards ───────────────────────────────────────────────────── */
+.ensemble-form {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  min-width: 0;
+}
+.ensemble-form .ensemble-card {
+  flex: 1;
+  width: 100%;
+  min-height: 100%;
+}
 .ensemble-card {
   text-align: center;
   padding: 2rem 1.5rem;
   border: 2px solid transparent;
 }
-.ensemble-card:nth-child(1)  { background: #fce4f2; }
-.ensemble-card:nth-child(2)  { background: #ede0fa; }
-.ensemble-card:nth-child(3)  { background: #e0f0fa; }
-.ensemble-card:nth-child(4)  { background: #e8fae4; }
-.ensemble-card:nth-child(5)  { background: #faf0e0; }
-.ensemble-card:nth-child(6)  { background: #fae4e4; }
-.ensemble-card:nth-child(n+7){ background: #f0e4fa; }
+.grid-2 > .ensemble-form:nth-child(1) .ensemble-card  { background: #fce4f2; }
+.grid-2 > .ensemble-form:nth-child(2) .ensemble-card  { background: #ede0fa; }
+.grid-2 > .ensemble-form:nth-child(3) .ensemble-card  { background: #e0f0fa; }
+.grid-2 > .ensemble-form:nth-child(4) .ensemble-card  { background: #e8fae4; }
+.grid-2 > .ensemble-form:nth-child(5) .ensemble-card  { background: #faf0e0; }
+.grid-2 > .ensemble-form:nth-child(6) .ensemble-card  { background: #fae4e4; }
+.grid-2 > .ensemble-form:nth-child(n+7) .ensemble-card { background: #f0e4fa; }
 
 .ensemble-card:hover { border-color: var(--accent); }
 

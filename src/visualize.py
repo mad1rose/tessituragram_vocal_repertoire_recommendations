@@ -126,6 +126,7 @@ def generate_notebook(
         "MIDI numbers are absolute \u2014 enharmonic equivalents (like F\u266f and G\u266d) "
         "share the same number, so pitches are directly comparable across songs."
     ))
+    nb.cells.append(nbformat.v4.new_code_cell('%matplotlib inline'))
 
     chart_idx = 0
     total_charts = sum(

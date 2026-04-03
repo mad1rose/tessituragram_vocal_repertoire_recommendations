@@ -12,18 +12,34 @@ function toggleCard(cardId) {
   card.classList.toggle('expanded');
 
   if (!wasExpanded) {
-    const charts = card.querySelectorAll('.plotly-chart');
-    charts.forEach(renderChart);
+    // Plotly measures the container; defer until after .result-detail is visible and laid out.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        card.querySelectorAll('.plotly-chart').forEach(renderChart);
+      });
+    });
   }
 }
 
 function renderChart(el) {
   if (el.dataset.rendered === 'true') return;
-  el.dataset.rendered = 'true';
+  if (typeof Plotly === 'undefined') {
+    el.textContent = 'Chart library failed to load (check network / CDN).';
+    return;
+  }
 
-  const normed = JSON.parse(el.dataset.normed || '{}');
-  const ideal  = JSON.parse(el.dataset.ideal || '{}');
-  const title  = el.dataset.chartTitle || '';
+  const normedRaw = el.getAttribute('data-normed');
+  const idealRaw = el.getAttribute('data-ideal');
+  let normed;
+  let ideal;
+  try {
+    normed = JSON.parse(normedRaw || '{}');
+    ideal = JSON.parse(idealRaw || '{}');
+  } catch (e) {
+    el.textContent = 'Chart data could not be parsed';
+    return;
+  }
+  const title = el.getAttribute('data-chart-title') || '';
 
   const allMidis = new Set([
     ...Object.keys(normed).map(Number),
@@ -79,8 +95,7 @@ function renderChart(el) {
       automargin: true,
     },
     yaxis: {
-      title: 'Proportion of singing time',
-      titlefont: { size: 10 },
+      title: { text: 'Proportion of singing time', font: { size: 10 } },
       gridcolor: '#ead6e6',
       automargin: true,
     },
@@ -89,8 +104,18 @@ function renderChart(el) {
     bargap: 0.2,
   };
 
-  Plotly.newPlot(el, [barTrace, lineTrace], layout, {
-    responsive: true,
-    displayModeBar: false,
-  });
+  try {
+    Plotly.newPlot(el, [barTrace, lineTrace], layout, {
+      responsive: true,
+      displayModeBar: false,
+    });
+    el.dataset.rendered = 'true';
+    requestAnimationFrame(() => {
+      if (typeof Plotly !== 'undefined' && Plotly.Plots && Plotly.Plots.resize) {
+        Plotly.Plots.resize(el);
+      }
+    });
+  } catch (e) {
+    el.textContent = 'Chart could not be drawn.';
+  }
 }
