@@ -1,0 +1,101 @@
+{
+    "experiment": "RQ2_baselines",
+    "description": "Baselines for RQ2 ranking stability: full model (range + cosine − α×avoid), cosine-only (α = 0), and range-only + random rankings (null). Uses the same random baseline selection rule as run_rq2_experiment.py.",
+    "parameters": {
+      "alpha_full": 0.5,
+      "bootstrap_samples": 10000,
+      "random_seed_baselines": 42,
+      "min_candidates": 10,
+      "n_baselines_target": 5,
+      "library_path": "data\\tessituragrams.json"
+    },
+    "data_summary": {
+      "total_songs_in_library": 101,
+      "n_baselines": 5
+    },
+    "models": [
+      "full",
+      "null_random",
+      "cosine_only"
+    ],
+    "model_descriptions": {
+      "full": "Range filter + cosine similarity − α×avoid_penalty (α = 0.5).",
+      "null_random": "Range filter only, then random rankings compared against a random reference ordering (null τ distribution).",
+      "cosine_only": "Range filter + cosine similarity only (α = 0.0; avoid list ignored in scoring)."
+    },
+    "metrics": {
+      "full": {
+        "mean_tau_overall": 0.849,
+        "std_tau_overall": 0.1138,
+        "mean_tau_per_baseline": 0.8481,
+        "std_tau_across_baselines": 0.0435,
+        "ci_95_baseline_mean": [
+          0.808,
+          0.8751
+        ],
+        "n_perturbations": 130,
+        "n_baselines": 5
+      },
+      "cosine_only": {
+        "mean_tau_overall": 0.8761,
+        "std_tau_overall": 0.1319,
+        "mean_tau_per_baseline": 0.8744,
+        "std_tau_across_baselines": 0.0401,
+        "ci_95_baseline_mean": [
+          0.839,
+          0.9066
+        ],
+        "n_perturbations": 130,
+        "n_baselines": 5
+      },
+      "null_random": {
+        "mean_tau_overall": -0.0363,
+        "std_tau_overall": 0.1816,
+        "mean_tau_per_baseline": -0.0373,
+        "std_tau_across_baselines": 0.0192,
+        "ci_95_baseline_mean": [
+          -0.053,
+          -0.0223
+        ],
+        "n_perturbations": 130,
+        "n_baselines": 5
+      }
+    },
+    "baseline_profiles": [
+      {
+        "source_song": "debussy-claude-3-chansons-de-france-no2-la-grotte-aupres-de-cette-grotte-sombre.mxl",
+        "composer": "Claude Debussy",
+        "n_perturbations_full": 28,
+        "n_perturbations_cosine_only": 28,
+        "n_samples_random": 28
+      },
+      {
+        "source_song": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl",
+        "composer": "Clara Schumann",
+        "n_perturbations_full": 24,
+        "n_perturbations_cosine_only": 24,
+        "n_samples_random": 24
+      },
+      {
+        "source_song": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl",
+        "composer": "Franz Schubert",
+        "n_perturbations_full": 30,
+        "n_perturbations_cosine_only": 30,
+        "n_samples_random": 30
+      },
+      {
+        "source_song": "schubert-franz-die-schone-mullerin-d795-no3-halt.mxl",
+        "composer": "Franz Schubert",
+        "n_perturbations_full": 24,
+        "n_perturbations_cosine_only": 24,
+        "n_samples_random": 24
+      },
+      {
+        "source_song": "schubert-franz-die-schone-mullerin-d795-no18-trockne-blumen.mxl",
+        "composer": "Franz Schubert",
+        "n_perturbations_full": 24,
+        "n_perturbations_cosine_only": 24,
+        "n_samples_random": 24
+      }
+    ]
+  }
