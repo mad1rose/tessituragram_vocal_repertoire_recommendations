@@ -29,7 +29,7 @@ _sys_path = list(__import__("sys").path)
 if str(ROOT) not in _sys_path:
     __import__("sys").path.insert(0, str(ROOT))
 
-from src.storage import load_tessituragrams  # noqa: E402
+from src.storage import load_flat_library, work_id  # noqa: E402
 from src.recommend import (  # noqa: E402
     filter_by_range,
     build_ideal_vector,
@@ -47,20 +47,31 @@ ALPHA_FULL = 0.5
 BOOTSTRAP_SAMPLES = 10_000
 
 
-def _bootstrap_ci_mean(values: List[float]) -> Tuple[float, float]:
-    """Bootstrap 95% CI for the mean of a list of values."""
+def _cluster_bootstrap_ci_mean(
+    values: List[float],
+    cluster_ids: List[str],
+) -> Tuple[float, float]:
+    """Cluster bootstrap 95% CI for the mean.
+
+    Resamples work-level clusters rather than individual observations to
+    preserve intra-work correlation (Cameron et al., 2008).
+    """
     if not values:
         return 0.0, 0.0
-    arr = np.array(values, dtype=float)
-    if len(arr) == 1:
-        m = float(arr[0])
+    clusters: dict[str, list[int]] = {}
+    for i, cid in enumerate(cluster_ids):
+        clusters.setdefault(cid, []).append(i)
+    cluster_keys = list(clusters.keys())
+    n_clusters = len(cluster_keys)
+    if n_clusters <= 1:
+        m = float(np.mean(values))
         return m, m
-    boot = np.array(
-        [
-            float(np.mean(random.choices(arr, k=len(arr))))
-            for _ in range(BOOTSTRAP_SAMPLES)
-        ]
-    )
+    values_arr = np.array(values, dtype=float)
+    boot = np.empty(BOOTSTRAP_SAMPLES)
+    for b in range(BOOTSTRAP_SAMPLES):
+        sampled = random.choices(cluster_keys, k=n_clusters)
+        indices = [idx for key in sampled for idx in clusters[key]]
+        boot[b] = np.mean(values_arr[indices])
     lo, hi = float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))
     return lo, hi
 
@@ -172,7 +183,7 @@ def run_rq1_baselines(library_path: Path) -> dict:
 
     Returns a results dict with per-model summary metrics and per-query detail.
     """
-    all_songs = load_tessituragrams(library_path)
+    all_songs = load_flat_library(library_path)
 
     # Build query list once, using the same seed and selection rule as RQ1.
     random.seed(RQ1_RANDOM_SEED)
@@ -246,10 +257,11 @@ def run_rq1_baselines(library_path: Path) -> dict:
         hr5 = float(np.mean(hit5_vals))
         mrr = float(np.mean(mrr_vals))
 
-        hr1_ci = _bootstrap_ci_mean(hit1_vals)
-        hr3_ci = _bootstrap_ci_mean(hit3_vals)
-        hr5_ci = _bootstrap_ci_mean(hit5_vals)
-        mrr_ci = _bootstrap_ci_mean(mrr_vals)
+        wids = [work_id(rec["filename"]) for rec in per_query if model in rec["models"]]
+        hr1_ci = _cluster_bootstrap_ci_mean(hit1_vals, wids)
+        hr3_ci = _cluster_bootstrap_ci_mean(hit3_vals, wids)
+        hr5_ci = _cluster_bootstrap_ci_mean(hit5_vals, wids)
+        mrr_ci = _cluster_bootstrap_ci_mean(mrr_vals, wids)
 
         def _round_metric(val: float, ci: Tuple[float, float]) -> dict:
             return {
@@ -278,13 +290,17 @@ def run_rq1_baselines(library_path: Path) -> dict:
             "random_seed_queries": RQ1_RANDOM_SEED,
             "min_candidates": RQ1_MIN_CANDIDATES,
             "n_queries_max": RQ1_N_QUERIES,
-            "library_path": str(Path("data/tessituragrams.json")),
+            "library_path": str(Path("data/all_tessituragrams.json")),
         },
         "data_summary": {
-            "total_songs_in_library": len(all_songs),
+            "total_flat_lines": len(all_songs),
+            "n_unique_works": len({work_id(s["filename"]) for s in all_songs}),
+            "n_multi_part_lines": sum(1 for s in all_songs if "__part_" in s.get("filename", "")),
             "valid_query_pool_size": valid_pool_size,
             "queries_sampled": n,
+            "n_unique_works_in_queries": len({work_id(rec["filename"]) for rec in per_query}),
             "random_sampling": True,
+            "bootstrap_method": "cluster (work-level)",
         },
         "models": ["full", "null_random", "cosine_only"],
         "model_descriptions": {
@@ -298,7 +314,7 @@ def run_rq1_baselines(library_path: Path) -> dict:
 
 
 def main() -> None:
-    library_path = ROOT / "data" / "tessituragrams.json"
+    library_path = ROOT / "data" / "all_tessituragrams.json"
     out_dir = ROOT / "experiment_results"
     out_dir.mkdir(exist_ok=True)
 

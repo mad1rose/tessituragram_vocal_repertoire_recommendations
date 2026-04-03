@@ -54,7 +54,7 @@ _sys_path = list(__import__("sys").path)
 if str(ROOT) not in _sys_path:
     __import__("sys").path.insert(0, str(ROOT))
 
-from src.storage import load_tessituragrams
+from src.storage import load_flat_library, work_id
 from src.recommend import (
     filter_by_range,
     build_ideal_vector,
@@ -69,7 +69,7 @@ BOTTOM_N_AVOID = 2
 BOOTSTRAP_SAMPLES = 10_000
 RANDOM_SEED = 42
 MIN_CANDIDATES = 10
-N_PROFILES = 25
+N_PROFILES = 50
 
 
 def _derive_synthetic_profile(song: dict) -> tuple[int, int, list[int], list[int]]:
@@ -249,7 +249,7 @@ def _select_profiles(
 def run_rq3_experiment(library_path: Path) -> dict:
     """Run RQ3: unrounded stats, Fisher z, Spearman for all sanity-check correlations, identity check, random profiles."""
     random.seed(RANDOM_SEED)
-    all_songs = load_tessituragrams(library_path)
+    all_songs = load_flat_library(library_path)
 
     profiles = _select_profiles(all_songs)
     if not profiles:
@@ -308,29 +308,53 @@ def run_rq3_experiment(library_path: Path) -> dict:
         mean_coef_cos = mean_coef_avoid = mean_r_sq = float("nan")
         n_regressions = 0
 
-    def bootstrap_mean(values: list[float]) -> tuple[float, float]:
-        boot = np.array([np.mean(random.choices(values, k=len(values))) for _ in range(BOOTSTRAP_SAMPLES)])
+    profile_work_ids = [work_id(r["source_song"]) for r in per_run]
+
+    def cluster_bootstrap_mean(values: list[float]) -> tuple[float, float]:
+        clusters: dict[str, list[int]] = {}
+        for i, wid in enumerate(profile_work_ids):
+            clusters.setdefault(wid, []).append(i)
+        cluster_keys = list(clusters.keys())
+        n_clusters = len(cluster_keys)
+        if n_clusters <= 1:
+            m = float(np.mean(values))
+            return m, m
+        values_arr = np.array(values, dtype=float)
+        boot = np.empty(BOOTSTRAP_SAMPLES)
+        for b in range(BOOTSTRAP_SAMPLES):
+            sampled = random.choices(cluster_keys, k=n_clusters)
+            indices = [idx for key in sampled for idx in clusters[key]]
+            boot[b] = np.mean(values_arr[indices])
         return float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))
 
-    def bootstrap_fisher(r_list: list[float], n_list: list[int]) -> tuple[float, float]:
+    def cluster_bootstrap_fisher(r_list: list[float], n_list: list[int]) -> tuple[float, float]:
+        clusters: dict[str, list[int]] = {}
+        for i, wid in enumerate(profile_work_ids):
+            clusters.setdefault(wid, []).append(i)
+        cluster_keys = list(clusters.keys())
+        n_clusters = len(cluster_keys)
+        if n_clusters <= 1:
+            m = _fisher_z_mean(r_list, n_list)
+            return m, m
         boot_means = []
         for _ in range(BOOTSTRAP_SAMPLES):
-            idx = random.choices(range(len(r_list)), k=len(r_list))
-            r_b = [r_list[i] for i in idx]
-            n_b = [n_list[i] for i in idx]
+            sampled = random.choices(cluster_keys, k=n_clusters)
+            indices = [idx for key in sampled for idx in clusters[key]]
+            r_b = [r_list[i] for i in indices]
+            n_b = [n_list[i] for i in indices]
             m = _fisher_z_mean(r_b, n_b)
             if not math.isnan(m):
                 boot_means.append(m)
         if not boot_means:
             return float("nan"), float("nan")
-        boot_means = np.array(boot_means)
-        return float(np.percentile(boot_means, 2.5)), float(np.percentile(boot_means, 97.5))
+        boot_arr = np.array(boot_means)
+        return float(np.percentile(boot_arr, 2.5)), float(np.percentile(boot_arr, 97.5))
 
-    ci_var = bootstrap_mean(vars_final)
-    ci_range = bootstrap_mean(ranges_final)
-    ci_r_fc = bootstrap_fisher(r_fc, n_songs_list)
-    ci_r_fa = bootstrap_fisher(r_fa, n_songs_list)
-    ci_r_cf = bootstrap_fisher(r_cf, n_songs_list)
+    ci_var = cluster_bootstrap_mean(vars_final)
+    ci_range = cluster_bootstrap_mean(ranges_final)
+    ci_r_fc = cluster_bootstrap_fisher(r_fc, n_songs_list)
+    ci_r_fa = cluster_bootstrap_fisher(r_fa, n_songs_list)
+    ci_r_cf = cluster_bootstrap_fisher(r_cf, n_songs_list)
 
     def safe_round(x: float, ndigits: int) -> float:
         if math.isnan(x):
@@ -353,15 +377,19 @@ def run_rq3_experiment(library_path: Path) -> dict:
             "n_profiles": N_PROFILES,
             "bootstrap_samples": BOOTSTRAP_SAMPLES,
             "random_seed": RANDOM_SEED,
-            "library_path": str(Path("data/tessituragrams.json")),
+            "library_path": str(Path("data/all_tessituragrams.json")),
         },
         "data_summary": {
-            "total_songs_in_library": len(all_songs),
+            "total_flat_lines": len(all_songs),
+            "n_unique_works": len({work_id(s["filename"]) for s in all_songs}),
+            "n_multi_part_lines": sum(1 for s in all_songs if "__part_" in s.get("filename", "")),
             "n_profiles": M,
+            "n_unique_works_in_profiles": len(set(profile_work_ids)),
             "n_excluded_r_final_cos": n_excluded_fc,
             "n_excluded_r_final_avoid": n_excluded_fa,
             "n_excluded_r_cos_fav": n_excluded_cf,
             "n_runs_with_regression": n_regressions,
+            "bootstrap_method": "cluster (work-level)",
         },
         "metrics": {
             "spread": {
@@ -443,7 +471,7 @@ def _nan_to_none(obj):  # JSON does not support NaN
 
 
 def main() -> None:
-    library_path = ROOT / "data" / "tessituragrams.json"
+    library_path = ROOT / "data" / "all_tessituragrams.json"
     out_dir = ROOT / "experiment_results"
     out_dir.mkdir(exist_ok=True)
 

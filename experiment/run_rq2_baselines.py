@@ -39,7 +39,7 @@ _sys_path = list(__import__("sys").path)
 if str(ROOT) not in _sys_path:
     __import__("sys").path.insert(0, str(ROOT))
 
-from src.storage import load_tessituragrams  # noqa: E402
+from src.storage import load_flat_library, work_id  # noqa: E402
 from src.recommend import (  # noqa: E402
     filter_by_range,
     build_ideal_vector,
@@ -58,22 +58,31 @@ ALPHA_FULL = 0.5
 BOOTSTRAP_SAMPLES = 10_000
 
 
-def _bootstrap_ci_mean_over_baselines(baseline_means: List[float]) -> Tuple[float, float]:
-    """
-    Bootstrap a 95% CI for the mean τ, treating baselines as the unit of analysis.
+def _cluster_bootstrap_ci_mean_over_baselines(
+    baseline_means: List[float],
+    baseline_work_ids: List[str],
+) -> Tuple[float, float]:
+    """Cluster bootstrap 95% CI for the mean τ across baselines.
+
+    Resamples work-level clusters rather than individual baselines
+    (Cameron et al., 2008).
     """
     if not baseline_means:
         return 0.0, 0.0
-    if len(baseline_means) == 1:
-        m = float(baseline_means[0])
+    clusters: dict[str, list[int]] = {}
+    for i, wid in enumerate(baseline_work_ids):
+        clusters.setdefault(wid, []).append(i)
+    cluster_keys = list(clusters.keys())
+    n_clusters = len(cluster_keys)
+    if n_clusters <= 1:
+        m = float(np.mean(baseline_means))
         return m, m
-    arr = np.array(baseline_means, dtype=float)
-    boot = np.array(
-        [
-            float(np.mean(random.choices(arr, k=len(arr))))
-            for _ in range(BOOTSTRAP_SAMPLES)
-        ]
-    )
+    values_arr = np.array(baseline_means, dtype=float)
+    boot = np.empty(BOOTSTRAP_SAMPLES)
+    for b in range(BOOTSTRAP_SAMPLES):
+        sampled = random.choices(cluster_keys, k=n_clusters)
+        indices = [idx for key in sampled for idx in clusters[key]]
+        boot[b] = np.mean(values_arr[indices])
     lo, hi = float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))
     return lo, hi
 
@@ -230,7 +239,10 @@ def _run_one_baseline_random(
     return tau_values
 
 
-def _aggregate_tau_lists(baseline_tau_lists: List[List[float]]) -> Dict[str, object]:
+def _aggregate_tau_lists(
+    baseline_tau_lists: List[List[float]],
+    baseline_work_ids: List[str],
+) -> Dict[str, object]:
     """Aggregate τ lists across baselines into summary metrics."""
     all_tau_values = [t for lst in baseline_tau_lists for t in lst]
     n_perturbations = len(all_tau_values)
@@ -259,7 +271,7 @@ def _aggregate_tau_lists(baseline_tau_lists: List[List[float]]) -> Dict[str, obj
     std_tau_across_baselines = (
         float(np.std(baseline_means, ddof=1)) if len(baseline_means) > 1 else 0.0
     )
-    ci_lo, ci_hi = _bootstrap_ci_mean_over_baselines(baseline_means)
+    ci_lo, ci_hi = _cluster_bootstrap_ci_mean_over_baselines(baseline_means, baseline_work_ids)
 
     return {
         "mean_tau_overall": round(mean_tau_overall, 4),
@@ -278,7 +290,7 @@ def run_rq2_baselines(library_path: Path) -> dict:
     selection rule as `run_rq2_experiment.py`.
     """
     random.seed(RQ2_RANDOM_SEED)
-    all_songs = load_tessituragrams(library_path)
+    all_songs = load_flat_library(library_path)
 
     baselines = rq2_select_baselines(all_songs)
     if not baselines:
@@ -341,9 +353,13 @@ def run_rq2_baselines(library_path: Path) -> dict:
             }
         )
 
-    metrics_full = _aggregate_tau_lists(baseline_tau_full)
-    metrics_cos = _aggregate_tau_lists(baseline_tau_cos)
-    metrics_rand = _aggregate_tau_lists(baseline_tau_rand)
+    baseline_wids = [
+        work_id(song.get("filename", ""))
+        for song, *_ in baselines
+    ]
+    metrics_full = _aggregate_tau_lists(baseline_tau_full, baseline_wids)
+    metrics_cos = _aggregate_tau_lists(baseline_tau_cos, baseline_wids)
+    metrics_rand = _aggregate_tau_lists(baseline_tau_rand, baseline_wids)
 
     return {
         "experiment": "RQ2_baselines",
@@ -358,11 +374,15 @@ def run_rq2_baselines(library_path: Path) -> dict:
             "random_seed_baselines": RQ2_RANDOM_SEED,
             "min_candidates": RQ2_MIN_CANDIDATES,
             "n_baselines_target": RQ2_N_BASELINES,
-            "library_path": str(Path("data/tessituragrams.json")),
+            "library_path": str(Path("data/all_tessituragrams.json")),
         },
         "data_summary": {
-            "total_songs_in_library": len(all_songs),
+            "total_flat_lines": len(all_songs),
+            "n_unique_works": len({work_id(s["filename"]) for s in all_songs}),
+            "n_multi_part_lines": sum(1 for s in all_songs if "__part_" in s.get("filename", "")),
             "n_baselines": len(baselines),
+            "n_unique_works_in_baselines": len(set(baseline_wids)),
+            "bootstrap_method": "cluster (work-level)",
         },
         "models": ["full", "null_random", "cosine_only"],
         "model_descriptions": {
@@ -380,7 +400,7 @@ def run_rq2_baselines(library_path: Path) -> dict:
 
 
 def main() -> None:
-    library_path = ROOT / "data" / "tessituragrams.json"
+    library_path = ROOT / "data" / "all_tessituragrams.json"
     out_dir = ROOT / "experiment_results"
     out_dir.mkdir(exist_ok=True)
 

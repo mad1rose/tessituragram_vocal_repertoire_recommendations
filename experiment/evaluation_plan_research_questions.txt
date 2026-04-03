@@ -1,0 +1,309 @@
+Evaluation plan — tessituragram recommendation experiments
+============================================================
+
+1  Dataset and pre-processing
+-----------------------------
+Source file:  data/all_tessituragrams.json
+Origin:       OpenScore Lieder Corpus; tessituragrams extracted from
+              MusicXML (.mxl) files via an automated pipeline.
+
+The JSON file contains one record per *work* (composition).  Each work
+carries metadata (filename, composer, title, lyricist) and a list of
+vocal *parts* (voice lines).  Every part has its own tessituragram (a
+pitch-class histogram of MIDI note durations) and its own statistics
+block (pitch range, total duration, etc.).
+
+Pre-processing step — line-level flattening:
+  Multi-part works are expanded so that each vocal line becomes a
+  separate item in the experiment library.  The function
+  load_flat_library() in src/storage.py performs this expansion:
+
+    - Single-part works:  kept as-is; the filename key is the original
+      MusicXML filename (e.g. "lc1234.mxl").
+    - Multi-part works:   each part becomes its own record, inheriting
+      the same composer/title but receiving a unique identifier:
+        <original_filename>__part_<part_id>
+      where part_id comes from the score's part label, or falls back to
+      the zero-based part index.  Example: "lc5678.mxl__part_P2".
+
+  Works whose part list is empty are silently dropped (no tessituragram
+  data to score).
+
+Data-summary fields recorded in every result JSON:
+  total_flat_lines       — number of items after flattening (the
+                           effective library size seen by the experiments)
+  n_unique_works         — number of distinct original compositions
+  n_multi_part_lines     — items that come from multi-part works
+  n_unique_works_in_*    — distinct works among the sampled queries /
+                           baselines / profiles
+
+These counts let the reader verify the full data pipeline:
+  n_unique_works + (n_multi_part_lines − <multi-part works count>)
+  == total_flat_lines.
+
+
+2  Synthetic user-profile rule (shared by RQ1 / RQ2 / RQ3)
+-----------------------------------------------------------
+For each query/baseline/profile, a synthetic user profile is derived
+from one vocal line's tessituragram:
+
+  1. L1-normalise the tessituragram (proportion of singing time per
+     MIDI pitch).
+  2. User range = [min_midi, max_midi] from the line's statistics.
+  3. Favourites = top TOP_N_FAV (=4) pitches by normalised duration.
+  4. Avoids    = bottom BOTTOM_N_AVOID (=2) pitches by normalised
+     duration.
+  5. Disjointness: if any avoid pitch appears in the favourite set,
+     it is removed from the avoid list.
+  6. Ties in duration are broken by MIDI number (ascending) for
+     deterministic reproducibility.
+
+This rule is identical across all six experiment scripts.
+
+
+3  Research questions
+---------------------
+
+RQ1 — Self-retrieval accuracy
+  Question:  When a synthetic user profile is derived from one vocal
+  line, does the system rank that same line at position 1 (or in the
+  top 3 / top 5)?
+
+  Procedure:
+    a. Collect all lines whose range-filtered candidate set C has
+       |C| >= MIN_CANDIDATES (=2).  This is the valid query pool.
+    b. Sample up to N_QUERIES (=200) lines uniformly at random from
+       the pool (without replacement; seed = RANDOM_SEED = 42).
+    c. For each sampled query, score all candidates with the full
+       model (alpha = 0.5) and record the rank of the query line.
+    d. Compute HR@1, HR@3, HR@5, MRR across queries.
+    e. Compute 95% confidence intervals via cluster bootstrap
+       (see Section 5).
+
+  Baselines (run_rq1_baselines.py):
+    - full:        the production model (alpha = 0.5)
+    - cosine_only: alpha = 0.0 (no avoid penalty)
+    - null_random: range-filter only + uniformly random ranking
+    All three baselines use the same query set and cluster bootstrap.
+
+RQ2 — Ranking stability under small preference changes
+  Question:  When we add or remove a single favourite or avoid note,
+  how much does the ranking change?
+
+  Procedure:
+    a. Collect all lines with |C| >= MIN_CANDIDATES (=10).
+    b. Sample N_BASELINES (=20) profiles at random (seed = 42).
+    c. For each baseline, generate all one-note perturbations:
+       - add one favourite (MIDI in range, not already fav/avoid)
+       - remove one favourite (each in turn)
+       - add one avoid (same constraints)
+       - remove one avoid (each in turn)
+    d. For each perturbation, recompute the ranking and measure
+       Kendall's tau against the baseline ranking.
+    e. Aggregate: mean tau per baseline, then mean of baseline means.
+    f. 95% CI via cluster bootstrap over baseline means (Section 5).
+
+  Interpretation bands (Kendall, 1948):
+    tau > 0.7    strong agreement
+    0.3 <= tau <= 0.7  moderate agreement
+    tau < 0.3    weak agreement
+
+  Baselines (run_rq2_baselines.py):
+    - full (alpha = 0.5), cosine-only (alpha = 0.0), random.
+    Same cluster bootstrap.
+
+RQ3 — Score spread and formula checks
+  Question:  (a) Do final_score values spread out across candidate
+  songs?  (b) Does the scoring formula behave as specified?
+
+  Procedure:
+    a. Sample N_PROFILES (=50) profiles (|C| >= 10, seed = 42).
+    b. For each profile, compute unrounded scores for every candidate
+       using the same formula as the application:
+         final_score = cosine_similarity(normed_song, ideal_vec)
+                       - alpha * avoid_penalty
+    c. Per-run metrics (on unrounded values):
+       - Spread:  variance and range of final_score.
+       - Identity check:  |final_score - (cos - alpha * avoid)|;
+         should be ~0 (floating-point level).
+       - OLS regression:  final ~ intercept + cos + avoid
+         (expect coef_cos ~ 1, coef_avoid ~ -alpha, R^2 ~ 1).
+       - Sanity-check correlations (Spearman rho, chosen because
+         variables are bounded and relationships may be non-linear):
+           final_score vs cosine_similarity  (expected: positive)
+           final_score vs avoid_penalty      (expected: negative)
+           cosine_similarity vs fav_overlap  (expected: positive)
+    d. Aggregate correlations via Fisher z-transformation:
+       r is clamped to (-0.999999, 0.999999) so atanh is defined;
+       averaged (optionally weighted by n_songs - 3); back-transformed
+       with tanh.  Undefined correlations (zero variance in one
+       variable) return NaN and are excluded from aggregation; the
+       number excluded is reported.
+    e. 95% CIs via cluster bootstrap (profiles grouped by work).
+
+Alpha sensitivity (run_alpha_sensitivity.py):
+  Sweep alpha in {0.0, 0.25, 0.5, 0.75, 1.0}.  For each value,
+  recompute all RQ1 and RQ2 metrics using the same query/baseline
+  sets (built once from the same seeds).  Cluster bootstrap CIs at
+  each alpha.
+
+
+4  Fixed design parameters
+--------------------------
+Parameter            Value    Used in
+alpha                0.5      RQ1, RQ2, RQ3 (main)
+TOP_N_FAV            4        all
+BOTTOM_N_AVOID       2        all
+RANDOM_SEED          42       all (query/baseline/profile sampling
+                              and bootstrap RNG)
+MIN_CANDIDATES (RQ1) 2        RQ1, RQ1 baselines
+MIN_CANDIDATES (RQ2) 10       RQ2, RQ2 baselines, RQ3
+N_QUERIES            200      RQ1 (sampled uniformly at random)
+N_BASELINES          20       RQ2 (sampled uniformly at random)
+N_PROFILES           50       RQ3 (sampled uniformly at random)
+BOOTSTRAP_SAMPLES    10,000   all CIs
+
+
+5  Cluster bootstrap — accounting for non-independent lines
+-----------------------------------------------------------
+
+Problem:
+  After flattening multi-part works, the library contains lines that
+  share a source composition.  Lines from the same work tend to have
+  similar pitch ranges, tessituragram shapes, and metadata (same
+  composer, same musical context).  When several such lines are sampled
+  as queries (or baselines / profiles), their experimental outcomes
+  are correlated: they are *not* independent and identically distributed
+  (iid).  A standard (iid) bootstrap that resamples individual lines
+  will underestimate the variance of the sampling distribution, producing
+  confidence intervals that are too narrow.
+
+Solution — cluster bootstrap (Cameron, Gelbach & Miller, 2008;
+  Field & Welsh, 2007):
+  1. Define the *cluster* as the original work, identified by the
+     work_id() function in src/storage.py, which strips the
+     "__part_<id>" suffix from a filename.
+  2. Group all sampled observations (query records / baseline means /
+     profile-level statistics) by their cluster (work_id).
+  3. For each of B = 10,000 bootstrap iterations:
+       a. Resample *clusters* with replacement.  The number of clusters
+          resampled equals the number of unique clusters in the original
+          sample (not the number of individual observations).
+       b. Collect all observations belonging to the resampled clusters.
+          If a cluster is drawn k times, its observations appear k
+          times.
+       c. Compute the statistic of interest (e.g. mean HR@1, mean tau,
+          Fisher z mean) on the collected observations.
+  4. The 2.5th and 97.5th percentiles of the B bootstrap statistics
+     form the 95% confidence interval.
+
+Why this is conservative and correct:
+  - When all sampled lines come from distinct works (i.e. no intra-
+    cluster correlation), the cluster bootstrap is asymptotically
+    equivalent to the standard bootstrap: both resample one observation
+    per cluster.  The CIs will be similar.
+  - When some lines share a work, the cluster bootstrap correctly
+    inflates the variance estimate to reflect the reduced effective
+    sample size.
+  - This approach requires no distributional assumptions beyond
+    exchangeability at the cluster level, which is satisfied here
+    because works are sampled uniformly at random.
+
+The bootstrap_method field in every result JSON is set to
+"cluster (work-level)" to document which procedure was used.
+
+
+6  Data-pipeline transparency
+-----------------------------
+Every result JSON records the full data flow:
+
+  total_flat_lines         — library size after flattening
+  n_unique_works           — distinct original compositions
+  n_multi_part_lines       — lines from multi-part works
+  valid_query_pool_size    — lines that pass the min-candidates filter
+  queries_sampled (etc.)   — actual sample size
+  n_unique_works_in_*      — unique works among the sampled items
+
+This allows the reader to verify:
+  - How many works were expanded and by how much.
+  - Whether the sample is dominated by a few prolific works (if
+    n_unique_works_in_queries is close to queries_sampled, most queries
+    come from distinct works and clustering has minimal effect).
+  - Whether any lines were silently dropped (total_flat_lines <
+    sum of parts across all input works).
+
+
+7  Rigor notes for publication
+------------------------------
+a. Authenticity:  All tessituragrams derive from real scores in the
+   OpenScore Lieder Corpus.  Nothing is synthetic beyond the defined
+   user-profile rule (Section 2), which is deterministic and
+   reproducible.
+
+b. Randomisation:  Query / baseline / profile sampling is uniform
+   random without replacement, seeded for reproducibility (seed = 42).
+
+c. Statistical dependence:  Lines from the same multi-part work are
+   not independent.  The cluster bootstrap (Section 5) addresses this
+   by resampling at the work level rather than the line level.  The
+   paper should report the number of unique works among sampled units
+   (e.g. "200 queries from K distinct works") so the reader can assess
+   the degree of clustering.
+
+d. Silent data drops:  Lines with empty tessituragrams or missing pitch
+   ranges are excluded from the valid query/baseline/profile pool.  The
+   counts in the result JSON (valid_*_pool_size vs total_flat_lines)
+   make this transparent.
+
+e. Bootstrap calibration:  10,000 resamples; percentile method
+   (Efron & Tibshirani, 1993).  This is standard practice for IR
+   evaluation (Urbano, Lima & Hanjalic, 2013).
+
+f. No multiple-testing correction is applied.  Each research question
+   tests a different aspect of the system; the metrics are presented
+   individually with CIs, not via family-wise null-hypothesis testing.
+
+g. Rounding:  RQ3 uses unrounded score values for all analyses
+   (variance, correlation, identity check, regression) to avoid
+   discretisation artifacts.
+
+
+8  Output files
+---------------
+experiment_results/
+  RQ1_results.json              RQ1 main experiment
+  RQ1_baselines.json            RQ1 model comparison
+  RQ2_results.json              RQ2 main experiment
+  RQ2_baselines.json            RQ2 model comparison
+  RQ3_results.json              RQ3 score-spread and formula checks
+  alpha_sensitivity_results.json  alpha sweep for RQ1 + RQ2
+
+
+9  Suggested run order
+----------------------
+Execute all commands from the repository root.
+
+  1. python experiment/run_rq1_experiment.py
+  2. python experiment/run_rq1_baselines.py
+  3. python experiment/run_rq2_experiment.py
+  4. python experiment/run_rq2_baselines.py
+  5. python experiment/run_rq3_experiment.py
+  6. python experiment/run_alpha_sensitivity.py
+
+
+10  References
+--------------
+Cameron, A. C., Gelbach, J. B. & Miller, D. L. (2008).  Bootstrap-
+  based improvements for inference with clustered errors.  Review of
+  Economics and Statistics, 90(3), 414–427.
+
+Efron, B. & Tibshirani, R. J. (1993).  An Introduction to the
+  Bootstrap.  Chapman & Hall.
+
+Field, C. A. & Welsh, A. H. (2007).  Bootstrapping clustered data.
+  Journal of the Royal Statistical Society: Series B, 69(3), 369–390.
+
+Kendall, M. G. (1948).  Rank Correlation Methods.  Charles Griffin.
+
+Urbano, J., Lima, H. & Hanjalic, A. (2013).  A methodological study
+  of evaluation in information retrieval.  ACM SIGIR Forum, 47(2).

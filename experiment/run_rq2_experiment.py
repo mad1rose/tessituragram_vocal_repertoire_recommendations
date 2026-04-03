@@ -26,7 +26,7 @@ _sys_path = list(__import__("sys").path)
 if str(ROOT) not in _sys_path:
     __import__("sys").path.insert(0, str(ROOT))
 
-from src.storage import load_tessituragrams
+from src.storage import load_flat_library, work_id
 from src.recommend import (  # noqa: E402
     filter_by_range,
     build_ideal_vector,
@@ -40,7 +40,7 @@ BOTTOM_N_AVOID = 2
 BOOTSTRAP_SAMPLES = 10_000
 RANDOM_SEED = 42
 MIN_CANDIDATES = 10  # Candidate set C must have ≥ 10 songs
-N_BASELINES = 5  # Number of baseline profiles to sample at random (if available)
+N_BASELINES = 20  # Number of baseline profiles to sample at random (if available)
 
 
 def _derive_synthetic_profile(song: dict) -> Tuple[int, int, List[int], List[int]]:
@@ -214,25 +214,34 @@ def _select_baselines(
     return random.sample(candidate_baselines, n_select)
 
 
-def _bootstrap_mean_over_baselines(baseline_means: list[float]) -> tuple[float, float]:
+def _cluster_bootstrap_mean_over_baselines(
+    baseline_means: list[float],
+    baseline_work_ids: list[str],
+) -> tuple[float, float]:
     """
-    Bootstrap a 95% CI for the mean τ, treating baselines as the unit of analysis.
+    Cluster bootstrap 95% CI for the mean τ across baselines.
 
-    We resample baseline means with replacement and compute the mean for each
-    bootstrap sample (Efron & Tibshirani, 1993; Urbano et al., 2013).
+    Baselines are grouped by their source work (work_id). The bootstrap
+    resamples work-clusters with replacement rather than individual baselines,
+    preserving intra-work dependence when two baselines happen to come from
+    different vocal lines of the same composition (Cameron et al., 2008).
     """
     if not baseline_means:
         return 0.0, 0.0
-    if len(baseline_means) == 1:
-        m = float(baseline_means[0])
+    clusters: dict[str, list[int]] = {}
+    for i, wid in enumerate(baseline_work_ids):
+        clusters.setdefault(wid, []).append(i)
+    cluster_keys = list(clusters.keys())
+    n_clusters = len(cluster_keys)
+    if n_clusters <= 1:
+        m = float(np.mean(baseline_means))
         return m, m
-
-    boot = np.array(
-        [
-            np.mean(random.choices(baseline_means, k=len(baseline_means)))
-            for _ in range(BOOTSTRAP_SAMPLES)
-        ]
-    )
+    values_arr = np.array(baseline_means, dtype=float)
+    boot = np.empty(BOOTSTRAP_SAMPLES)
+    for b in range(BOOTSTRAP_SAMPLES):
+        sampled = random.choices(cluster_keys, k=n_clusters)
+        indices = [idx for key in sampled for idx in clusters[key]]
+        boot[b] = np.mean(values_arr[indices])
     lo, hi = float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))
     return lo, hi
 
@@ -246,7 +255,7 @@ def run_rq2_experiment(library_path: Path) -> dict:
     - Treats baselines as iid units for CIs (bootstrap over baseline means).
     """
     random.seed(RANDOM_SEED)
-    all_songs = load_tessituragrams(library_path)
+    all_songs = load_flat_library(library_path)
 
     baselines = _select_baselines(all_songs)
     if not baselines:
@@ -294,16 +303,20 @@ def run_rq2_experiment(library_path: Path) -> dict:
         float(np.std(all_tau_values, ddof=1)) if n_perturbations > 1 else 0.0
     )
 
-    # Baseline-level aggregation and bootstrap
+    # Baseline-level aggregation and cluster bootstrap
     baseline_means = [
         float(np.mean(tau_vals)) if tau_vals else 0.0
         for tau_vals in baseline_tau_lists
+    ]
+    baseline_work_ids = [
+        work_id(song.get("filename", ""))
+        for song, *_ in baselines
     ]
     mean_tau_per_baseline = float(np.mean(baseline_means)) if baseline_means else 0.0
     std_tau_across_baselines = (
         float(np.std(baseline_means, ddof=1)) if len(baseline_means) > 1 else 0.0
     )
-    ci_lo, ci_hi = _bootstrap_mean_over_baselines(baseline_means)
+    ci_lo, ci_hi = _cluster_bootstrap_mean_over_baselines(baseline_means, baseline_work_ids)
 
     return {
         "experiment": "RQ2_ranking_stability",
@@ -320,13 +333,17 @@ def run_rq2_experiment(library_path: Path) -> dict:
             "n_baselines_target": N_BASELINES,
             "bootstrap_samples": BOOTSTRAP_SAMPLES,
             "random_seed": RANDOM_SEED,
-            "library_path": str(Path("data/tessituragrams.json")),
+            "library_path": str(Path("data/all_tessituragrams.json")),
         },
         "baseline_profiles": per_baseline_summary,
         "data_summary": {
-            "total_songs_in_library": len(all_songs),
+            "total_flat_lines": len(all_songs),
+            "n_unique_works": len({work_id(s["filename"]) for s in all_songs}),
+            "n_multi_part_lines": sum(1 for s in all_songs if "__part_" in s.get("filename", "")),
             "n_baselines": len(baselines),
+            "n_unique_works_in_baselines": len(set(baseline_work_ids)),
             "total_perturbations": n_perturbations,
+            "bootstrap_method": "cluster (work-level)",
         },
         "metrics": {
             # Overall descriptive stats across all perturbations
@@ -347,8 +364,9 @@ def run_rq2_experiment(library_path: Path) -> dict:
 
 
 def main() -> None:
-    library_path = ROOT / "data" / "tessituragrams.json"
+    library_path = ROOT / "data" / "all_tessituragrams.json"
     out_dir = ROOT / "experiment_results"
+    out_dir.mkdir(exist_ok=True)
 
     print("Running RQ2 Ranking Stability Experiment...")
     print(f"Library: {library_path}")

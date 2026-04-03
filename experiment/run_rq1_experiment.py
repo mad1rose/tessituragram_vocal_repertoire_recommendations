@@ -6,7 +6,7 @@ most- and least-used pitches as favourites and avoids), does the system
 rank that same song at position 1, or within the top 3 or top 5?
 
 Queries are randomly sampled from all valid songs (candidate set >= 2);
-up to N_QUERIES are used (seeded for reproducibility).
+up to N_QUERIES are used (seeded for reproducibility; 200 with the full library).
 Metrics: HR@1, MRR, HR@3, HR@5 with 95% bootstrap confidence intervals.
 """
 
@@ -24,7 +24,7 @@ sys_path = list(__import__('sys').path)
 if str(ROOT) not in sys_path:
     __import__('sys').path.insert(0, str(ROOT))
 
-from src.storage import load_tessituragrams
+from src.storage import load_flat_library, work_id
 from src.recommend import (
     filter_by_range,
     build_ideal_vector,
@@ -37,7 +37,7 @@ BOTTOM_N_AVOID = 2
 BOOTSTRAP_SAMPLES = 10_000
 RANDOM_SEED = 42  # For reproducible sampling and bootstrap; Urbano et al. (2013) stress reproducibility
 MIN_CANDIDATES = 2  # At least 2 songs in candidate set (so there is a real ranking)
-N_QUERIES = 50  # Max number of queries to sample at random; use all valid if fewer
+N_QUERIES = 200  # Max number of queries to sample at random; use all valid if fewer
 
 
 def _derive_synthetic_profile(song: dict) -> tuple[int, int, list[int], list[int]]:
@@ -111,7 +111,7 @@ def _select_queries(
 def run_rq1_experiment(library_path: Path) -> dict:
     """Run the RQ1 self-retrieval experiment. Uses random sampling of queries (seeded). Returns full results dict."""
     random.seed(RANDOM_SEED)
-    all_songs = load_tessituragrams(library_path)
+    all_songs = load_flat_library(library_path)
 
     query_list, valid_pool_size = _select_queries(all_songs)
     records: list[dict] = []
@@ -158,16 +158,38 @@ def run_rq1_experiment(library_path: Path) -> dict:
     hr5 = np.mean([r['hit@5'] for r in records]) if n else 0.0
     mrr = np.mean([r['1/rank'] for r in records]) if n else 0.0
 
-    # Bootstrap 95% CI (percentile method; Urbano et al., 2013; Efron & Tibshirani)
-    def bootstrap_mean(values: list[float], n_samples: int = BOOTSTRAP_SAMPLES) -> tuple[float, float]:
-        boot = np.array([np.mean(random.choices(values, k=len(values))) for _ in range(n_samples)])
-        lo, hi = float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))
-        return lo, hi
+    # Cluster bootstrap 95% CI (percentile method).
+    # Lines from the same work (identified by work_id) are not independent;
+    # resampling clusters (works) rather than individual observations accounts
+    # for intra-work correlation (Cameron, Gelbach & Miller, 2008; Field & Welsh, 2007).
+    def cluster_bootstrap_mean(
+        values: list[float],
+        cluster_ids: list[str],
+        n_samples: int = BOOTSTRAP_SAMPLES,
+    ) -> tuple[float, float]:
+        if not values:
+            return 0.0, 0.0
+        clusters: dict[str, list[int]] = {}
+        for i, cid in enumerate(cluster_ids):
+            clusters.setdefault(cid, []).append(i)
+        cluster_keys = list(clusters.keys())
+        n_clusters = len(cluster_keys)
+        if n_clusters <= 1:
+            m = float(np.mean(values))
+            return m, m
+        values_arr = np.array(values, dtype=float)
+        boot = np.empty(n_samples)
+        for b in range(n_samples):
+            sampled = random.choices(cluster_keys, k=n_clusters)
+            indices = [idx for key in sampled for idx in clusters[key]]
+            boot[b] = np.mean(values_arr[indices])
+        return float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))
 
-    hr1_ci = bootstrap_mean([r['hit@1'] for r in records]) if n else (0.0, 0.0)
-    hr3_ci = bootstrap_mean([r['hit@3'] for r in records]) if n else (0.0, 0.0)
-    hr5_ci = bootstrap_mean([r['hit@5'] for r in records]) if n else (0.0, 0.0)
-    mrr_ci = bootstrap_mean([r['1/rank'] for r in records]) if n else (0.0, 0.0)
+    work_ids = [work_id(r['filename']) for r in records]
+    hr1_ci = cluster_bootstrap_mean([r['hit@1'] for r in records], work_ids) if n else (0.0, 0.0)
+    hr3_ci = cluster_bootstrap_mean([r['hit@3'] for r in records], work_ids) if n else (0.0, 0.0)
+    hr5_ci = cluster_bootstrap_mean([r['hit@5'] for r in records], work_ids) if n else (0.0, 0.0)
+    mrr_ci = cluster_bootstrap_mean([r['1/rank'] for r in records], work_ids) if n else (0.0, 0.0)
 
     return {
         'experiment': 'RQ1_self_retrieval_accuracy',
@@ -180,13 +202,17 @@ def run_rq1_experiment(library_path: Path) -> dict:
             'n_queries_max': N_QUERIES,
             'bootstrap_samples': BOOTSTRAP_SAMPLES,
             'random_seed': RANDOM_SEED,
-            'library_path': str(Path('data/tessituragrams.json')),
+            'library_path': str(Path('data/all_tessituragrams.json')),
         },
         'data_summary': {
-            'total_songs_in_library': len(all_songs),
+            'total_flat_lines': len(all_songs),
+            'n_unique_works': len({work_id(s['filename']) for s in all_songs}),
+            'n_multi_part_lines': sum(1 for s in all_songs if '__part_' in s.get('filename', '')),
             'valid_query_pool_size': valid_pool_size,
             'queries_sampled': n,
+            'n_unique_works_in_queries': len({work_id(r['filename']) for r in records}),
             'random_sampling': True,
+            'bootstrap_method': 'cluster (work-level)',
         },
         'metrics': {
             'HR@1': {'value': round(hr1, 4), 'ci_95': [round(hr1_ci[0], 4), round(hr1_ci[1], 4)]},
@@ -205,7 +231,7 @@ def run_rq1_experiment(library_path: Path) -> dict:
 
 
 def main() -> None:
-    library_path = ROOT / 'data' / 'tessituragrams.json'
+    library_path = ROOT / 'data' / 'all_tessituragrams.json'
     out_dir = ROOT / 'experiment_results'
     out_dir.mkdir(exist_ok=True)
 

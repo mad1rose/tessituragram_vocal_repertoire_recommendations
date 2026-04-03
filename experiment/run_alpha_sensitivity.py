@@ -29,7 +29,7 @@ _sys_path = list(__import__("sys").path)
 if str(ROOT) not in _sys_path:
     __import__("sys").path.insert(0, str(ROOT))
 
-from src.storage import load_tessituragrams  # noqa: E402
+from src.storage import load_flat_library, work_id  # noqa: E402
 from src.recommend import (  # noqa: E402
     filter_by_range,
     build_ideal_vector,
@@ -54,40 +54,52 @@ ALPHA_VALUES: List[float] = [0.0, 0.25, 0.5, 0.75, 1.0]
 BOOTSTRAP_SAMPLES = 10_000
 
 
-def _bootstrap_ci_mean(values: List[float]) -> Tuple[float, float]:
-    """Bootstrap 95% CI for the mean of a list of values."""
+def _cluster_bootstrap_ci_mean(
+    values: List[float],
+    cluster_ids: List[str],
+) -> Tuple[float, float]:
+    """Cluster bootstrap 95% CI for the mean (Cameron et al., 2008)."""
     if not values:
         return 0.0, 0.0
-    arr = np.array(values, dtype=float)
-    if len(arr) == 1:
-        m = float(arr[0])
+    clusters: dict[str, list[int]] = {}
+    for i, cid in enumerate(cluster_ids):
+        clusters.setdefault(cid, []).append(i)
+    cluster_keys = list(clusters.keys())
+    n_clusters = len(cluster_keys)
+    if n_clusters <= 1:
+        m = float(np.mean(values))
         return m, m
-    boot = np.array(
-        [
-            float(np.mean(random.choices(arr, k=len(arr))))
-            for _ in range(BOOTSTRAP_SAMPLES)
-        ]
-    )
+    values_arr = np.array(values, dtype=float)
+    boot = np.empty(BOOTSTRAP_SAMPLES)
+    for b in range(BOOTSTRAP_SAMPLES):
+        sampled = random.choices(cluster_keys, k=n_clusters)
+        indices = [idx for key in sampled for idx in clusters[key]]
+        boot[b] = np.mean(values_arr[indices])
     lo, hi = float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))
     return lo, hi
 
 
-def _bootstrap_ci_mean_over_baselines(baseline_means: List[float]) -> Tuple[float, float]:
-    """
-    Bootstrap a 95% CI for the mean tau, treating baselines as the unit of analysis.
-    """
+def _cluster_bootstrap_ci_mean_over_baselines(
+    baseline_means: List[float],
+    baseline_work_ids: List[str],
+) -> Tuple[float, float]:
+    """Cluster bootstrap 95% CI for the mean tau across baselines."""
     if not baseline_means:
         return 0.0, 0.0
-    if len(baseline_means) == 1:
-        m = float(baseline_means[0])
+    clusters: dict[str, list[int]] = {}
+    for i, wid in enumerate(baseline_work_ids):
+        clusters.setdefault(wid, []).append(i)
+    cluster_keys = list(clusters.keys())
+    n_clusters = len(cluster_keys)
+    if n_clusters <= 1:
+        m = float(np.mean(baseline_means))
         return m, m
-    arr = np.array(baseline_means, dtype=float)
-    boot = np.array(
-        [
-            float(np.mean(random.choices(arr, k=len(arr))))
-            for _ in range(BOOTSTRAP_SAMPLES)
-        ]
-    )
+    values_arr = np.array(baseline_means, dtype=float)
+    boot = np.empty(BOOTSTRAP_SAMPLES)
+    for b in range(BOOTSTRAP_SAMPLES):
+        sampled = random.choices(cluster_keys, k=n_clusters)
+        indices = [idx for key in sampled for idx in clusters[key]]
+        boot[b] = np.mean(values_arr[indices])
     lo, hi = float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))
     return lo, hi
 
@@ -163,10 +175,11 @@ def _compute_rq1_metrics_for_alpha(
     hr5 = float(np.mean(hr5_vals))
     mrr = float(np.mean(mrr_vals))
 
-    hr1_ci = _bootstrap_ci_mean(hr1_vals)
-    hr3_ci = _bootstrap_ci_mean(hr3_vals)
-    hr5_ci = _bootstrap_ci_mean(hr5_vals)
-    mrr_ci = _bootstrap_ci_mean(mrr_vals)
+    wids = [work_id(r["filename"]) for r in records]
+    hr1_ci = _cluster_bootstrap_ci_mean(hr1_vals, wids)
+    hr3_ci = _cluster_bootstrap_ci_mean(hr3_vals, wids)
+    hr5_ci = _cluster_bootstrap_ci_mean(hr5_vals, wids)
+    mrr_ci = _cluster_bootstrap_ci_mean(mrr_vals, wids)
 
     def _round_metric(val: float, ci: Tuple[float, float]) -> dict:
         return {
@@ -271,8 +284,9 @@ def _compute_rq2_metrics_for_alpha(
     ci_95_baseline_mean.
     """
     baseline_tau_lists: List[List[float]] = []
+    baseline_work_ids: List[str] = []
     for song, user_min, user_max, fav_midis, avoid_midis in baselines:
-        _ = song  # source filename not needed here; this is alpha-focused
+        baseline_work_ids.append(work_id(song.get("filename", "")))
         tau_vals = _run_one_baseline_for_alpha(
             all_songs,
             user_min,
@@ -310,7 +324,7 @@ def _compute_rq2_metrics_for_alpha(
     std_tau_across_baselines = (
         float(np.std(baseline_means, ddof=1)) if len(baseline_means) > 1 else 0.0
     )
-    ci_lo, ci_hi = _bootstrap_ci_mean_over_baselines(baseline_means)
+    ci_lo, ci_hi = _cluster_bootstrap_ci_mean_over_baselines(baseline_means, baseline_work_ids)
 
     return {
         "mean_tau_overall": round(mean_tau_overall, 4),
@@ -330,7 +344,7 @@ def run_alpha_sensitivity(library_path: Path) -> dict:
     Reuses the same selection rules (and seeds) as the main RQ1/RQ2
     experiments to ensure the only changing variable is alpha.
     """
-    all_songs = load_tessituragrams(library_path)
+    all_songs = load_flat_library(library_path)
 
     # RQ1: build query list once using the same seed and selection rule.
     random.seed(RQ1_RANDOM_SEED)
@@ -378,14 +392,22 @@ def run_alpha_sensitivity(library_path: Path) -> dict:
             "rq2_random_seed": RQ2_RANDOM_SEED,
             "rq2_n_baselines_target": RQ2_N_BASELINES,
             "rq2_min_candidates": RQ2_MIN_CANDIDATES,
-            "library_path": str(Path("data/tessituragrams.json")),
+            "library_path": str(Path("data/all_tessituragrams.json")),
+        },
+        "data_summary": {
+            "total_flat_lines": len(all_songs),
+            "n_unique_works": len({work_id(s["filename"]) for s in all_songs}),
+            "n_multi_part_lines": sum(1 for s in all_songs if "__part_" in s.get("filename", "")),
+            "bootstrap_method": "cluster (work-level)",
         },
         "rq1_setup": {
             "valid_query_pool_size": rq1_valid_pool_size,
             "queries_sampled": len(rq1_query_list),
+            "n_unique_works_in_queries": len({work_id(q[0].get("filename", "")) for q in rq1_query_list}),
         },
         "rq2_setup": {
             "n_baselines": len(rq2_baselines),
+            "n_unique_works_in_baselines": len({work_id(b[0].get("filename", "")) for b in rq2_baselines}),
         },
         "rq1_metrics": rq1_results,
         "rq2_metrics": rq2_results,
@@ -393,7 +415,7 @@ def run_alpha_sensitivity(library_path: Path) -> dict:
 
 
 def main() -> None:
-    library_path = ROOT / "data" / "tessituragrams.json"
+    library_path = ROOT / "data" / "all_tessituragrams.json"
     out_dir = ROOT / "experiment_results"
     out_dir.mkdir(exist_ok=True)
 

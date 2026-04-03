@@ -65,6 +65,17 @@ def flatten_song_part(song: dict, part_index: int = 0) -> dict:
     }
 
 
+def work_id(filename: str) -> str:
+    """Extract the original work identifier, stripping any ``__part_*`` suffix.
+
+    Multi-part works are flattened into lines like ``song.mxl__part_P1``;
+    this returns ``song.mxl`` so that lines from the same work can be
+    grouped for cluster-aware bootstrap resampling.
+    """
+    idx = filename.find('__part_')
+    return filename[:idx] if idx >= 0 else filename
+
+
 # ── Generic song I/O (unchanged) ────────────────────────────────────────────
 
 def merge_songs(existing: list[dict], new: list[dict]) -> list[dict]:
@@ -91,6 +102,34 @@ def load_tessituragrams(input_path: Path) -> list[dict]:
     with open(input_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     return data.get('songs', [])
+
+
+def load_flat_library(input_path: Path) -> list[dict]:
+    """Load songs and flatten every vocal line into one solo-shaped record.
+
+    For ``all_tessituragrams.json`` (list of parts per song), each part becomes a
+    row like ``tessituragrams.json``. Multi-part works get a unique
+    ``filename`` (``original.mxl__part_P1``) so experiments can match the
+    correct line. Legacy files with a dict ``tessituragram`` are returned
+    unchanged, one row per song.
+    """
+    songs = load_tessituragrams(input_path)
+    flat: list[dict] = []
+    for song in songs:
+        parts = song.get('tessituragram', [])
+        if not isinstance(parts, list):
+            flat.append(song)
+            continue
+        if not parts:
+            continue
+        for i in range(len(parts)):
+            entry = flatten_song_part(song, i)
+            if len(parts) > 1:
+                base_fn = song.get('filename', '')
+                pid = entry.get('part_id') or str(i)
+                entry['filename'] = f'{base_fn}__part_{pid}'
+            flat.append(entry)
+    return flat
 
 
 # ── Recommendations I/O ──────────────────────────────────────────────────────
