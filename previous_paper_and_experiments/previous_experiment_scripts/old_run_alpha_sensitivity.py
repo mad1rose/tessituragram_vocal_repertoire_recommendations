@@ -1,21 +1,17 @@
 """
-Alpha sensitivity analysis for RQ1 and RQ2.
+Experiment 1 — Alpha sensitivity (101-line library, tessituragrams.json).
 
-We sweep alpha in {0.0, 0.25, 0.5, 0.75, 1.0} and, for each value:
+Sweeps α ∈ {0.0, 0.25, 0.5, 0.75, 1.0} for RQ1 (same 50-query draw as
+old_run_rq1_experiment.py) and RQ2 (same five baselines as old_RQ2_results.json / Table 3).
 
-- RQ1: compute HR@1, HR@3, HR@5, MRR with 95% bootstrap CIs using the
-  same query pool and sampling rule as run_rq1_experiment.py.
-- RQ2: compute mean Kendall's tau across perturbations, baseline-level
-  mean tau, and 95% bootstrap CI using the same baseline selection rule
-  as run_rq2_experiment.py.
+Output: previous_paper_and_experiments/previous_experiment_results/old_alpha_sensitivity_results.json
 
-This script does not modify the main RQ1/RQ2 experiment scripts; it
-reuses their helper functions for selecting queries and baselines, and
-uses src.recommend.score_songs with different alpha values.
+Does not import experiment/run_rq1_experiment.py or experiment/run_rq2_experiment.py.
 """
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import random
 from pathlib import Path
@@ -23,11 +19,11 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 
-# Allow running from project root or experiment folder
-ROOT = Path(__file__).resolve().parent.parent
+SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 _sys_path = list(__import__("sys").path)
-if str(ROOT) not in _sys_path:
-    __import__("sys").path.insert(0, str(ROOT))
+if str(REPO_ROOT) not in _sys_path:
+    __import__("sys").path.insert(0, str(REPO_ROOT))
 
 from src.storage import load_tessituragrams  # noqa: E402
 from src.recommend import (  # noqa: E402
@@ -35,27 +31,63 @@ from src.recommend import (  # noqa: E402
     build_ideal_vector,
     score_songs,
 )
-from experiment.run_rq1_experiment import (  # noqa: E402
-    _select_queries as rq1_select_queries,
+
+from exp1_common import (  # noqa: E402
     RANDOM_SEED as RQ1_RANDOM_SEED,
-    N_QUERIES as RQ1_N_QUERIES,
+    N_QUERIES as RQ1_N_QUERIES_MAX,
     MIN_CANDIDATES as RQ1_MIN_CANDIDATES,
-)
-from experiment.run_rq2_experiment import (  # noqa: E402
-    _select_baselines as rq2_select_baselines,
-    _compute_kendall_tau,
-    RANDOM_SEED as RQ2_RANDOM_SEED,
-    N_BASELINES as RQ2_N_BASELINES,
-    MIN_CANDIDATES as RQ2_MIN_CANDIDATES,
+    select_queries,
 )
 
+_exp1_rq2_spec = importlib.util.spec_from_file_location(
+    "_exp1_rq2_alpha",
+    SCRIPT_DIR / "old_run_rq2_experiment.py",
+)
+assert _exp1_rq2_spec and _exp1_rq2_spec.loader
+_exp1_rq2 = importlib.util.module_from_spec(_exp1_rq2_spec)
+_exp1_rq2_spec.loader.exec_module(_exp1_rq2)
+
+_compute_kendall_tau = _exp1_rq2._compute_kendall_tau
+_derive_synthetic_profile = _exp1_rq2._derive_synthetic_profile
 
 ALPHA_VALUES: List[float] = [0.0, 0.25, 0.5, 0.75, 1.0]
 BOOTSTRAP_SAMPLES = 10_000
 
+RESULTS_DIR = REPO_ROOT / "previous_paper_and_experiments" / "previous_experiment_results"
+LIBRARY_PATH = REPO_ROOT / "data" / "tessituragrams.json"
+# Canonical RQ2 run (Table 3): load the same five baselines so α-sensitivity τ uses
+# the same 130 perturbations as old_run_rq2_experiment / old_RQ2_results.json.
+CANONICAL_RQ2_JSON = RESULTS_DIR / "old_RQ2_results.json"
+
+
+def _load_rq2_baselines_from_canonical_rq2_json(
+    all_songs: List[dict],
+    canonical_path: Path,
+) -> Tuple[List[Tuple[dict, int, int, List[int], List[int]]], List[str]]:
+    """Rebuild baseline tuples from archived RQ2 output (order-preserving)."""
+    with canonical_path.open(encoding="utf-8") as f:
+        data = json.load(f)
+    by_filename = {s.get("filename"): s for s in all_songs}
+    out: List[Tuple[dict, int, int, List[int], List[int]]] = []
+    order: List[str] = []
+    for bp in data.get("baseline_profiles", []):
+        fn = bp.get("source_song")
+        if not fn:
+            continue
+        order.append(fn)
+        song = by_filename.get(fn)
+        if song is None:
+            raise KeyError(
+                f"Baseline {fn!r} from {canonical_path} not found in {LIBRARY_PATH}"
+            )
+        umin, umax, fav, avoid = _derive_synthetic_profile(song)
+        out.append((song, umin, umax, fav, avoid))
+    if not out:
+        raise ValueError(f"No baseline_profiles in {canonical_path}")
+    return out, order
+
 
 def _bootstrap_ci_mean(values: List[float]) -> Tuple[float, float]:
-    """Bootstrap 95% CI for the mean of a list of values."""
     if not values:
         return 0.0, 0.0
     arr = np.array(values, dtype=float)
@@ -73,9 +105,6 @@ def _bootstrap_ci_mean(values: List[float]) -> Tuple[float, float]:
 
 
 def _bootstrap_ci_mean_over_baselines(baseline_means: List[float]) -> Tuple[float, float]:
-    """
-    Bootstrap a 95% CI for the mean tau, treating baselines as the unit of analysis.
-    """
     if not baseline_means:
         return 0.0, 0.0
     if len(baseline_means) == 1:
@@ -97,19 +126,11 @@ def _compute_rq1_metrics_for_alpha(
     query_list: List[Tuple[dict, int, int, List[int], List[int]]],
     alpha: float,
 ) -> Dict[str, dict]:
-    """
-    Reuse the RQ1 pipeline over a fixed query_list for a given alpha.
-
-    Returns a dict with HR@1, HR@3, HR@5, MRR, each containing value and ci_95.
-    """
-    from experiment.run_rq1_experiment import filter_by_range as rq1_filter_by_range  # type: ignore
-    from experiment.run_rq1_experiment import build_ideal_vector as rq1_build_ideal_vector  # type: ignore
-
     records: List[dict] = []
     for song, user_min, user_max, fav_midis, avoid_midis in query_list:
         filename = song.get("filename", "")
-        filtered = rq1_filter_by_range(all_songs, user_min, user_max)
-        ideal_vec = rq1_build_ideal_vector(user_min, user_max, fav_midis, avoid_midis)
+        filtered = filter_by_range(all_songs, user_min, user_max)
+        ideal_vec = build_ideal_vector(user_min, user_max, fav_midis, avoid_midis)
         results = score_songs(
             filtered,
             ideal_vec,
@@ -190,12 +211,6 @@ def _run_one_baseline_for_alpha(
     avoid_midis: List[int],
     alpha: float,
 ) -> List[float]:
-    """
-    RQ2 baseline run for a given alpha.
-
-    This mirrors _run_one_baseline from run_rq2_experiment.py but takes alpha
-    as a parameter and returns only the list of tau values for that baseline.
-    """
     filtered = filter_by_range(all_songs, user_min, user_max)
     ideal_vec = build_ideal_vector(user_min, user_max, fav_midis, avoid_midis)
     ranking_r0 = score_songs(
@@ -210,7 +225,6 @@ def _run_one_baseline_for_alpha(
 
     perturbations: List[Tuple[str, int, List[int], List[int]]] = []
 
-    # Collect all MIDI notes that actually occur in the candidate set C
     used_midis_in_C: set[int] = set()
     for song in filtered:
         tess = song.get("tessituragram", {}) or {}
@@ -218,29 +232,25 @@ def _run_one_baseline_for_alpha(
 
     midi_in_range = {m for m in used_midis_in_C if user_min <= m <= user_max}
 
-    # 1. Add one favourite: MIDI in range, not already favourite or avoid
     for m in midi_in_range:
         if m not in fav_midis and m not in avoid_midis:
             perturbations.append(("add_fav", m, fav_midis + [m], avoid_midis))
 
-    # 2. Remove one favourite: each favourite in turn
     for i, m in enumerate(fav_midis):
-        new_fav = fav_midis[: i] + fav_midis[i + 1 :]
+        new_fav = fav_midis[:i] + fav_midis[i + 1 :]
         perturbations.append(("remove_fav", m, new_fav, avoid_midis))
 
-    # 3. Add one avoid: MIDI in range, not already avoid or favourite
     for m in midi_in_range:
         if m not in avoid_midis and m not in fav_midis:
             perturbations.append(("add_avoid", m, fav_midis, avoid_midis + [m]))
 
-    # 4. Remove one avoid: each avoid in turn
     for i, m in enumerate(avoid_midis):
-        new_avoid = avoid_midis[: i] + avoid_midis[i + 1 :]
+        new_avoid = avoid_midis[:i] + avoid_midis[i + 1 :]
         perturbations.append(("remove_avoid", m, fav_midis, new_avoid))
 
     tau_values: List[float] = []
     for pert_type, midi_changed, new_fav, new_avoid in perturbations:
-        _ = pert_type  # unused label here; kept for parity with original function
+        _ = pert_type
         _ = midi_changed
         ideal_new = build_ideal_vector(user_min, user_max, new_fav, new_avoid)
         ranking_new = score_songs(
@@ -263,16 +273,9 @@ def _compute_rq2_metrics_for_alpha(
     baselines: List[Tuple[dict, int, int, List[int], List[int]]],
     alpha: float,
 ) -> Dict[str, float]:
-    """
-    Reuse the RQ2 pipeline over a fixed baseline set for a given alpha.
-
-    Returns a dict mirroring the main RQ2 metrics section: mean_tau_overall,
-    std_tau_overall, mean_tau_per_baseline, std_tau_across_baselines,
-    ci_95_baseline_mean.
-    """
     baseline_tau_lists: List[List[float]] = []
     for song, user_min, user_max, fav_midis, avoid_midis in baselines:
-        _ = song  # source filename not needed here; this is alpha-focused
+        _ = song
         tau_vals = _run_one_baseline_for_alpha(
             all_songs,
             user_min,
@@ -324,61 +327,47 @@ def _compute_rq2_metrics_for_alpha(
 
 
 def run_alpha_sensitivity(library_path: Path) -> dict:
-    """
-    Run alpha sensitivity analysis for RQ1 and RQ2.
-
-    Reuses the same selection rules (and seeds) as the main RQ1/RQ2
-    experiments to ensure the only changing variable is alpha.
-    """
     all_songs = load_tessituragrams(library_path)
 
-    # RQ1: build query list once using the same seed and selection rule.
     random.seed(RQ1_RANDOM_SEED)
-    rq1_query_list, rq1_valid_pool_size = rq1_select_queries(all_songs)
+    rq1_query_list, rq1_valid_pool_size = select_queries(all_songs, filter_by_range)
 
-    # RQ2: build baseline list once using the same seed and selection rule.
-    random.seed(RQ2_RANDOM_SEED)
-    rq2_baselines = rq2_select_baselines(all_songs)
+    rq2_baselines, rq2_baseline_filenames = _load_rq2_baselines_from_canonical_rq2_json(
+        all_songs, CANONICAL_RQ2_JSON
+    )
 
     rq1_results: Dict[str, dict] = {}
     rq2_results: Dict[str, dict] = {}
 
     for alpha in ALPHA_VALUES:
-        # RQ1 metrics for this alpha
-        rq1_metrics_alpha = _compute_rq1_metrics_for_alpha(
-            all_songs,
-            rq1_query_list,
-            alpha=alpha,
+        rq1_results[str(alpha)] = _compute_rq1_metrics_for_alpha(
+            all_songs, rq1_query_list, alpha=alpha
         )
-        rq1_results[str(alpha)] = rq1_metrics_alpha
-
-        # RQ2 metrics for this alpha
-        rq2_metrics_alpha = _compute_rq2_metrics_for_alpha(
-            all_songs,
-            rq2_baselines,
-            alpha=alpha,
+        rq2_results[str(alpha)] = _compute_rq2_metrics_for_alpha(
+            all_songs, rq2_baselines, alpha=alpha
         )
-        rq2_results[str(alpha)] = rq2_metrics_alpha
 
     return {
         "experiment": "alpha_sensitivity",
+        "experiment_phase": "Experiment_1_small_library",
         "description": (
-            "Sensitivity of RQ1 and RQ2 metrics to the avoid-penalty weight alpha. "
-            "For each alpha in {0.0, 0.25, 0.5, 0.75, 1.0}, we recompute HR@1, "
-            "HR@3, HR@5, MRR (RQ1) and Kendall's tau (RQ2) using the same query "
-            "and baseline selection rules as the main experiments."
+            "Sensitivity of RQ1 and RQ2 metrics to α on the 101-line library. "
+            "RQ1: same 50-query draw as old_run_rq1_experiment (seed 42). "
+            "RQ2: same five baseline profiles as old_RQ2_results.json (Table 3), "
+            "not a fresh random.sample — ensures 130 perturbations match the main RQ2 run."
         ),
         "alpha_values": ALPHA_VALUES,
         "parameters": {
             "alpha_values": ALPHA_VALUES,
             "bootstrap_samples": BOOTSTRAP_SAMPLES,
             "rq1_random_seed": RQ1_RANDOM_SEED,
-            "rq1_n_queries_max": RQ1_N_QUERIES,
+            "rq1_n_queries_max": RQ1_N_QUERIES_MAX,
             "rq1_min_candidates": RQ1_MIN_CANDIDATES,
-            "rq2_random_seed": RQ2_RANDOM_SEED,
-            "rq2_n_baselines_target": RQ2_N_BASELINES,
-            "rq2_min_candidates": RQ2_MIN_CANDIDATES,
-            "library_path": str(Path("data/tessituragrams.json")),
+            "rq2_baselines_source": "old_RQ2_results.json (baseline_profiles.source_song)",
+            "rq2_n_baselines_target": _exp1_rq2.N_BASELINES,
+            "rq2_min_candidates": _exp1_rq2.MIN_CANDIDATES,
+            "library_path": "data/tessituragrams.json",
+            "bootstrap_method": "i.i.d. (query-level / baseline-level resampling)",
         },
         "rq1_setup": {
             "valid_query_pool_size": rq1_valid_pool_size,
@@ -386,6 +375,7 @@ def run_alpha_sensitivity(library_path: Path) -> dict:
         },
         "rq2_setup": {
             "n_baselines": len(rq2_baselines),
+            "baseline_source_filenames_in_order": rq2_baseline_filenames,
         },
         "rq1_metrics": rq1_results,
         "rq2_metrics": rq2_results,
@@ -393,16 +383,14 @@ def run_alpha_sensitivity(library_path: Path) -> dict:
 
 
 def main() -> None:
-    library_path = ROOT / "data" / "tessituragrams.json"
-    out_dir = ROOT / "experiment_results"
-    out_dir.mkdir(exist_ok=True)
+    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
-    print("Running alpha sensitivity analysis for RQ1 and RQ2...")
-    print(f"Library: {library_path}")
+    print("Experiment 1 — Alpha sensitivity")
+    print(f"Library: {LIBRARY_PATH}")
 
-    results = run_alpha_sensitivity(library_path)
+    results = run_alpha_sensitivity(LIBRARY_PATH)
 
-    out_json = out_dir / "alpha_sensitivity_results.json"
+    out_json = RESULTS_DIR / "old_alpha_sensitivity_results.json"
     with out_json.open("w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     print(f"Results saved to {out_json}")

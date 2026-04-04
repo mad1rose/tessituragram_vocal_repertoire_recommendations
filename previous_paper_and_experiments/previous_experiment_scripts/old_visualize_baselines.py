@@ -1,14 +1,15 @@
 """
 Visualizations for RQ1/RQ2 baselines: full vs null_random vs cosine_only.
 
-Reads:
+Reads Experiment 1:
+  - previous_paper_and_experiments/previous_experiment_results/old_RQ1_baselines.json
+  - previous_paper_and_experiments/previous_experiment_results/old_RQ2_baselines.json
+
+Reads Experiment 2:
   - experiment_results/RQ1_baselines.json
   - experiment_results/RQ2_baselines.json
 
-Produces:
-  - experiment_results/RQ1_baselines.png
-  - experiment_results/RQ2_baselines.png
-  - experiment_results/RQ_baselines_combined.png
+Writes PNGs next to the JSON files used for each experiment.
 """
 
 from __future__ import annotations
@@ -19,10 +20,13 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-ROOT = Path(__file__).resolve().parent.parent
-EXP_DIR = ROOT / "experiment_results"
-RQ1_BASELINES_PATH = EXP_DIR / "RQ1_baselines.json"
-RQ2_BASELINES_PATH = EXP_DIR / "RQ2_baselines.json"
+ROOT = Path(__file__).resolve().parents[2]
+EXP1_DIR = ROOT / "previous_paper_and_experiments" / "previous_experiment_results"
+EXP2_DIR = ROOT / "experiment_results"
+RQ1_EXP1_PATH = EXP1_DIR / "old_RQ1_baselines.json"
+RQ2_EXP1_PATH = EXP1_DIR / "old_RQ2_baselines.json"
+RQ1_EXP2_PATH = EXP2_DIR / "RQ1_baselines.json"
+RQ2_EXP2_PATH = EXP2_DIR / "RQ2_baselines.json"
 
 
 def _load_json(path: Path) -> dict:
@@ -30,7 +34,7 @@ def _load_json(path: Path) -> dict:
         return json.load(f)
 
 
-def fig_rq1_baselines(results: dict) -> None:
+def fig_rq1_baselines(results: dict, out_dir: Path, stem: str = "RQ1_baselines") -> None:
     """
     Bar/line plot comparing HR@1 and MRR across
     full vs null_random vs cosine_only (with 95% CI whiskers).
@@ -106,13 +110,14 @@ def fig_rq1_baselines(results: dict) -> None:
     ax.legend()
 
     fig.tight_layout()
-    out_path = EXP_DIR / "RQ1_baselines.png"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{stem}.png"
     fig.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved: {out_path}")
 
 
-def fig_rq2_baselines(results: dict) -> None:
+def fig_rq2_baselines(results: dict, out_dir: Path, stem: str = "RQ2_baselines") -> None:
     """
     Bar plot comparing mean baseline-level τ across
     full vs null_random vs cosine_only (with 95% CI).
@@ -170,13 +175,16 @@ def fig_rq2_baselines(results: dict) -> None:
     ax.legend(loc="upper left")
 
     fig.tight_layout()
-    out_path = EXP_DIR / "RQ2_baselines.png"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{stem}.png"
     fig.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved: {out_path}")
 
 
-def fig_combined(rq1_results: dict, rq2_results: dict) -> None:
+def fig_combined(
+    rq1_results: dict, rq2_results: dict, out_dir: Path, stem: str = "RQ_baselines_combined"
+) -> None:
     """
     Combined 1x2 layout for the paper:
       - Left: RQ1 HR@1 + MRR vs model
@@ -260,7 +268,7 @@ def fig_combined(rq1_results: dict, rq2_results: dict) -> None:
     ax1.set_xticklabels(labels, rotation=0)
     ax1.set_ylabel("Score")
     ax1.set_ylim(0.0, 1.15)
-    ax1.set_title("RQ1: self-retrieval baselines")
+    ax1.set_title("RQ1: Oracle self-retrieval baselines")
     ax1.grid(axis="y", alpha=0.3)
     ax1.legend()
 
@@ -293,20 +301,29 @@ def fig_combined(rq1_results: dict, rq2_results: dict) -> None:
 
     fig.suptitle("Baselines: full vs null vs cosine-only (RQ1 & RQ2)", fontsize=14, y=1.03)
     fig.tight_layout()
-    out_path = EXP_DIR / "RQ_baselines_combined.png"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"{stem}.png"
     fig.savefig(out_path, dpi=150, bbox_inches="tight")
     plt.close(fig)
     print(f"Saved: {out_path}")
 
 
 def main() -> None:
-    print("Loading baseline results...")
-    rq1_results = _load_json(RQ1_BASELINES_PATH)
-    rq2_results = _load_json(RQ2_BASELINES_PATH)
-    print("Generating baseline comparison figures...")
-    fig_rq1_baselines(rq1_results)
-    fig_rq2_baselines(rq2_results)
-    fig_combined(rq1_results, rq2_results)
+    jobs = [
+        ("Experiment 1", RQ1_EXP1_PATH, RQ2_EXP1_PATH, EXP1_DIR, "exp1_"),
+        ("Experiment 2", RQ1_EXP2_PATH, RQ2_EXP2_PATH, EXP2_DIR, ""),
+    ]
+    for label, rq1p, rq2p, out_dir, prefix in jobs:
+        if not rq1p.is_file() or not rq2p.is_file():
+            print(f"Skip {label}: missing {rq1p.name} or {rq2p.name}")
+            continue
+        print(f"Loading {label} baseline results...")
+        rq1_results = _load_json(rq1p)
+        rq2_results = _load_json(rq2p)
+        print(f"Generating figures for {label} -> {out_dir}")
+        fig_rq1_baselines(rq1_results, out_dir, stem=f"{prefix}RQ1_baselines")
+        fig_rq2_baselines(rq2_results, out_dir, stem=f"{prefix}RQ2_baselines")
+        fig_combined(rq1_results, rq2_results, out_dir, stem=f"{prefix}RQ_baselines_combined")
     print("Done.")
 
 

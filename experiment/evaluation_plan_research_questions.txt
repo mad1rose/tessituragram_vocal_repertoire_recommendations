@@ -64,27 +64,70 @@ This rule is identical across all six experiment scripts.
 3  Research questions
 ---------------------
 
-RQ1 — Self-retrieval accuracy
-  Question:  When a synthetic user profile is derived from one vocal
-  line, does the system rank that same line at position 1 (or in the
-  top 3 / top 5)?
+RQ1 — Self-retrieval performance (synthetic oracle / identifiability)
+  Interpretation:  Preferences are derived from the *same* vocal line
+  that serves as the retrieval target (written range + top/bottom
+  duration pitches).  RQ1 asks how often that line ranks highly among
+  range-filtered candidates—a sanity check on representation and
+  scoring, not a simulation of unconstrained human taste.  HR@k and MRR
+  are hit-rates and mean reciprocal rank on this oracle task—not
+  supervised “accuracy” with external relevance labels.
+
+  Question:  How often, when the synthetic profile is derived from one
+  vocal line, does the system rank that same line at position 1 (or in
+  the top 3 / top 5)?
 
   Procedure:
     a. Collect all lines whose range-filtered candidate set C has
        |C| >= MIN_CANDIDATES (=2).  This is the valid query pool.
-    b. Sample up to N_QUERIES (=200) lines uniformly at random from
-       the pool (without replacement; seed = RANDOM_SEED = 42).
+    b. Sample queries uniformly at random from the pool of *eligible
+       lines* (without replacement; seed = 42).  The sampling frame is
+       lines, not compositions: works with more eligible lines appear
+       more often in the pool than single-line works (Experiment 2).
+       *Paper Experiment 2 / main scripts:* random.Random(42) in
+       run_rq1_experiment.py; up to N_QUERIES (=200) on
+       data/all_tessituragrams.json (1,655-line library).
+       *Paper Experiment 1:* 50 queries on the 101-line library
+       (data/tessituragrams.json), same eligibility rule—
+       random.seed(42) then sample in
+       previous_paper_and_experiments/previous_experiment_scripts/
+       (exp1_common.py, old_run_rq1_experiment.py, old_run_rq1_baselines.py);
+       outputs in previous_paper_and_experiments/previous_experiment_results/old_*.json.
     c. For each sampled query, score all candidates with the full
        model (alpha = 0.5) and record the rank of the query line.
     d. Compute HR@1, HR@3, HR@5, MRR across queries.
-    e. Compute 95% confidence intervals via cluster bootstrap
-       (see Section 5).
+    e. 95% bootstrap percentile intervals for the mean query-level metric:
+       *Paper Experiment 1* (old_run_rq1_experiment.py,
+       old_run_rq1_baselines.py):  i.i.d. bootstrap resampling
+       query-level outcomes (percentile method; Efron & Tibshirani, 1993).
+       After random.seed(42), query selection consumes RNG state; the
+       bootstrap loop uses the continuation of that global stream—there
+       is no separate fixed bootstrap seed (43).
+       *Paper Experiment 2* (experiment/run_rq1_experiment.py,
+       run_rq1_baselines.py):  work-level cluster bootstrap (Section 5;
+       Cameron et al., 2008; Field & Welsh, 2007).  Query draw uses
+       random.Random(42); bootstrap uses random.Random(43), independent
+       of the query draw.
 
-  Baselines (run_rq1_baselines.py):
+  Null baseline:  range filter then a uniform random permutation of
+  candidates.  Conditional on |C|, P(top-1 hit) = 1/|C|; the expected
+  mean HR@1 over a fixed set of queries equals the sample mean of 1/|C|
+  (linearity of expectation).
+
+  Reported diagnostics (JSON):  Experiment 2 — run_rq1_experiment.py and
+  run_rq1_baselines.py; Experiment 1 — old_run_rq1_experiment.py and
+  old_run_rq1_baselines.py.  Each records per-query n_candidates and
+  aggregate candidate_pool_summary; baselines JSON adds descriptive
+  stratification of HR@1 by |C| bins (point estimates only, no CIs).
+
+  Baselines (same three models in both experiments):
     - full:        the production model (alpha = 0.5)
     - cosine_only: alpha = 0.0 (no avoid penalty)
     - null_random: range-filter only + uniformly random ranking
-    All three baselines use the same query set and cluster bootstrap.
+  Experiment 2 (run_rq1_baselines.py):  same query draw as
+  run_rq1_experiment.py; cluster bootstrap for CIs.
+  Experiment 1 (old_run_rq1_baselines.py):  same query rule and seed as
+  old_run_rq1_experiment.py; i.i.d. query-level bootstrap for CIs.
 
 RQ2 — Ranking stability under small preference changes
   Question:  When we add or remove a single favourite or avoid note,
@@ -141,11 +184,15 @@ RQ3 — Score spread and formula checks
        number excluded is reported.
     e. 95% CIs via cluster bootstrap (profiles grouped by work).
 
-Alpha sensitivity (run_alpha_sensitivity.py):
+Alpha sensitivity:
   Sweep alpha in {0.0, 0.25, 0.5, 0.75, 1.0}.  For each value,
   recompute all RQ1 and RQ2 metrics using the same query/baseline
-  sets (built once from the same seeds).  Cluster bootstrap CIs at
-  each alpha.
+  sets (built once from the same seeds).
+  *Experiment 2* (experiment/run_alpha_sensitivity.py):  cluster
+  bootstrap CIs at each alpha (with the seed policy documented in the
+  paper for RQ1 at alpha = 0.5 vs other alphas).
+  *Experiment 1* (previous_paper_and_experiments/.../
+  old_run_alpha_sensitivity.py):  i.i.d. bootstrap CIs at each alpha.
 
 
 4  Fixed design parameters
@@ -154,11 +201,18 @@ Parameter            Value    Used in
 alpha                0.5      RQ1, RQ2, RQ3 (main)
 TOP_N_FAV            4        all
 BOTTOM_N_AVOID       2        all
-RANDOM_SEED          42       all (query/baseline/profile sampling
-                              and bootstrap RNG)
+RANDOM_SEED_QUERIES  42       query/baseline/profile draws (RQ1 scripts
+                              alias as RANDOM_SEED for imports)
+RANDOM_SEED_BOOTSTRAP 43      Experiment 2 only: bootstrap resampling for
+                              RQ1 / RQ1 baselines (and alpha sweep where
+                              applicable); separate stream from query draw.
+                              Experiment 1 does not use this constant;
+                              bootstrap follows the global RNG after queries.
 MIN_CANDIDATES (RQ1) 2        RQ1, RQ1 baselines
 MIN_CANDIDATES (RQ2) 10       RQ2, RQ2 baselines, RQ3
-N_QUERIES            200      RQ1 (sampled uniformly at random)
+N_QUERIES            200      RQ1 main scripts (large library); paper
+                              Experiment 1 uses 50 queries on the
+                              101-line library (see RQ1 text above)
 N_BASELINES          20       RQ2 (sampled uniformly at random)
 N_PROFILES           50       RQ3 (sampled uniformly at random)
 BOOTSTRAP_SAMPLES    10,000   all CIs
@@ -205,12 +259,28 @@ Why this is conservative and correct:
   - When some lines share a work, the cluster bootstrap correctly
     inflates the variance estimate to reflect the reduced effective
     sample size.
-  - This approach requires no distributional assumptions beyond
-    exchangeability at the cluster level, which is satisfied here
-    because works are sampled uniformly at random.
+  - Query units are drawn uniformly from the pool of *eligible lines*
+    (Section 3, RQ1), not uniformly from compositions.  Cluster
+    bootstrap is used to respect **within-work dependence** among sampled
+    lines (Cameron et al., 2008; Field & Welsh, 2007); it does **not**
+    assert that compositions were simple-random-sampled.
+  - Resampling clusters is standard when outcomes may be correlated
+    within cluster; the percentile interval follows Efron & Tibshirani
+    (1993).
 
-The bootstrap_method field in every result JSON is set to
-"cluster (work-level)" to document which procedure was used.
+The data_summary.bootstrap_method field documents the procedure used
+for that run:  Experiment 1 RQ1 JSON records "i.i.d. (query-level
+resampling)"; Experiment 2 RQ1 JSON records "cluster (work-level)".
+
+Equivalence if cluster bootstrap were applied on a one-line-per-work
+library (conceptual; paper Experiment 1 code uses i.i.d. bootstrap):
+  If each composition contributed at most one query line, every
+  work-level cluster would contain exactly one query line.  Resampling
+  K clusters with replacement and taking all lines in those clusters
+  would then coincide with ordinary bootstrap resampling of the K
+  query-level outcomes (Efron and Tibshirani, 1993).  Experiment 1
+  implements i.i.d. query bootstrap directly in
+  old_run_rq1_experiment.py.
 
 
 6  Data-pipeline transparency
@@ -241,14 +311,16 @@ a. Authenticity:  All tessituragrams derive from real scores in the
    reproducible.
 
 b. Randomisation:  Query / baseline / profile sampling is uniform
-   random without replacement, seeded for reproducibility (seed = 42).
+   over the defined pool of eligible *lines* (or analogous units),
+   without replacement where stated, seeded for reproducibility
+   (seed = 42 for draws).
 
 c. Statistical dependence:  Lines from the same multi-part work are
-   not independent.  The cluster bootstrap (Section 5) addresses this
-   by resampling at the work level rather than the line level.  The
-   paper should report the number of unique works among sampled units
-   (e.g. "200 queries from K distinct works") so the reader can assess
-   the degree of clustering.
+   not independent.  For Experiment 2, the cluster bootstrap (Section 5)
+   addresses this by resampling at the work level rather than the line
+   level.  The paper should report the number of unique works among
+   sampled units (e.g. "200 queries from K distinct works") so the
+   reader can assess the degree of clustering.
 
 d. Silent data drops:  Lines with empty tessituragrams or missing pitch
    ranges are excluded from the valid query/baseline/profile pool.  The
@@ -266,6 +338,12 @@ f. No multiple-testing correction is applied.  Each research question
 g. Rounding:  RQ3 uses unrounded score values for all analyses
    (variance, correlation, identity check, regression) to avoid
    discretisation artifacts.
+
+h. Cross-experiment contrasts:  Comparing raw RQ1 HR@1 (or other
+   metrics) between Experiment 1 and Experiment 2 confounds corpus
+   subset, distribution of |C|, the null benchmark (mean of 1/|C|),
+   and line-level sampling weights—not a controlled “library size
+   only” effect.  Interpret side-by-side numbers descriptively.
 
 
 8  Output files

@@ -1,1572 +1,1638 @@
 {
-    "experiment": "RQ1_baselines",
-    "description": "Baselines for RQ1 self-retrieval accuracy: full model (range + cosine − α×avoid), cosine-only (α = 0), and range-only + random ranking (null). Uses the same random query pool definition and sampling rule as run_rq1_experiment.py.",
-    "parameters": {
-      "alpha_full": 0.5,
-      "bootstrap_samples": 10000,
-      "random_seed_queries": 42,
-      "min_candidates": 2,
-      "n_queries_max": 50,
-      "library_path": "data\\tessituragrams.json"
-    },
-    "data_summary": {
-      "total_songs_in_library": 101,
-      "valid_query_pool_size": 95,
-      "queries_sampled": 50,
-      "random_sampling": true
-    },
-    "models": [
-      "full",
-      "null_random",
-      "cosine_only"
-    ],
-    "model_descriptions": {
-      "full": "Range filter + cosine similarity − α×avoid_penalty (α = 0.5).",
-      "null_random": "Range filter only, then a completely random ranking over the candidate set (null model).",
-      "cosine_only": "Range filter + cosine similarity only (α = 0.0; avoid list ignored in scoring)."
-    },
-    "metrics": {
-      "full": {
-        "HR@1": {
-          "value": 0.84,
-          "ci_95": [
-            0.72,
-            0.94
-          ]
-        },
-        "HR@3": {
-          "value": 1.0,
-          "ci_95": [
-            1.0,
-            1.0
-          ]
-        },
-        "HR@5": {
-          "value": 1.0,
-          "ci_95": [
-            1.0,
-            1.0
-          ]
-        },
-        "MRR": {
-          "value": 0.9067,
-          "ci_95": [
-            0.8433,
-            0.9633
-          ]
-        }
-      },
-      "null_random": {
-        "HR@1": {
-          "value": 0.06,
-          "ci_95": [
-            0.0,
-            0.12
-          ]
-        },
-        "HR@3": {
-          "value": 0.14,
-          "ci_95": [
-            0.06,
-            0.24
-          ]
-        },
-        "HR@5": {
-          "value": 0.26,
-          "ci_95": [
-            0.14,
-            0.38
-          ]
-        },
-        "MRR": {
-          "value": 0.1756,
-          "ci_95": [
-            0.115,
-            0.2474
-          ]
-        }
-      },
-      "cosine_only": {
-        "HR@1": {
-          "value": 0.88,
-          "ci_95": [
-            0.78,
-            0.96
-          ]
-        },
-        "HR@3": {
-          "value": 1.0,
-          "ci_95": [
-            1.0,
-            1.0
-          ]
-        },
-        "HR@5": {
-          "value": 1.0,
-          "ci_95": [
-            1.0,
-            1.0
-          ]
-        },
-        "MRR": {
-          "value": 0.93,
-          "ci_95": [
-            0.8733,
-            0.9767
-          ]
-        }
-      }
-    },
-    "per_query": [
+  "experiment": "RQ1_baselines",
+  "experiment_phase": "Experiment_1_small_library",
+  "description": "Baselines for RQ1 oracle self-retrieval (identifiability): full, cosine-only, null random. Same query rule as old_run_rq1_experiment.py (seed 42, N=50).",
+  "parameters": {
+    "alpha_full": 0.5,
+    "bootstrap_samples": 10000,
+    "random_seed_queries": 42,
+    "random_seed_null_baseline_stream": 10042,
+    "min_candidates": 2,
+    "n_queries_max": 50,
+    "library_path": "data/tessituragrams.json"
+  },
+  "data_summary": {
+    "total_songs_in_library": 101,
+    "valid_query_pool_size": 95,
+    "queries_sampled": 50,
+    "random_sampling": true,
+    "bootstrap_method": "i.i.d. (query-level resampling)",
+    "candidate_pool_summary": {
+      "n_queries": 50,
+      "n_candidates_min": 2,
+      "n_candidates_max": 89,
+      "n_candidates_mean": 34,
+      "n_candidates_median": 28.0,
+      "n_candidates_p25": 11.0,
+      "n_candidates_p75": 51.0,
+      "fraction_n_candidates_le_5": 0.06,
+      "fraction_n_candidates_le_10": 0.18,
+      "fraction_n_candidates_le_20": 0.42,
+      "mean_inverse_n_candidates": 0.071196
+    }
+  },
+  "descriptive_stratification_hr1_by_pool_size": {
+    "note": "Point estimates only (no CIs). Null P(top-1)=1/|C| per query.",
+    "bins": [
       {
-        "filename": "schumann-robert-dichterliebe-op48-no3-die-rose-die-lilie-die-taube.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 3 Die Rose Die Lilie Die Taube",
-        "n_candidates": 15,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 10.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.1
-          }
-        }
+        "bin_label": "2 <= |C| <= 20",
+        "n_queries": 21,
+        "hr1_full_mean": 0.809524,
+        "hr1_null_random_mean": 0.047619,
+        "mean_inverse_n_candidates": 0.137219
       },
       {
-        "filename": "schumann-robert-liederkreis-op39-no6-schone-fremde.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis, Op.39 — No. 6 Schone Fremde",
-        "n_candidates": 14,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 10.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.1
-          }
-        }
-      },
-      {
-        "filename": "schumann-clara-6-lieder-op13-no4-der-mond-kommt-still-gegangen.mxl",
-        "composer": "Clara Schumann",
-        "title": "6 Lieder, Op.13 — No. 4 Der Mond Kommt Still Gegangen",
-        "n_candidates": 32,
-        "models": {
-          "full": {
-            "rank": 3.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.3333333333333333
-          },
-          "cosine_only": {
-            "rank": 3.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.3333333333333333
-          },
-          "null_random": {
-            "rank": 31.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.03225806451612903
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no17-die-bose-farbe.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin (D.795) — No. 17 Die Bose Farbe",
-        "n_candidates": 38,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 7.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.14285714285714285
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no13-mit-dem-grunen-lautenbande.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin (D.795) — No. 13 Mit Dem Grunen Lautenbande",
-        "n_candidates": 14,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 11.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.09090909090909091
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no10-tranenregen.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin, Op.25 — No. 10 Tranenregen",
-        "n_candidates": 9,
-        "models": {
-          "full": {
-            "rank": 2.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.5
-          },
-          "cosine_only": {
-            "rank": 2.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.5
-          },
-          "null_random": {
-            "rank": 9.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.1111111111111111
-          }
-        }
-      },
-      {
-        "filename": "debussy-claude-3-chansons-de-france-no1-rondel-le-temps-a-laisse-son-manteau.mxl",
-        "composer": "Claude Debussy",
-        "title": "3 Chansons de France — No. 1 Rondel Le Temps A Laisse Son Manteau",
-        "n_candidates": 61,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 51.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.0196078431372549
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no5-mondnacht.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis, Op.39 — No. 5 Mondnacht",
-        "n_candidates": 19,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 12.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.08333333333333333
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no9-das-ist-ein-floten-und-geigen.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 9 Das Ist Ein Floten Und Geigen",
-        "n_candidates": 41,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 5.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 1.0,
-            "1/rank": 0.2
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no8-ruckblick.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 8 Ruckblick",
-        "n_candidates": 51,
-        "models": {
-          "full": {
-            "rank": 3.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.3333333333333333
-          },
-          "cosine_only": {
-            "rank": 3.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.3333333333333333
-          },
-          "null_random": {
-            "rank": 49.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.02040816326530612
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no3-waldesgesprach.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis, Op.39 — No. 3 Waldesgesprach",
-        "n_candidates": 89,
-        "models": {
-          "full": {
-            "rank": 2.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.5
-          },
-          "cosine_only": {
-            "rank": 2.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.5
-          },
-          "null_random": {
-            "rank": 52.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.019230769230769232
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no11-ein-jungling-liebt-ein-madchen.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 11 Ein Jungling Liebt Ein Madchen",
-        "n_candidates": 47,
-        "models": {
-          "full": {
-            "rank": 3.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.3333333333333333
-          },
-          "cosine_only": {
-            "rank": 2.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.5
-          },
-          "null_random": {
-            "rank": 15.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.06666666666666667
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no15-die-krahe.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 15 Die Krahe",
-        "n_candidates": 73,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 68.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.014705882352941176
-          }
-        }
-      },
-      {
-        "filename": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl",
-        "composer": "Clara Schumann",
-        "title": "6 Lieder, Op.13 — No. 5 Ich Hab In Deinem Auge",
-        "n_candidates": 20,
-        "models": {
-          "full": {
-            "rank": 2.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.5
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 20.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.05
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-frauenliebe-und-leben-op42-no6-susser-freund-du-blickest.mxl",
-        "composer": "Robert Schumann",
-        "title": "Frauenliebe und Leben, Op.42 — No. 6 Susser Freund Du Blickest",
-        "n_candidates": 6,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 5.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 1.0,
-            "1/rank": 0.2
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no7-ich-grolle-nicht.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 7 Ich Grolle Nicht",
-        "n_candidates": 85,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 29.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.034482758620689655
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no1-das-wandern.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin (D.795) — No. 1 Das Wandern",
-        "n_candidates": 7,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no11-mein.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin (D.795) — No. 11 Mein",
-        "n_candidates": 38,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 33.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.030303030303030304
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no3-gefrorne-tranen.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 3 Gefrorne Tranen",
-        "n_candidates": 73,
-        "models": {
-          "full": {
-            "rank": 3.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.3333333333333333
-          },
-          "cosine_only": {
-            "rank": 3.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.3333333333333333
-          },
-          "null_random": {
-            "rank": 26.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.038461538461538464
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no16-die-alten-bosen-lieder.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 16 Die Alten Bosen Lieder",
-        "n_candidates": 64,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 24.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.041666666666666664
-          }
-        }
-      },
-      {
-        "filename": "schumann-clara-lieder-op12-no11-warum-willst-du-andre-fragen.mxl",
-        "composer": "Clara Schumann",
-        "title": "Lieder, Op.12 — No. 11 Warum Willst Du Andre Fragen",
-        "n_candidates": 20,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 16.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.0625
-          }
-        }
-      },
-      {
-        "filename": "faure-gabriel-cinq-melodies-op58-no3-green.mxl",
-        "composer": "Fauré, Gabriel",
-        "title": "Cinq Mélodies, Op.58 — No. 3 Green",
-        "n_candidates": 44,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 5.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 1.0,
-            "1/rank": 0.2
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no8-und-wusstens-die-blumen.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 8 Und Wusstens Die Blumen",
-        "n_candidates": 3,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 2.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.5
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no14-der-greise-kopf.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 14 Der Greise Kopf",
-        "n_candidates": 41,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 8.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.125
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-frauenliebe-und-leben-op42-no3-ich-kanns-nicht-fassen-nicht-glauben.mxl",
-        "composer": "Robert Schumann",
-        "title": "Frauenliebe und Leben — No. 3 Ich Kanns Nicht Fassen Nicht Glauben",
-        "n_candidates": 41,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 25.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.04
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no18-der-sturmische-morgen.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 18 Der Sturmische Morgen",
-        "n_candidates": 18,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 6.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.16666666666666666
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-frauenliebe-und-leben-op42-no5-helft-mir-ihr-schwestern.mxl",
-        "composer": "Robert Schumann",
-        "title": "Frauenliebe und Leben, Op.42 — No. 5 Helft Mir Ihr Schwestern",
-        "n_candidates": 85,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 77.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.012987012987012988
-          }
-        }
-      },
-      {
-        "filename": "schumann-clara-6-lieder-op13-no1-ich-stand-in-dunklen-traumen.mxl",
-        "composer": "Clara Schumann",
-        "title": "6 Lieder, Op.13 — No. 1 Ich Stand In Dunklen Traumen",
-        "n_candidates": 28,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 8.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.125
-          }
-        }
-      },
-      {
-        "filename": "debussy-claude-trois-chansons-de-bilitis-no2-la-chevelure.mxl",
-        "composer": "Claude Debussy",
-        "title": "Trois Chansons de Bilitis — No. 2 La Chevelure",
-        "n_candidates": 61,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 41.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.024390243902439025
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no4-wenn-ich-in-deine-augen-seh.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 4 Wenn Ich In Deine Augen Seh",
-        "n_candidates": 11,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 2.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.5
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no6-der-neugierige.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin — No. 6 Der Neugierige",
-        "n_candidates": 16,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 6.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.16666666666666666
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no7-auf-dem-flusse.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 7 Auf Dem Flusse",
-        "n_candidates": 95,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 27.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.037037037037037035
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no12-fruhlingsnacht.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis, Op.39 — No. 12 Fruhlingsnacht",
-        "n_candidates": 28,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 24.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.041666666666666664
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-frauenliebe-und-leben-op42-no1-seit-ich-ihn-gesehen.mxl",
-        "composer": "Robert Schumann",
-        "title": "Frauenliebe und Leben, Op.42 — No. 1 Seit Ich Ihn Gesehen",
-        "n_candidates": 4,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no1-gute-nacht.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 1 Gute Nacht",
-        "n_candidates": 56,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 7.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.14285714285714285
-          }
-        }
-      },
-      {
-        "filename": "debussy-claude-trois-chansons-de-bilitis-no3-le-tombeau-des-naiades.mxl",
-        "composer": "Claude Debussy",
-        "title": "Trois Chansons de Bilitis — No. 3 Le Tombeau Des Naiades",
-        "n_candidates": 56,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 37.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.02702702702702703
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no1-in-der-fremde-i.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis, Op.39 — No. 1 In Der Fremde I",
-        "n_candidates": 6,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 6.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.16666666666666666
-          }
-        }
-      },
-      {
-        "filename": "schumann-clara-6-lieder-op13-no6-die-stille-lotosblume.mxl",
-        "composer": "Clara Schumann",
-        "title": "6 Lieder, Op.13 — No. 6 Die Stille Lotosblume",
-        "n_candidates": 20,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 15.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.06666666666666667
-          }
-        }
-      },
-      {
-        "filename": "faure-gabriel-cinq-melodies-op58-no2-en-sourdine.mxl",
-        "composer": "Gabriel Fauré",
-        "title": "Cinq Mélodies, Op.58 — No. 2 En Sourdine",
-        "n_candidates": 9,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 9.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.1111111111111111
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no19-tauschung.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 19 Tauschung",
-        "n_candidates": 9,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 5.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 1.0,
-            "1/rank": 0.2
-          }
-        }
-      },
-      {
-        "filename": "faure-gabriel-cinq-melodies-op-58-no4-a-clymene.mxl",
-        "composer": "Gabriel Fauré",
-        "title": "Cinq Mélodies Op. 58 — No. 4 A Clymene",
-        "n_candidates": 41,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 2.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.5
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no4-erstarrung.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 4 Erstarrung",
-        "n_candidates": 20,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 5.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 1.0,
-            "1/rank": 0.2
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no2-wohin.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin — No. 2 Wohin",
-        "n_candidates": 51,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 12.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.08333333333333333
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no9-wehmuth.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis, Op.39 — No. 9 Wehmuth",
-        "n_candidates": 6,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 3.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.3333333333333333
-          }
-        }
-      },
-      {
-        "filename": "schumann-clara-6-lieder-op13-no3-liebeszauber.mxl",
-        "composer": "Clara Schumann",
-        "title": "6 Lieder, Op.13 — No. 3 Liebeszauber",
-        "n_candidates": 38,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 25.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.04
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no9-des-mullers-blumen.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin (D.795) — No. 9 Des Mullers Blumen",
-        "n_candidates": 19,
-        "models": {
-          "full": {
-            "rank": 2.0,
-            "hit@1": 0.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 0.5
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 14.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.07142857142857142
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-dichterliebe-op48-no13-ich-hab-im-traum-geweinet.mxl",
-        "composer": "Robert Schumann",
-        "title": "Dichterliebe, Op.48 — No. 13 Ich Hab Im Traum Geweinet",
-        "n_candidates": 18,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-die-schone-mullerin-d795-no16-die-liebe-farbe.mxl",
-        "composer": "Franz Schubert",
-        "title": "Die schöne Müllerin (D.795) — No. 16 Die Liebe Farbe",
-        "n_candidates": 6,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 5.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 1.0,
-            "1/rank": 0.2
-          }
-        }
-      },
-      {
-        "filename": "schumann-robert-liederkreis-op39-no10-zwielicht.mxl",
-        "composer": "Robert Schumann",
-        "title": "Liederkreis — No. 10 Zwielicht",
-        "n_candidates": 27,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 6.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.16666666666666666
-          }
-        }
-      },
-      {
-        "filename": "schubert-franz-winterreise-d911-no17-im-dorfe.mxl",
-        "composer": "Franz Schubert",
-        "title": "Winterreise, D.911 — No. 17 Im Dorfe",
-        "n_candidates": 15,
-        "models": {
-          "full": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "cosine_only": {
-            "rank": 1.0,
-            "hit@1": 1.0,
-            "hit@3": 1.0,
-            "hit@5": 1.0,
-            "1/rank": 1.0
-          },
-          "null_random": {
-            "rank": 14.0,
-            "hit@1": 0.0,
-            "hit@3": 0.0,
-            "hit@5": 0.0,
-            "1/rank": 0.07142857142857142
-          }
-        }
+        "bin_label": "|C| >= 21",
+        "n_queries": 29,
+        "hr1_full_mean": 0.724138,
+        "hr1_null_random_mean": 0.068966,
+        "mean_inverse_n_candidates": 0.023386
       }
     ]
-  }
+  },
+  "models": [
+    "full",
+    "null_random",
+    "cosine_only"
+  ],
+  "model_descriptions": {
+    "full": "Range filter + cosine − α×avoid (α = 0.5).",
+    "null_random": "Range filter + uniform random ranking.",
+    "cosine_only": "Range filter + cosine only (α = 0)."
+  },
+  "metrics": {
+    "full": {
+      "HR@1": {
+        "value": 0.76,
+        "ci_95": [
+          0.64,
+          0.88
+        ]
+      },
+      "HR@3": {
+        "value": 0.98,
+        "ci_95": [
+          0.94,
+          1.0
+        ]
+      },
+      "HR@5": {
+        "value": 1.0,
+        "ci_95": [
+          1.0,
+          1.0
+        ]
+      },
+      "MRR": {
+        "value": 0.8617,
+        "ci_95": [
+          0.79,
+          0.9283
+        ]
+      }
+    },
+    "null_random": {
+      "HR@1": {
+        "value": 0.06,
+        "ci_95": [
+          0.0,
+          0.14
+        ]
+      },
+      "HR@3": {
+        "value": 0.18,
+        "ci_95": [
+          0.08,
+          0.3
+        ]
+      },
+      "HR@5": {
+        "value": 0.3,
+        "ci_95": [
+          0.18,
+          0.42
+        ]
+      },
+      "MRR": {
+        "value": 0.1841,
+        "ci_95": [
+          0.1238,
+          0.2577
+        ]
+      }
+    },
+    "cosine_only": {
+      "HR@1": {
+        "value": 0.8,
+        "ci_95": [
+          0.68,
+          0.9
+        ]
+      },
+      "HR@3": {
+        "value": 1.0,
+        "ci_95": [
+          1.0,
+          1.0
+        ]
+      },
+      "HR@5": {
+        "value": 1.0,
+        "ci_95": [
+          1.0,
+          1.0
+        ]
+      },
+      "MRR": {
+        "value": 0.8833,
+        "ci_95": [
+          0.8167,
+          0.9433
+        ]
+      }
+    }
+  },
+  "paired_full_minus_cosine": {
+    "description": "Per-query difference (full − cosine_only); same query draw; i.i.d. bootstrap on differences.",
+    "HR@1": {
+      "mean_diff": -0.04,
+      "ci_95": [
+        -0.1,
+        0.0
+      ]
+    },
+    "HR@3": {
+      "mean_diff": -0.02,
+      "ci_95": [
+        -0.06,
+        0.0
+      ]
+    },
+    "HR@5": {
+      "mean_diff": 0.0,
+      "ci_95": [
+        0.0,
+        0.0
+      ]
+    },
+    "MRR": {
+      "mean_diff": -0.0217,
+      "ci_95": [
+        -0.0533,
+        0.0017
+      ]
+    }
+  },
+  "per_query": [
+    {
+      "filename": "schumann-robert-frauenliebe-und-leben-op42-no6-susser-freund-du-blickest.mxl",
+      "composer": "Robert Schumann",
+      "title": "Frauenliebe und Leben, Op.42 — No. 6 Susser Freund Du Blickest",
+      "n_candidates": 6,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no13-mit-dem-grunen-lautenbande.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin (D.795) — No. 13 Mit Dem Grunen Lautenbande",
+      "n_candidates": 14,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 6.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.16666666666666666
+        }
+      }
+    },
+    {
+      "filename": "debussy-claude-trois-chansons-de-bilitis-no2-la-chevelure.mxl",
+      "composer": "Claude Debussy",
+      "title": "Trois Chansons de Bilitis — No. 2 La Chevelure",
+      "n_candidates": 61,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 7.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.14285714285714285
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-winterreise-d911-no13-die-post.mxl",
+      "composer": "Franz Schubert",
+      "title": "Winterreise, D.911 — No. 13 Die Post",
+      "n_candidates": 44,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 14.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.07142857142857142
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-winterreise-d911-no1-gute-nacht.mxl",
+      "composer": "Franz Schubert",
+      "title": "Winterreise, D.911 — No. 1 Gute Nacht",
+      "n_candidates": 56,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 26.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.038461538461538464
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no8-morgengruss.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin — No. 8 Morgengruss",
+      "n_candidates": 3,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no16-die-liebe-farbe.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin (D.795) — No. 16 Die Liebe Farbe",
+      "n_candidates": 6,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no12-pause.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin (D.795) — No. 12 Pause",
+      "n_candidates": 28,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 16.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.0625
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-liederkreis-op39-no11-im-walde.mxl",
+      "composer": "Robert Schumann",
+      "title": "Liederkreis, Op.39 — No. 11 Im Walde",
+      "n_candidates": 7,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 4.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 1.0,
+          "1/rank": 0.25
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-dichterliebe-op48-no16-die-alten-bosen-lieder.mxl",
+      "composer": "Robert Schumann",
+      "title": "Dichterliebe, Op.48 — No. 16 Die Alten Bosen Lieder",
+      "n_candidates": 64,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 40.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.025
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no10-tranenregen.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin, Op.25 — No. 10 Tranenregen",
+      "n_candidates": 9,
+      "models": {
+        "full": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        },
+        "cosine_only": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        },
+        "null_random": {
+          "rank": 6.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.16666666666666666
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-dichterliebe-op48-no9-das-ist-ein-floten-und-geigen.mxl",
+      "composer": "Robert Schumann",
+      "title": "Dichterliebe, Op.48 — No. 9 Das Ist Ein Floten Und Geigen",
+      "n_candidates": 41,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 36.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.027777777777777776
+        }
+      }
+    },
+    {
+      "filename": "schumann-clara-6-lieder-op13-no1-ich-stand-in-dunklen-traumen.mxl",
+      "composer": "Clara Schumann",
+      "title": "6 Lieder, Op.13 — No. 1 Ich Stand In Dunklen Traumen",
+      "n_candidates": 28,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 21.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.047619047619047616
+        }
+      }
+    },
+    {
+      "filename": "debussy-claude-trois-chansons-de-bilitis-no3-le-tombeau-des-naiades.mxl",
+      "composer": "Claude Debussy",
+      "title": "Trois Chansons de Bilitis — No. 3 Le Tombeau Des Naiades",
+      "n_candidates": 56,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 41.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.024390243902439025
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-liederkreis-op39-no6-schone-fremde.mxl",
+      "composer": "Robert Schumann",
+      "title": "Liederkreis, Op.39 — No. 6 Schone Fremde",
+      "n_candidates": 14,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 4.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 1.0,
+          "1/rank": 0.25
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-liederkreis-op39-no1-in-der-fremde-i.mxl",
+      "composer": "Robert Schumann",
+      "title": "Liederkreis, Op.39 — No. 1 In Der Fremde I",
+      "n_candidates": 6,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 5.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 1.0,
+          "1/rank": 0.2
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no7-ungeduld.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin (D.795) — No. 7 Ungeduld",
+      "n_candidates": 33,
+      "models": {
+        "full": {
+          "rank": 4.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 1.0,
+          "1/rank": 0.25
+        },
+        "cosine_only": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        },
+        "null_random": {
+          "rank": 31.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.03225806451612903
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no9-des-mullers-blumen.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin (D.795) — No. 9 Des Mullers Blumen",
+      "n_candidates": 19,
+      "models": {
+        "full": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 11.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.09090909090909091
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-dichterliebe-op48-no11-ein-jungling-liebt-ein-madchen.mxl",
+      "composer": "Robert Schumann",
+      "title": "Dichterliebe, Op.48 — No. 11 Ein Jungling Liebt Ein Madchen",
+      "n_candidates": 47,
+      "models": {
+        "full": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        },
+        "cosine_only": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        },
+        "null_random": {
+          "rank": 45.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.022222222222222223
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-frauenliebe-und-leben-op42-no5-helft-mir-ihr-schwestern.mxl",
+      "composer": "Robert Schumann",
+      "title": "Frauenliebe und Leben, Op.42 — No. 5 Helft Mir Ihr Schwestern",
+      "n_candidates": 85,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 16.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.0625
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-dichterliebe-op48-no4-wenn-ich-in-deine-augen-seh.mxl",
+      "composer": "Robert Schumann",
+      "title": "Dichterliebe, Op.48 — No. 4 Wenn Ich In Deine Augen Seh",
+      "n_candidates": 11,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 11.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.09090909090909091
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no5-am-feierabend.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin (D.795)\n — No. 5 Am Feierabend",
+      "n_candidates": 73,
+      "models": {
+        "full": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        },
+        "cosine_only": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        },
+        "null_random": {
+          "rank": 68.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.014705882352941176
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-liederkreis-op39-no10-zwielicht.mxl",
+      "composer": "Robert Schumann",
+      "title": "Liederkreis — No. 10 Zwielicht",
+      "n_candidates": 27,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 13.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.07692307692307693
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-winterreise-d911-no9-irrlicht.mxl",
+      "composer": "Franz Schubert",
+      "title": "Winterreise, D.911 — No. 9 Irrlicht",
+      "n_candidates": 80,
+      "models": {
+        "full": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        },
+        "cosine_only": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        },
+        "null_random": {
+          "rank": 29.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.034482758620689655
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-liederkreis-op39-no3-waldesgesprach.mxl",
+      "composer": "Robert Schumann",
+      "title": "Liederkreis, Op.39 — No. 3 Waldesgesprach",
+      "n_candidates": 89,
+      "models": {
+        "full": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        },
+        "cosine_only": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        },
+        "null_random": {
+          "rank": 42.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.023809523809523808
+        }
+      }
+    },
+    {
+      "filename": "schumann-clara-6-lieder-op13-no4-der-mond-kommt-still-gegangen.mxl",
+      "composer": "Clara Schumann",
+      "title": "6 Lieder, Op.13 — No. 4 Der Mond Kommt Still Gegangen",
+      "n_candidates": 32,
+      "models": {
+        "full": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        },
+        "cosine_only": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        },
+        "null_random": {
+          "rank": 11.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.09090909090909091
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-liederkreis-op39-no5-mondnacht.mxl",
+      "composer": "Robert Schumann",
+      "title": "Liederkreis, Op.39 — No. 5 Mondnacht",
+      "n_candidates": 19,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 9.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.1111111111111111
+        }
+      }
+    },
+    {
+      "filename": "debussy-claude-3-chansons-de-france-no1-rondel-le-temps-a-laisse-son-manteau.mxl",
+      "composer": "Claude Debussy",
+      "title": "3 Chansons de France — No. 1 Rondel Le Temps A Laisse Son Manteau",
+      "n_candidates": 61,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 29.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.034482758620689655
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no19-der-muller-und-der-bach.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin (D.795) — No. 19 Der Muller Und Der Bach",
+      "n_candidates": 11,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 4.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 1.0,
+          "1/rank": 0.25
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-frauenliebe-und-leben-op42-no7-an-meinem-herzen-an-meiner-brust.mxl",
+      "composer": "Robert Schumann",
+      "title": "Frauenliebe und Leben — No. 7 An Meinem Herzen An Meiner Brust",
+      "n_candidates": 38,
+      "models": {
+        "full": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        },
+        "cosine_only": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        },
+        "null_random": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-winterreise-d911-no20-der-wegweiser.mxl",
+      "composer": "Franz Schubert",
+      "title": "Winterreise, D.911 — No. 20 Der Wegweiser",
+      "n_candidates": 11,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 4.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 1.0,
+          "1/rank": 0.25
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-dichterliebe-op48-no15-aus-alten-marchen.mxl",
+      "composer": "Robert Schumann",
+      "title": "Dichterliebe, Op.48 — No. 15 Aus Alten Marchen",
+      "n_candidates": 89,
+      "models": {
+        "full": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        },
+        "cosine_only": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        },
+        "null_random": {
+          "rank": 89.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.011235955056179775
+        }
+      }
+    },
+    {
+      "filename": "faure-gabriel-cinq-melodies-op58-no5-cest-lextase.mxl",
+      "composer": "Gabriel Fauré",
+      "title": "Cinq Mélodies, Op.58 — No. 5 Cest Lextase",
+      "n_candidates": 22,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 19.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.05263157894736842
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-liederkreis-op39-no12-fruhlingsnacht.mxl",
+      "composer": "Robert Schumann",
+      "title": "Liederkreis, Op.39 — No. 12 Fruhlingsnacht",
+      "n_candidates": 28,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 20.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.05
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-winterreise-d911-no4-erstarrung.mxl",
+      "composer": "Franz Schubert",
+      "title": "Winterreise, D.911 — No. 4 Erstarrung",
+      "n_candidates": 20,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 17.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.058823529411764705
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no2-wohin.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin — No. 2 Wohin",
+      "n_candidates": 51,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        }
+      }
+    },
+    {
+      "filename": "faure-gabriel-cinq-melodies-op58-no1-mandoline.mxl",
+      "composer": "Gabriel Fauré",
+      "title": "Cinq Mélodies, Op.58 — No. 1 Mandoline",
+      "n_candidates": 15,
+      "models": {
+        "full": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        },
+        "cosine_only": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        },
+        "null_random": {
+          "rank": 10.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.1
+        }
+      }
+    },
+    {
+      "filename": "faure-gabriel-cinq-melodies-op-58-no4-a-clymene.mxl",
+      "composer": "Gabriel Fauré",
+      "title": "Cinq Mélodies Op. 58 — No. 4 A Clymene",
+      "n_candidates": 41,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no4-danksagung-an-den-bach.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin (D.795)\n — No. 4 Danksagung An Den Bach",
+      "n_candidates": 11,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 11.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.09090909090909091
+        }
+      }
+    },
+    {
+      "filename": "schumann-clara-6-lieder-op13-no5-ich-hab-in-deinem-auge.mxl",
+      "composer": "Clara Schumann",
+      "title": "6 Lieder, Op.13 — No. 5 Ich Hab In Deinem Auge",
+      "n_candidates": 20,
+      "models": {
+        "full": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 3.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.3333333333333333
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no20-des-baches-wiegenlied.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin (D.795) — No. 20 Des Baches Wiegenlied",
+      "n_candidates": 3,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 2.0,
+          "hit@1": 0.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 0.5
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-dichterliebe-op48-no12-am-leuchtenden-sommermorgen.mxl",
+      "composer": "Robert Schumann",
+      "title": "Dichterliebe, Op.48 — No. 12 Am Leuchtenden Sommermorgen",
+      "n_candidates": 2,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-winterreise-d911-no16-letzte-hoffnung.mxl",
+      "composer": "Franz Schubert",
+      "title": "Winterreise, D.911 — No. 16 Letzte Hoffnung",
+      "n_candidates": 85,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 42.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.023809523809523808
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-die-schone-mullerin-d795-no15-eifersucht-und-stolz.mxl",
+      "composer": "Franz Schubert",
+      "title": "Die schöne Müllerin — No. 15 Eifersucht Und Stolz",
+      "n_candidates": 51,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 6.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.16666666666666666
+        }
+      }
+    },
+    {
+      "filename": "debussy-claude-3-chansons-de-france-no3-rondel-pour-ce-que-plaisance-est-morte.mxl",
+      "composer": "Claude Debussy",
+      "title": "3 Chansons de France — No. 3 Rondel Pour Ce Que Plaisance Est Morte",
+      "n_candidates": 22,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 20.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.05
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-winterreise-d911-no24-der-leiermann.mxl",
+      "composer": "Franz Schubert",
+      "title": "Winterreise, D.911 — No. 24 Der Leiermann",
+      "n_candidates": 14,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 7.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.14285714285714285
+        }
+      }
+    },
+    {
+      "filename": "schumann-robert-frauenliebe-und-leben-op42-no2-er-der-herrlichste-von-allen.mxl",
+      "composer": "Robert Schumann",
+      "title": "Frauenliebe und Leben, Op.42 — No. 2 Er Der Herrlichste Von Allen",
+      "n_candidates": 56,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 4.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 1.0,
+          "1/rank": 0.25
+        }
+      }
+    },
+    {
+      "filename": "schubert-franz-winterreise-d911-no12-einsamkeit.mxl",
+      "composer": "Franz Schubert",
+      "title": "Winterreise, D.911 — No. 12 Einsamkeit",
+      "n_candidates": 44,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 20.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.05
+        }
+      }
+    },
+    {
+      "filename": "faure-gabriel-cinq-melodies-op58-no2-en-sourdine.mxl",
+      "composer": "Gabriel Fauré",
+      "title": "Cinq Mélodies, Op.58 — No. 2 En Sourdine",
+      "n_candidates": 9,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 9.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.1111111111111111
+        }
+      }
+    },
+    {
+      "filename": "schumann-clara-6-lieder-op13-no3-liebeszauber.mxl",
+      "composer": "Clara Schumann",
+      "title": "6 Lieder, Op.13 — No. 3 Liebeszauber",
+      "n_candidates": 38,
+      "models": {
+        "full": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "cosine_only": {
+          "rank": 1.0,
+          "hit@1": 1.0,
+          "hit@3": 1.0,
+          "hit@5": 1.0,
+          "1/rank": 1.0
+        },
+        "null_random": {
+          "rank": 19.0,
+          "hit@1": 0.0,
+          "hit@3": 0.0,
+          "hit@5": 0.0,
+          "1/rank": 0.05263157894736842
+        }
+      }
+    }
+  ]
+}

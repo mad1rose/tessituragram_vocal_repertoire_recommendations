@@ -49,7 +49,7 @@ import numpy as np
 from scipy.stats import spearmanr
 
 # Allow running from project root or experiment folder
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 _sys_path = list(__import__("sys").path)
 if str(ROOT) not in _sys_path:
     __import__("sys").path.insert(0, str(ROOT))
@@ -444,15 +444,15 @@ def _nan_to_none(obj):  # JSON does not support NaN
 
 def main() -> None:
     library_path = ROOT / "data" / "tessituragrams.json"
-    out_dir = ROOT / "experiment_results"
-    out_dir.mkdir(exist_ok=True)
+    out_dir = ROOT / "previous_paper_and_experiments" / "previous_experiment_results"
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-    print("Running RQ3 Score Spread and Formula Checks...")
+    print("Experiment 1 — RQ3 Score Spread and Formula Checks")
     print(f"Library: {library_path}")
 
     results = run_rq3_experiment(library_path)
 
-    out_json = out_dir / "RQ3_results.json"
+    out_json = out_dir / "old_RQ3_results.json"
     with open(out_json, "w", encoding="utf-8") as f:
         json.dump(_nan_to_none(results), f, indent=2, ensure_ascii=False)
     print(f"Results saved to {out_json}")

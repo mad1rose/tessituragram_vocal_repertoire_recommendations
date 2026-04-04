@@ -5,6 +5,17 @@ tessituragram vocal repertoire recommendation system. It is written for
 readers who may not have a deep background in computer science,
 statistics, or music theory.
 
+**Scope.** Unless a section says otherwise, the narrative and tables below
+refer to **Experiment 2**—the **1,655-line** library and archived outputs
+under `experiment_results/` (e.g. `RQ1_results.json`). The CADSCOM paper
+also reports **Experiment 1** (101 vocal lines, one per composition) from
+`previous_paper_and_experiments/previous_experiment_results/old_*.json`.
+Experiment 1 uses **i.i.d. bootstrap** resampling of query-level outcomes
+(Efron & Tibshirani, 1993); Experiment 2 uses **work-level cluster
+bootstrap** for RQ1/RQ2 where noted (Cameron et al., 2008; Field & Welsh,
+2007). See `experiment/evaluation_plan_research_questions.txt` for the
+full split.
+
 ---
 
 ## What is this system?
@@ -38,16 +49,17 @@ multi-part works and **1,313 lines** came from single-voice songs.
 
 ## How we created test scenarios
 
-To test the system fairly and without bias, we used a method called
-**synthetic user profiles**. For each test, we picked a song from the
-library and pretended a singer's preferences perfectly matched that
-song's characteristics:
+To test the system fairly and without bias, we used **synthetic
+profiles** derived from a chosen **vocal line** in the library (each line
+is one singing part—often one “song,” but duets contribute multiple
+lines). We pretended a singer's preferences perfectly matched that
+line’s tessituragram:
 
-- The singer's **vocal range** was set to the song's pitch range.
-- The singer's **4 favorite notes** were the 4 pitches the song uses
-  most.
-- The singer's **2 avoid notes** were the 2 pitches the song uses
-  least.
+- The singer's **vocal range** was set to the line's written pitch range.
+- The singer's **4 favorite notes** were the 4 pitches the line spends
+  the most time on (by duration).
+- The singer's **2 avoid notes** were the 2 pitches the line spends the
+  least time on (by duration).
 
 This gave us an objective, repeatable way to test the system without
 relying on real human opinions (which would be subjective and hard to
@@ -59,72 +71,86 @@ the same results.
 
 ---
 
-## Research Question 1: Does the system find the right song?
+## Research Question 1: Synthetic self-retrieval (identifiability check)
 
 ### The question
 
-If we build a singer profile from a specific song, will the system rank
-that same song at the top of its recommendations?
+This is **not** a user study. We use **synthetic self-retrieval**: we
+pick a **vocal line** from the library, build the singer profile *from
+that line’s own tessituragram* (range, favourite pitches = most sung
+durations, avoid pitches = least sung), then ask: **how often** does the
+system rank **that same line** at the top (or in the top 3 or 5) among
+all lines that pass the range filter?
 
-### How we tested it
+That tests whether the scoring pipeline can recover the generating item
+when preferences are an oracle encoding of that item—not whether real
+singers would be satisfied in the wild.
 
-We randomly selected **200 songs** from the library (out of 1,647
-eligible songs). For each one, we:
+### How we tested it (large-library experiment)
 
-1. Created a synthetic singer profile from the song.
-2. Asked the system to rank all songs that fit the singer's range.
-3. Checked where the original song appeared in the ranking.
+We randomly selected **200 vocal lines** from the library (out of 1,647
+eligible lines—lines with at least two candidates after range
+filtering). Query sampling uses **seed 42**. For each line, we:
+
+1. Built the synthetic profile from that line.
+2. Ranked every **candidate** line that fits the profile’s range.
+3. Recorded the rank of the **target** line (the one we built the
+   profile from).
+
+The archived results also report how many candidates **|C|** each query
+had (median 263, mean about 374 on this draw). The **null** model only
+applies the range filter and then shuffles candidates at random. For a
+uniform shuffle, the chance the target is first is **1/|C|** on that
+query; averaging **1/|C|** over the 200 queries gives about **0.017**
+(1.7%), which is the order of magnitude of the observed null HR@1
+(**2%**).
 
 ### The results
 
 | Metric | Value | What it means |
 |--------|-------|---------------|
-| **HR@1** | **55.0%** | The correct song was ranked #1 in 55% of tests |
-| **HR@3** | **80.0%** | The correct song was in the top 3 in 80% of tests |
-| **HR@5** | **86.0%** | The correct song was in the top 5 in 86% of tests |
-| **MRR** | **0.69** | On average, the correct song appeared around position 1.5 |
+| **HR@1** | **55.0%** | The target line was ranked #1 in 55% of tests |
+| **HR@3** | **80.0%** | The target line was in the top 3 in 80% of tests |
+| **HR@5** | **86.0%** | The target line was in the top 5 in 86% of tests |
+| **MRR** | **0.69** | On average, reciprocal rank ≈ 0.69 (roughly around position 1.5) |
 
-(95% confidence intervals: HR@1 [48.1%, 61.7%], HR@3 [74.1%, 85.4%],
-HR@5 [81.1%, 90.6%], MRR [0.63, 0.74])
+95% bootstrap intervals (work-level clustering; **fixed** query draw;
+see `RQ1_results.json`): HR@1 [48.0%, 61.9%], HR@3 [74.4%, 85.5%],
+HR@5 [81.1%, 90.6%], MRR [0.64, 0.73].
 
 ### What this means in plain language
 
-The system is quite good at finding songs that match a singer's
-preferences. More than half the time, the exact right song is the #1
-recommendation. The vast majority of the time (86%), it appears in the
-top 5. This is strong evidence that the recommendation algorithm works
-as intended.
+Under this controlled test, the system usually places the **correct
+target line** very high in the list, and far above a random ranking. It
+does not prove how humans would experience recommendations.
 
-The system does not always rank the correct song at #1 because many
-songs in the library are genuinely similar -- they use similar pitches
-in similar proportions. When the correct song lands at position 2 or 3,
-it is because other songs are an equally good or nearly-as-good match,
-which is actually a desirable property for a recommendation system.
+The target line is not always #1 because many lines share similar
+duration-weighted pitch shapes; when it lands at positions 2–3, other
+lines are legitimately close matches in tessituragram space.
 
 ---
 
 ## Research Question 1 -- Baseline Comparisons
 
-To understand how good the system really is, we compared it against two
-simpler alternatives using the same 200 test songs:
+We compared the full model to two baselines on the **same 200** query
+lines (see `RQ1_baselines.json`):
 
 | Model | HR@1 | MRR | Description |
 |-------|------|-----|-------------|
-| **Full model** | **55.0%** | **0.69** | The complete system (cosine similarity + avoid penalty) |
-| **Cosine-only** | 54.5% | 0.69 | Same system but ignoring the "avoid notes" feature |
-| **Random** | 2.0% | 0.06 | Picks songs in random order (no intelligence at all) |
+| **Full model** | **55.0%** | **0.69** | Range filter + cosine similarity + avoid penalty (α = 0.5) |
+| **Cosine-only** | 54.5% | 0.69 | Same but α = 0 (avoid list not used in the score) |
+| **Random** | 2.0% | 0.06 | Range filter, then random order |
 
 ### What this means
 
-- The full system is **dramatically better than random guessing** (55%
-  vs 2%). This proves the algorithm is doing meaningful work, not just
-  getting lucky.
-- The full model and cosine-only model perform almost identically for
-  self-retrieval. This makes sense: in the self-retrieval test, the
-  avoid notes are the least-used pitches, so they have very little
-  weight and removing them barely changes the ranking. The avoid penalty
-  becomes more important in real-world use where a singer might avoid
-  notes for reasons unrelated to how much a song uses them.
+- The full system is **dramatically better than random guessing** on
+  HR@1 (55% vs 2%). The null rate is in line with **mean 1/|C|** on
+  this query draw (~1.7%), not a bug.
+- The full model and cosine-only model perform almost identically here.
+  Under self-retrieval, avoids are the least-used pitches of the target
+  line, so the avoid term rarely reorders the top of the list. That does
+  **not** mean avoids are useless for real users who specify avoids for
+  other reasons.
 
 ---
 
@@ -314,11 +340,12 @@ values: 0.0, 0.25, 0.5, 0.75, and 1.0. Everything else stayed the same
 
 ### What this means
 
-- **Self-retrieval accuracy (RQ1) is largely insensitive to alpha.**
+- **Oracle self-retrieval performance (RQ1) is largely insensitive to alpha.**
   Changing alpha from 0.0 to 1.0 only shifts HR@1 by about 1.5
   percentage points. This means the avoid penalty does not
-  dramatically help or hurt the system's ability to find the right
-  song, which makes sense because in the self-retrieval test, avoid
+  dramatically help or hurt the system's ability to rank the **target
+  line** highly in this identifiability setup, which makes sense because
+  in the self-retrieval test, avoid
   notes are the least-used pitches and carry very little weight
   regardless of alpha.
 - **Ranking stability (RQ2) decreases slightly as alpha increases.**
@@ -328,7 +355,8 @@ values: 0.0, 0.25, 0.5, 0.75, and 1.0. Everything else stayed the same
   for "strong agreement"), so the system stays stable at all tested
   alpha values.
 - **Alpha = 0.5 is a reasonable default.** It provides a balanced
-  trade-off: nearly the best self-retrieval accuracy while keeping
+  trade-off: nearly the best oracle self-retrieval hit-rates on this draw
+  while keeping
   ranking stability strong. It gives singers meaningful control over
   their avoid preferences without making the system jittery.
 
@@ -338,29 +366,43 @@ values: 0.0, 0.25, 0.5, 0.75, and 1.0. Everything else stayed the same
 
 ### Confidence intervals
 
-All confidence intervals in this report are 95% intervals computed
-using a technique called **cluster bootstrap** with 10,000 resamples.
-A confidence interval gives a range of plausible values for a metric.
-For example, "HR@1 = 55% [48.1%, 61.7%]" means we are 95% confident
-the true HR@1 falls between 48.1% and 61.7%.
+**Experiment 2 (this report, `experiment_results/`):** 95% intervals for
+RQ1/RQ2 (and related summaries) use **work-level cluster bootstrap**
+with 10,000 resamples (Cameron et al., 2008; Field & Welsh, 2007;
+percentile method, Efron & Tibshirani, 1993).
 
-### Why "cluster" bootstrap?
+**Experiment 1** (`old_*.json`): 95% intervals use **i.i.d. bootstrap**
+resampling of query-level (or baseline-level) outcomes with 10,000
+resamples (Efron & Tibshirani, 1993), appropriate when each sampled
+query line comes from a distinct composition in that small library.
 
-Some songs in the library come from the same composition (for example,
-the soprano and alto lines of a duet). These related lines might behave
-similarly in experiments, which could make our confidence intervals
-misleadingly narrow if we treated every line as fully independent. The
-cluster bootstrap accounts for this by grouping lines from the same
-composition together when computing confidence intervals. This produces
-more honest (slightly wider) intervals that accurately reflect our
-uncertainty.
+A confidence interval gives a range of plausible values for a metric
+**under the stated resampling scheme** for the fixed sample. For
+example, "HR@1 = 55% [48.1%, 61.7%]" summarizes bootstrap variation for
+the archived query draw, not repeated re-draws of queries from the corpus.
+
+### Why "cluster" bootstrap (Experiment 2)?
+
+Some lines in the library come from the same composition (for example,
+two parts of a duet). Those related lines can behave similarly in
+experiments, which would make confidence intervals **too narrow** if we
+treated every line as fully independent. Cluster bootstrap resamples
+**compositions (work IDs)** with replacement, then includes all sampled
+lines belonging to those works, which inflates variance appropriately
+when queries share a work. Queries themselves are drawn uniformly from
+the pool of **eligible lines** (not uniformly from compositions); the
+bootstrap addresses **within-work dependence**, not that compositions
+were simple-random-sampled.
 
 ### Reproducibility
 
-Every random selection in these experiments used a fixed random seed
-(42), meaning anyone who re-runs the code will get exactly the same
-results. No results were cherry-picked, manually adjusted, or
-fabricated in any way.
+Query / baseline draws use **seed 42**. For Experiment 2 RQ1 and RQ1
+baselines, bootstrap resampling uses a **separate seed (43)** so query
+selection and bootstrap streams are independent and reproducible (see
+`experiment/run_rq1_experiment.py`). Experiment 1 scripts use **seed 42**
+for queries; the bootstrap loop then continues the global random stream
+after query selection (no separate bootstrap seed). No results were
+cherry-picked, manually adjusted, or fabricated in any way.
 
 ---
 
@@ -376,11 +418,22 @@ fabricated in any way.
    as specified, with zero numerical error.
 
 4. **The system is robust to parameter choices.** Changing the
-   avoid-penalty weight (alpha) has only minor effects on accuracy and
-   stability.
+   avoid-penalty weight (alpha) has only minor effects on oracle
+   self-retrieval hit-rates and on stability.
 
 5. **The avoid penalty is a meaningful feature.** While it does not
-   dramatically affect self-retrieval accuracy (because the test is
+   dramatically affect self-retrieval **performance** on this
+   identifiability task (because the test is
    designed with least-used pitches as avoids), it gives singers real
    control over their preferences and introduces only a small, acceptable
    reduction in ranking stability.
+
+---
+
+## References (bootstrap methods cited above)
+
+Cameron, A. C., Gelbach, J. B., & Miller, D. L. (2008). Bootstrap-based improvements for inference with clustered errors. *Review of Economics and Statistics*, 90(3), 414–427.
+
+Efron, B., & Tibshirani, R. J. (1993). *An Introduction to the Bootstrap*. Chapman and Hall/CRC.
+
+Field, C. A., & Welsh, A. H. (2007). Bootstrapping clustered data. *Journal of the Royal Statistical Society: Series B*, 69(3), 369–390.

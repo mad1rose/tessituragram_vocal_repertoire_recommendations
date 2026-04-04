@@ -17,7 +17,9 @@
       1.0
     ],
     "bootstrap_samples": 10000,
-    "rq1_random_seed": 42,
+    "rq1_random_seed_queries": 42,
+    "rq1_random_seed_bootstrap": 43,
+    "bootstrap_rng_note": "RQ1 at alpha=0.5 uses sequential bootstrap draws from seed 43 (matches run_rq1_experiment.py). Other alpha values and RQ2 use SHA-256–derived seeds per (phase, alpha, metric) so resamples do not depend on loop order.",
     "rq1_n_queries_max": 200,
     "rq1_min_candidates": 2,
     "rq2_random_seed": 42,
@@ -45,29 +47,29 @@
       "HR@1": {
         "value": 0.545,
         "ci_95": [
-          0.4774,
-          0.6128
+          0.4772,
+          0.6131
         ]
       },
       "HR@3": {
         "value": 0.775,
         "ci_95": [
-          0.715,
-          0.8317
+          0.7157,
+          0.8308
         ]
       },
       "HR@5": {
         "value": 0.855,
         "ci_95": [
-          0.805,
-          0.902
+          0.8039,
+          0.9015
         ]
       },
       "MRR": {
         "value": 0.687,
         "ci_95": [
-          0.6365,
-          0.7358
+          0.637,
+          0.7364
         ]
       }
     },
@@ -76,28 +78,28 @@
         "value": 0.555,
         "ci_95": [
           0.4873,
-          0.6232
+          0.6238
         ]
       },
       "HR@3": {
         "value": 0.805,
         "ci_95": [
-          0.7476,
-          0.86
+          0.7487,
+          0.8593
         ]
       },
       "HR@5": {
         "value": 0.855,
         "ci_95": [
-          0.804,
+          0.8051,
           0.9031
         ]
       },
       "MRR": {
         "value": 0.6933,
         "ci_95": [
-          0.6433,
-          0.7427
+          0.643,
+          0.7414
         ]
       }
     },
@@ -105,29 +107,29 @@
       "HR@1": {
         "value": 0.55,
         "ci_95": [
-          0.4832,
-          0.6193
+          0.4802,
+          0.6186
         ]
       },
       "HR@3": {
         "value": 0.8,
         "ci_95": [
-          0.7426,
-          0.8537
+          0.7436,
+          0.855
         ]
       },
       "HR@5": {
         "value": 0.86,
         "ci_95": [
           0.8109,
-          0.9059
+          0.9055
         ]
       },
       "MRR": {
         "value": 0.6853,
         "ci_95": [
-          0.6351,
-          0.7344
+          0.6354,
+          0.7345
         ]
       }
     },
@@ -135,29 +137,29 @@
       "HR@1": {
         "value": 0.54,
         "ci_95": [
-          0.47,
-          0.608
+          0.4724,
+          0.6089
         ]
       },
       "HR@3": {
         "value": 0.785,
         "ci_95": [
           0.7273,
-          0.8408
+          0.84
         ]
       },
       "HR@5": {
         "value": 0.855,
         "ci_95": [
-          0.804,
-          0.9015
+          0.805,
+          0.9029
         ]
       },
       "MRR": {
         "value": 0.6786,
         "ci_95": [
-          0.6268,
-          0.7283
+          0.6278,
+          0.7282
         ]
       }
     },
@@ -165,29 +167,29 @@
       "HR@1": {
         "value": 0.54,
         "ci_95": [
-          0.4724,
-          0.6061
+          0.4721,
+          0.608
         ]
       },
       "HR@3": {
         "value": 0.78,
         "ci_95": [
-          0.7214,
-          0.8358
+          0.7206,
+          0.835
         ]
       },
       "HR@5": {
         "value": 0.84,
         "ci_95": [
           0.7879,
-          0.8894
+          0.89
         ]
       },
       "MRR": {
         "value": 0.6724,
         "ci_95": [
-          0.6202,
-          0.723
+          0.6195,
+          0.7229
         ]
       }
     }
@@ -199,7 +201,7 @@
       "mean_tau_per_baseline": 0.8662,
       "std_tau_across_baselines": 0.0252,
       "ci_95_baseline_mean": [
-        0.8554,
+        0.8553,
         0.8767
       ],
       "n_perturbations": 580,
@@ -211,8 +213,8 @@
       "mean_tau_per_baseline": 0.8499,
       "std_tau_across_baselines": 0.0311,
       "ci_95_baseline_mean": [
-        0.8359,
-        0.8628
+        0.8362,
+        0.8629
       ],
       "n_perturbations": 580,
       "n_baselines": 20
@@ -223,8 +225,8 @@
       "mean_tau_per_baseline": 0.837,
       "std_tau_across_baselines": 0.0335,
       "ci_95_baseline_mean": [
-        0.8226,
-        0.8509
+        0.8224,
+        0.8508
       ],
       "n_perturbations": 580,
       "n_baselines": 20
@@ -235,8 +237,8 @@
       "mean_tau_per_baseline": 0.8263,
       "std_tau_across_baselines": 0.0326,
       "ci_95_baseline_mean": [
-        0.8117,
-        0.8394
+        0.8121,
+        0.8398
       ],
       "n_perturbations": 580,
       "n_baselines": 20
@@ -247,8 +249,8 @@
       "mean_tau_per_baseline": 0.8183,
       "std_tau_across_baselines": 0.0334,
       "ci_95_baseline_mean": [
-        0.8036,
-        0.8323
+        0.8039,
+        0.8325
       ],
       "n_perturbations": 580,
       "n_baselines": 20

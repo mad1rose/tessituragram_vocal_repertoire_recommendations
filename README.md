@@ -23,21 +23,22 @@ The core use cases are:
   - `visualize_recommendations.py` – Generates a Jupyter notebook with recommendation charts: each song's normalised tessituragram overlaid with the matched profile's ideal vector.
 
 - **`data/`** – Data files.
-  - `all_tessituragrams.json` – **Primary dataset** used by the recommendation CLI. Contains tessituragrams for all songs, including songs with multiple voice parts (each part stored separately with its own `part_id` and `part_name`).
-  - `tessituragrams.json` – Older single-part dataset used by the experiment scripts.
+  - `all_tessituragrams.json` – **Primary dataset** for the recommendation CLI and for **Experiment 2** (paper: 1,655 vocal lines / 1,419 works). Multi-part works appear as separate lines (`part_id`, `part_name`).
+  - `tessituragrams.json` – **Experiment 1** subset (101 solo vocal lines, one per composition), used with the scripts under `previous_paper_and_experiments/previous_experiment_scripts/` for the compact-library protocol.
   - `recommendations.json` – Output of the recommendation CLI (overwritten each run).
 
-- **`experiment/`** – Python scripts for **running the experiments** reported in the paper.
+- **`experiment/`** – Python scripts for **Experiment 2** (large library: `data/all_tessituragrams.json`).
   - `run_rq1_experiment.py`, `run_rq2_experiment.py`, `run_rq3_experiment.py` – Main experiment entry points for research questions RQ1–RQ3.
   - `run_rq1_baselines.py`, `run_rq2_baselines.py` – Baseline methods for comparison.
-  - `run_alpha_sensitivity.py` – Alpha‑sensitivity analysis experiments.
+  - `run_alpha_sensitivity.py` – Alpha‑sensitivity analysis (same seeds and sampling rules as the main RQ scripts; see `alpha_sensitivity_results.json`).
   - `visualize_rq1.py`, `visualize_rq2.py`, `visualize_rq3.py`, `visualize_baselines.py`, `visualize_alpha_sensitivity.py` – Plotting / visualization of experiment outputs.
-  - *Note:* experiment scripts use the older `data/tessituragrams.json` for reproducibility.
 
-- **`experiment_results/`** – **Results of the experiments**.
+- **`experiment_results/`** – **Canonical JSON outputs for Experiment 2** (tables in the paper; large-library protocol).
   - `RQ1_results.json`, `RQ2_results.json`, `RQ3_results.json` – Main experiment outputs.
   - `RQ1_baselines.json`, `RQ2_baselines.json` – Baseline experiment results.
-  - `alpha_sensitivity_results.json` – Results for alpha‑sensitivity runs.
+  - `alpha_sensitivity_results.json` – Alpha‑sensitivity runs.
+
+- **`previous_paper_and_experiments/`** – **Experiment 1** scripts (`previous_experiment_scripts/`, e.g. `old_run_rq1_experiment.py`) and **canonical JSON** for the 101-line protocol (`previous_experiment_results/old_*.json`). Use this tree when reproducing compact-library numbers or extending that protocol without changing Experiment 2 outputs.
 
 - **`how_tos/`** – Plain‑text guides that explain **how to run the code in this repo**, written for users with **limited computer science background**.
   - `how_to_create_tessituragrams.txt` – Step‑by‑step instructions to install dependencies and run the tessituragram creation pipeline.

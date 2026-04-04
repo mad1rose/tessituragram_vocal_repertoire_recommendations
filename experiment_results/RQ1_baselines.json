@@ -1,10 +1,12 @@
 {
   "experiment": "RQ1_baselines",
-  "description": "Baselines for RQ1 self-retrieval accuracy: full model (range + cosine − α×avoid), cosine-only (α = 0), and range-only + random ranking (null). Uses the same random query pool definition and sampling rule as run_rq1_experiment.py.",
+  "description": "Baselines for RQ1 oracle self-retrieval (identifiability): full model (range + cosine − α×avoid), cosine-only (α = 0), and range-only + random ranking (null). Uses the same random query pool definition and sampling rule as run_rq1_experiment.py.",
   "parameters": {
     "alpha_full": 0.5,
     "bootstrap_samples": 10000,
     "random_seed_queries": 42,
+    "random_seed_bootstrap": 43,
+    "random_seed_null_baseline_stream": 10042,
     "min_candidates": 2,
     "n_queries_max": 200,
     "library_path": "data\\all_tessituragrams.json"
@@ -17,7 +19,39 @@
     "queries_sampled": 200,
     "n_unique_works_in_queries": 192,
     "random_sampling": true,
-    "bootstrap_method": "cluster (work-level)"
+    "bootstrap_method": "cluster (work-level)",
+    "candidate_pool_summary": {
+      "n_queries": 200,
+      "n_candidates_min": 3,
+      "n_candidates_max": 1386,
+      "n_candidates_mean": 374.43,
+      "n_candidates_median": 263.0,
+      "n_candidates_p25": 70.0,
+      "n_candidates_p75": 593.0,
+      "fraction_n_candidates_le_5": 0.005,
+      "fraction_n_candidates_le_10": 0.035,
+      "fraction_n_candidates_le_20": 0.09,
+      "mean_inverse_n_candidates": 0.016956
+    }
+  },
+  "descriptive_stratification_hr1_by_pool_size": {
+    "note": "Point estimates only (no CIs). Under uniform random ranking, P(top-1 hit) = 1/|C| for that query; mean 1/|C| over a bin approximates expected null HR@1 if |C| were held fixed.",
+    "bins": [
+      {
+        "bin_label": "2 <= |C| <= 20",
+        "n_queries": 18,
+        "hr1_full_mean": 0.888889,
+        "hr1_null_random_mean": 0.166667,
+        "mean_inverse_n_candidates": 0.107147
+      },
+      {
+        "bin_label": "|C| >= 21",
+        "n_queries": 182,
+        "hr1_full_mean": 0.516484,
+        "hr1_null_random_mean": 0.005495,
+        "mean_inverse_n_candidates": 0.008036
+      }
+    ]
   },
   "models": [
     "full",
@@ -34,29 +68,29 @@
       "HR@1": {
         "value": 0.55,
         "ci_95": [
-          0.4806,
-          0.6173
+          0.4802,
+          0.6186
         ]
       },
       "HR@3": {
         "value": 0.8,
         "ci_95": [
-          0.7413,
-          0.8537
+          0.7436,
+          0.855
         ]
       },
       "HR@5": {
         "value": 0.86,
         "ci_95": [
           0.8109,
-          0.9059
+          0.9055
         ]
       },
       "MRR": {
         "value": 0.6853,
         "ci_95": [
-          0.6347,
-          0.7356
+          0.6354,
+          0.7345
         ]
       }
     },
@@ -79,14 +113,14 @@
         "value": 0.07,
         "ci_95": [
           0.0357,
-          0.1066
+          0.1061
         ]
       },
       "MRR": {
         "value": 0.062,
         "ci_95": [
-          0.0424,
-          0.085
+          0.0427,
+          0.0853
         ]
       }
     },
@@ -94,31 +128,62 @@
       "HR@1": {
         "value": 0.545,
         "ci_95": [
-          0.4769,
-          0.6131
+          0.4772,
+          0.6139
         ]
       },
       "HR@3": {
         "value": 0.775,
         "ci_95": [
-          0.7143,
+          0.7157,
           0.8308
         ]
       },
       "HR@5": {
         "value": 0.855,
         "ci_95": [
-          0.802,
-          0.9026
+          0.804,
+          0.9024
         ]
       },
       "MRR": {
         "value": 0.687,
         "ci_95": [
-          0.6366,
-          0.7347
+          0.6376,
+          0.7352
         ]
       }
+    }
+  },
+  "paired_full_minus_cosine": {
+    "description": "Per-query difference (full − cosine_only); same query draw; work-level cluster bootstrap on differences.",
+    "HR@1": {
+      "mean_diff": 0.005,
+      "ci_95": [
+        -0.0443,
+        0.0508
+      ]
+    },
+    "HR@3": {
+      "mean_diff": 0.025,
+      "ci_95": [
+        0.0,
+        0.0508
+      ]
+    },
+    "HR@5": {
+      "mean_diff": 0.005,
+      "ci_95": [
+        -0.0246,
+        0.035
+      ]
+    },
+    "MRR": {
+      "mean_diff": -0.0017,
+      "ci_95": [
+        -0.0272,
+        0.0248
+      ]
     }
   },
   "per_query": [

@@ -1,5 +1,5 @@
 """
-Baselines for Research Question 1: Self-retrieval accuracy.
+Baselines for Research Question 1: Oracle self-retrieval / identifiability (Experiment 2).
 
 We compare three models, using the same random query sampling rule as
 `run_rq1_experiment.py`:
@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import random
+import warnings
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -38,18 +39,26 @@ from src.recommend import (  # noqa: E402
 from experiment.run_rq1_experiment import (  # noqa: E402
     _select_queries as rq1_select_queries,
     RANDOM_SEED as RQ1_RANDOM_SEED,
+    RANDOM_SEED_BOOTSTRAP as RQ1_RANDOM_SEED_BOOTSTRAP,
     MIN_CANDIDATES as RQ1_MIN_CANDIDATES,
     N_QUERIES as RQ1_N_QUERIES,
+)
+from experiment.rq1_pool_stats import (  # noqa: E402
+    compute_candidate_pool_summary,
+    stratify_rq1_by_pool_size,
 )
 
 
 ALPHA_FULL = 0.5
 BOOTSTRAP_SAMPLES = 10_000
+# Dedicated stream for null-model shuffles (independent of query and bootstrap RNG).
+RANDOM_SEED_NULL_BASELINE = RQ1_RANDOM_SEED + 10_000
 
 
 def _cluster_bootstrap_ci_mean(
     values: List[float],
     cluster_ids: List[str],
+    rng: random.Random,
 ) -> Tuple[float, float]:
     """Cluster bootstrap 95% CI for the mean.
 
@@ -58,18 +67,27 @@ def _cluster_bootstrap_ci_mean(
     """
     if not values:
         return 0.0, 0.0
+    if len(values) != len(cluster_ids):
+        raise ValueError(
+            f"cluster bootstrap: len(values)={len(values)} != len(cluster_ids)={len(cluster_ids)}"
+        )
     clusters: dict[str, list[int]] = {}
     for i, cid in enumerate(cluster_ids):
         clusters.setdefault(cid, []).append(i)
     cluster_keys = list(clusters.keys())
     n_clusters = len(cluster_keys)
     if n_clusters <= 1:
+        warnings.warn(
+            "cluster_bootstrap: only one cluster; CI equals point estimate",
+            UserWarning,
+            stacklevel=2,
+        )
         m = float(np.mean(values))
         return m, m
     values_arr = np.array(values, dtype=float)
     boot = np.empty(BOOTSTRAP_SAMPLES)
     for b in range(BOOTSTRAP_SAMPLES):
-        sampled = random.choices(cluster_keys, k=n_clusters)
+        sampled = rng.choices(cluster_keys, k=n_clusters)
         indices = [idx for key in sampled for idx in clusters[key]]
         boot[b] = np.mean(values_arr[indices])
     lo, hi = float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))
@@ -185,15 +203,15 @@ def run_rq1_baselines(library_path: Path) -> dict:
     """
     all_songs = load_flat_library(library_path)
 
-    # Build query list once, using the same seed and selection rule as RQ1.
-    random.seed(RQ1_RANDOM_SEED)
-    query_list, valid_pool_size = rq1_select_queries(all_songs)
+    rng_queries = random.Random(RQ1_RANDOM_SEED)
+    rng_bootstrap = random.Random(RQ1_RANDOM_SEED_BOOTSTRAP)
+    query_list, valid_pool_size = rq1_select_queries(all_songs, rng_queries)
 
     per_query: List[dict] = []
 
     # Separate RNG for the random-ranking baseline so it is reproducible and
-    # independent of any bootstrap resampling calls.
-    rng_random_rank = random.Random(RQ1_RANDOM_SEED + 10_000)
+    # independent of query-draw and bootstrap streams.
+    rng_random_rank = random.Random(RANDOM_SEED_NULL_BASELINE)
 
     for idx, (song, user_min, user_max, fav_midis, avoid_midis) in enumerate(
         query_list
@@ -224,6 +242,16 @@ def run_rq1_baselines(library_path: Path) -> dict:
         per_query.append(record)
 
     n = len(per_query)
+
+    nc_list = [int(rec["n_candidates"]) for rec in per_query]
+    pool_summary = compute_candidate_pool_summary(nc_list) if nc_list else {}
+    stratification = stratify_rq1_by_pool_size(
+        per_query,
+        bins=[
+            (2, 20, "2 <= |C| <= 20"),
+            (21, None, "|C| >= 21"),
+        ],
+    )
 
     def _collect(model_name: str, key: str) -> List[float]:
         vals: List[float] = []
@@ -258,10 +286,14 @@ def run_rq1_baselines(library_path: Path) -> dict:
         mrr = float(np.mean(mrr_vals))
 
         wids = [work_id(rec["filename"]) for rec in per_query if model in rec["models"]]
-        hr1_ci = _cluster_bootstrap_ci_mean(hit1_vals, wids)
-        hr3_ci = _cluster_bootstrap_ci_mean(hit3_vals, wids)
-        hr5_ci = _cluster_bootstrap_ci_mean(hit5_vals, wids)
-        mrr_ci = _cluster_bootstrap_ci_mean(mrr_vals, wids)
+        assert len(hit1_vals) == len(wids)
+        assert len(hit3_vals) == len(wids)
+        assert len(hit5_vals) == len(wids)
+        assert len(mrr_vals) == len(wids)
+        hr1_ci = _cluster_bootstrap_ci_mean(hit1_vals, wids, rng_bootstrap)
+        hr3_ci = _cluster_bootstrap_ci_mean(hit3_vals, wids, rng_bootstrap)
+        hr5_ci = _cluster_bootstrap_ci_mean(hit5_vals, wids, rng_bootstrap)
+        mrr_ci = _cluster_bootstrap_ci_mean(mrr_vals, wids, rng_bootstrap)
 
         def _round_metric(val: float, ci: Tuple[float, float]) -> dict:
             return {
@@ -276,10 +308,49 @@ def run_rq1_baselines(library_path: Path) -> dict:
             "MRR": _round_metric(mrr, mrr_ci),
         }
 
+    # Paired full − cosine: same queries; cluster bootstrap on per-query differences.
+    diff_hr1: List[float] = []
+    diff_hr3: List[float] = []
+    diff_hr5: List[float] = []
+    diff_mrr: List[float] = []
+    wids_paired: List[str] = []
+    for rec in per_query:
+        mf = rec["models"].get("full")
+        mc = rec["models"].get("cosine_only")
+        if mf is None or mc is None:
+            continue
+        diff_hr1.append(float(mf["hit@1"]) - float(mc["hit@1"]))
+        diff_hr3.append(float(mf["hit@3"]) - float(mc["hit@3"]))
+        diff_hr5.append(float(mf["hit@5"]) - float(mc["hit@5"]))
+        diff_mrr.append(float(mf["1/rank"]) - float(mc["1/rank"]))
+        wids_paired.append(work_id(rec["filename"]))
+    assert len(diff_hr1) == len(wids_paired)
+    paired: Dict[str, dict] = {}
+    if diff_hr1:
+        d1, c1 = float(np.mean(diff_hr1)), _cluster_bootstrap_ci_mean(
+            diff_hr1, wids_paired, rng_bootstrap
+        )
+        d3, c3 = float(np.mean(diff_hr3)), _cluster_bootstrap_ci_mean(
+            diff_hr3, wids_paired, rng_bootstrap
+        )
+        d5, c5 = float(np.mean(diff_hr5)), _cluster_bootstrap_ci_mean(
+            diff_hr5, wids_paired, rng_bootstrap
+        )
+        dm, cm = float(np.mean(diff_mrr)), _cluster_bootstrap_ci_mean(
+            diff_mrr, wids_paired, rng_bootstrap
+        )
+        paired = {
+            "description": "Per-query difference (full − cosine_only); same query draw; work-level cluster bootstrap on differences.",
+            "HR@1": {"mean_diff": round(d1, 4), "ci_95": [round(c1[0], 4), round(c1[1], 4)]},
+            "HR@3": {"mean_diff": round(d3, 4), "ci_95": [round(c3[0], 4), round(c3[1], 4)]},
+            "HR@5": {"mean_diff": round(d5, 4), "ci_95": [round(c5[0], 4), round(c5[1], 4)]},
+            "MRR": {"mean_diff": round(dm, 4), "ci_95": [round(cm[0], 4), round(cm[1], 4)]},
+        }
+
     return {
         "experiment": "RQ1_baselines",
         "description": (
-            "Baselines for RQ1 self-retrieval accuracy: full model "
+            "Baselines for RQ1 oracle self-retrieval (identifiability): full model "
             "(range + cosine − α×avoid), cosine-only (α = 0), and "
             "range-only + random ranking (null). Uses the same random "
             "query pool definition and sampling rule as run_rq1_experiment.py."
@@ -288,6 +359,8 @@ def run_rq1_baselines(library_path: Path) -> dict:
             "alpha_full": ALPHA_FULL,
             "bootstrap_samples": BOOTSTRAP_SAMPLES,
             "random_seed_queries": RQ1_RANDOM_SEED,
+            "random_seed_bootstrap": RQ1_RANDOM_SEED_BOOTSTRAP,
+            "random_seed_null_baseline_stream": RANDOM_SEED_NULL_BASELINE,
             "min_candidates": RQ1_MIN_CANDIDATES,
             "n_queries_max": RQ1_N_QUERIES,
             "library_path": str(Path("data/all_tessituragrams.json")),
@@ -301,6 +374,15 @@ def run_rq1_baselines(library_path: Path) -> dict:
             "n_unique_works_in_queries": len({work_id(rec["filename"]) for rec in per_query}),
             "random_sampling": True,
             "bootstrap_method": "cluster (work-level)",
+            "candidate_pool_summary": pool_summary,
+        },
+        "descriptive_stratification_hr1_by_pool_size": {
+            "note": (
+                "Point estimates only (no CIs). Under uniform random ranking, "
+                "P(top-1 hit) = 1/|C| for that query; mean 1/|C| over a bin approximates "
+                "expected null HR@1 if |C| were held fixed."
+            ),
+            "bins": stratification,
         },
         "models": ["full", "null_random", "cosine_only"],
         "model_descriptions": {
@@ -309,6 +391,7 @@ def run_rq1_baselines(library_path: Path) -> dict:
             "cosine_only": "Range filter + cosine similarity only (α = 0.0; avoid list ignored in scoring).",
         },
         "metrics": metrics,
+        "paired_full_minus_cosine": paired,
         "per_query": per_query,
     }
 
@@ -318,7 +401,7 @@ def main() -> None:
     out_dir = ROOT / "experiment_results"
     out_dir.mkdir(exist_ok=True)
 
-    print("Running RQ1 Self-Retrieval Baselines (full vs cosine-only vs random)...")
+    print("Running RQ1 oracle self-retrieval baselines (full vs cosine-only vs random)...")
     print(f"Library: {library_path}")
 
     results = run_rq1_baselines(library_path)
@@ -337,6 +420,14 @@ def main() -> None:
             f"HR@1 = {mm['HR@1']['value']}  CI: {mm['HR@1']['ci_95']}  |  "
             f"MRR = {mm['MRR']['value']}  CI: {mm['MRR']['ci_95']}"
         )
+    paired = results.get("paired_full_minus_cosine") or {}
+    if paired:
+        print("\n--- Paired full minus cosine (mean diff, 95% CI) ---")
+        for key in ["HR@1", "MRR"]:
+            block = paired.get(key, {})
+            print(
+                f"{key}: mean_diff = {block.get('mean_diff')}  CI: {block.get('ci_95')}"
+            )
 
 
 if __name__ == "__main__":

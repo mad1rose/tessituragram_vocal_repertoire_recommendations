@@ -16,6 +16,7 @@ uses src.recommend.score_songs with different alpha values.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import random
 from pathlib import Path
@@ -38,6 +39,7 @@ from src.recommend import (  # noqa: E402
 from experiment.run_rq1_experiment import (  # noqa: E402
     _select_queries as rq1_select_queries,
     RANDOM_SEED as RQ1_RANDOM_SEED,
+    RANDOM_SEED_BOOTSTRAP as RQ1_RANDOM_SEED_BOOTSTRAP,
     N_QUERIES as RQ1_N_QUERIES,
     MIN_CANDIDATES as RQ1_MIN_CANDIDATES,
 )
@@ -54,13 +56,27 @@ ALPHA_VALUES: List[float] = [0.0, 0.25, 0.5, 0.75, 1.0]
 BOOTSTRAP_SAMPLES = 10_000
 
 
+def _bootstrap_rng_derived(base_seed: int, *parts: object) -> random.Random:
+    """Stable RNG for one bootstrap job (SHA-256; independent of call order)."""
+    payload = str(base_seed) + "|" + "|".join(str(p) for p in parts)
+    digest = hashlib.sha256(payload.encode("utf-8")).digest()
+    # random.Random accepts arbitrary int; keep positive for portability
+    seed_int = int.from_bytes(digest[:8], "big") & 0x7FFFFFFFFFFFFFFF
+    return random.Random(seed_int)
+
+
 def _cluster_bootstrap_ci_mean(
     values: List[float],
     cluster_ids: List[str],
+    rng: random.Random,
 ) -> Tuple[float, float]:
     """Cluster bootstrap 95% CI for the mean (Cameron et al., 2008)."""
     if not values:
         return 0.0, 0.0
+    if len(values) != len(cluster_ids):
+        raise ValueError(
+            f"cluster bootstrap: len(values)={len(values)} != len(cluster_ids)={len(cluster_ids)}"
+        )
     clusters: dict[str, list[int]] = {}
     for i, cid in enumerate(cluster_ids):
         clusters.setdefault(cid, []).append(i)
@@ -72,7 +88,7 @@ def _cluster_bootstrap_ci_mean(
     values_arr = np.array(values, dtype=float)
     boot = np.empty(BOOTSTRAP_SAMPLES)
     for b in range(BOOTSTRAP_SAMPLES):
-        sampled = random.choices(cluster_keys, k=n_clusters)
+        sampled = rng.choices(cluster_keys, k=n_clusters)
         indices = [idx for key in sampled for idx in clusters[key]]
         boot[b] = np.mean(values_arr[indices])
     lo, hi = float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))
@@ -82,10 +98,13 @@ def _cluster_bootstrap_ci_mean(
 def _cluster_bootstrap_ci_mean_over_baselines(
     baseline_means: List[float],
     baseline_work_ids: List[str],
+    rng: random.Random,
 ) -> Tuple[float, float]:
     """Cluster bootstrap 95% CI for the mean tau across baselines."""
     if not baseline_means:
         return 0.0, 0.0
+    if len(baseline_means) != len(baseline_work_ids):
+        raise ValueError("baseline means and work id lists must align")
     clusters: dict[str, list[int]] = {}
     for i, wid in enumerate(baseline_work_ids):
         clusters.setdefault(wid, []).append(i)
@@ -97,7 +116,7 @@ def _cluster_bootstrap_ci_mean_over_baselines(
     values_arr = np.array(baseline_means, dtype=float)
     boot = np.empty(BOOTSTRAP_SAMPLES)
     for b in range(BOOTSTRAP_SAMPLES):
-        sampled = random.choices(cluster_keys, k=n_clusters)
+        sampled = rng.choices(cluster_keys, k=n_clusters)
         indices = [idx for key in sampled for idx in clusters[key]]
         boot[b] = np.mean(values_arr[indices])
     lo, hi = float(np.percentile(boot, 2.5)), float(np.percentile(boot, 97.5))
@@ -176,10 +195,27 @@ def _compute_rq1_metrics_for_alpha(
     mrr = float(np.mean(mrr_vals))
 
     wids = [work_id(r["filename"]) for r in records]
-    hr1_ci = _cluster_bootstrap_ci_mean(hr1_vals, wids)
-    hr3_ci = _cluster_bootstrap_ci_mean(hr3_vals, wids)
-    hr5_ci = _cluster_bootstrap_ci_mean(hr5_vals, wids)
-    mrr_ci = _cluster_bootstrap_ci_mean(mrr_vals, wids)
+    # α = 0.5: same RNG stream and metric order as run_rq1_experiment.py (seed 43)
+    # so RQ1 CIs match standalone RQ1_results.json. Other α: independent derived seeds.
+    if abs(alpha - 0.5) < 1e-9:
+        rng_seq = random.Random(RQ1_RANDOM_SEED_BOOTSTRAP)
+        hr1_ci = _cluster_bootstrap_ci_mean(hr1_vals, wids, rng_seq)
+        hr3_ci = _cluster_bootstrap_ci_mean(hr3_vals, wids, rng_seq)
+        hr5_ci = _cluster_bootstrap_ci_mean(hr5_vals, wids, rng_seq)
+        mrr_ci = _cluster_bootstrap_ci_mean(mrr_vals, wids, rng_seq)
+    else:
+        hr1_ci = _cluster_bootstrap_ci_mean(
+            hr1_vals, wids, _bootstrap_rng_derived(RQ1_RANDOM_SEED_BOOTSTRAP, "rq1", alpha, "HR@1")
+        )
+        hr3_ci = _cluster_bootstrap_ci_mean(
+            hr3_vals, wids, _bootstrap_rng_derived(RQ1_RANDOM_SEED_BOOTSTRAP, "rq1", alpha, "HR@3")
+        )
+        hr5_ci = _cluster_bootstrap_ci_mean(
+            hr5_vals, wids, _bootstrap_rng_derived(RQ1_RANDOM_SEED_BOOTSTRAP, "rq1", alpha, "HR@5")
+        )
+        mrr_ci = _cluster_bootstrap_ci_mean(
+            mrr_vals, wids, _bootstrap_rng_derived(RQ1_RANDOM_SEED_BOOTSTRAP, "rq1", alpha, "MRR")
+        )
 
     def _round_metric(val: float, ci: Tuple[float, float]) -> dict:
         return {
@@ -324,7 +360,10 @@ def _compute_rq2_metrics_for_alpha(
     std_tau_across_baselines = (
         float(np.std(baseline_means, ddof=1)) if len(baseline_means) > 1 else 0.0
     )
-    ci_lo, ci_hi = _cluster_bootstrap_ci_mean_over_baselines(baseline_means, baseline_work_ids)
+    rng_tau = _bootstrap_rng_derived(RQ1_RANDOM_SEED_BOOTSTRAP, "rq2", alpha, "mean_tau_baseline")
+    ci_lo, ci_hi = _cluster_bootstrap_ci_mean_over_baselines(
+        baseline_means, baseline_work_ids, rng_tau
+    )
 
     return {
         "mean_tau_overall": round(mean_tau_overall, 4),
@@ -346,9 +385,8 @@ def run_alpha_sensitivity(library_path: Path) -> dict:
     """
     all_songs = load_flat_library(library_path)
 
-    # RQ1: build query list once using the same seed and selection rule.
-    random.seed(RQ1_RANDOM_SEED)
-    rq1_query_list, rq1_valid_pool_size = rq1_select_queries(all_songs)
+    rng_rq1_queries = random.Random(RQ1_RANDOM_SEED)
+    rq1_query_list, rq1_valid_pool_size = rq1_select_queries(all_songs, rng_rq1_queries)
 
     # RQ2: build baseline list once using the same seed and selection rule.
     random.seed(RQ2_RANDOM_SEED)
@@ -386,7 +424,13 @@ def run_alpha_sensitivity(library_path: Path) -> dict:
         "parameters": {
             "alpha_values": ALPHA_VALUES,
             "bootstrap_samples": BOOTSTRAP_SAMPLES,
-            "rq1_random_seed": RQ1_RANDOM_SEED,
+            "rq1_random_seed_queries": RQ1_RANDOM_SEED,
+            "rq1_random_seed_bootstrap": RQ1_RANDOM_SEED_BOOTSTRAP,
+            "bootstrap_rng_note": (
+                "RQ1 at alpha=0.5 uses sequential bootstrap draws from seed 43 (matches "
+                "run_rq1_experiment.py). Other alpha values and RQ2 use SHA-256–derived "
+                "seeds per (phase, alpha, metric) so resamples do not depend on loop order."
+            ),
             "rq1_n_queries_max": RQ1_N_QUERIES,
             "rq1_min_candidates": RQ1_MIN_CANDIDATES,
             "rq2_random_seed": RQ2_RANDOM_SEED,

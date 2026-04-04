@@ -20,8 +20,8 @@ from typing import List, Tuple
 import numpy as np
 from scipy.stats import kendalltau
 
-# Allow running from project root or experiment folder
-ROOT = Path(__file__).resolve().parent.parent
+# Repository root (parent of previous_paper_and_experiments/)
+ROOT = Path(__file__).resolve().parents[2]
 _sys_path = list(__import__("sys").path)
 if str(ROOT) not in _sys_path:
     __import__("sys").path.insert(0, str(ROOT))
@@ -348,14 +348,15 @@ def run_rq2_experiment(library_path: Path) -> dict:
 
 def main() -> None:
     library_path = ROOT / "data" / "tessituragrams.json"
-    out_dir = ROOT / "experiment_results"
+    out_dir = ROOT / "previous_paper_and_experiments" / "previous_experiment_results"
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-    print("Running RQ2 Ranking Stability Experiment...")
+    print("Experiment 1 — RQ2 Ranking Stability")
     print(f"Library: {library_path}")
 
     results = run_rq2_experiment(library_path)
 
-    out_json = out_dir / "RQ2_results.json"
+    out_json = out_dir / "old_RQ2_results.json"
     with open(out_json, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     print(f"Results saved to {out_json}")

@@ -25,6 +25,7 @@ yielding a null distribution centred near zero.
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import random
 from pathlib import Path
@@ -33,8 +34,8 @@ from typing import Dict, List, Tuple
 import numpy as np
 from scipy.stats import kendalltau
 
-# Allow running from project root or experiment folder
-ROOT = Path(__file__).resolve().parent.parent
+SCRIPT_DIR = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[2]
 _sys_path = list(__import__("sys").path)
 if str(ROOT) not in _sys_path:
     __import__("sys").path.insert(0, str(ROOT))
@@ -45,13 +46,20 @@ from src.recommend import (  # noqa: E402
     build_ideal_vector,
     score_songs,
 )
-from experiment.run_rq2_experiment import (  # noqa: E402
-    _derive_synthetic_profile,
-    _select_baselines as rq2_select_baselines,
-    RANDOM_SEED as RQ2_RANDOM_SEED,
-    MIN_CANDIDATES as RQ2_MIN_CANDIDATES,
-    N_BASELINES as RQ2_N_BASELINES,
+
+_exp1_rq2_spec = importlib.util.spec_from_file_location(
+    "_exp1_rq2_module",
+    SCRIPT_DIR / "old_run_rq2_experiment.py",
 )
+assert _exp1_rq2_spec and _exp1_rq2_spec.loader
+_exp1_rq2 = importlib.util.module_from_spec(_exp1_rq2_spec)
+_exp1_rq2_spec.loader.exec_module(_exp1_rq2)
+
+_derive_synthetic_profile = _exp1_rq2._derive_synthetic_profile
+rq2_select_baselines = _exp1_rq2._select_baselines
+RQ2_RANDOM_SEED = _exp1_rq2.RANDOM_SEED
+RQ2_MIN_CANDIDATES = _exp1_rq2.MIN_CANDIDATES
+RQ2_N_BASELINES = _exp1_rq2.N_BASELINES
 
 
 ALPHA_FULL = 0.5
@@ -381,15 +389,15 @@ def run_rq2_baselines(library_path: Path) -> dict:
 
 def main() -> None:
     library_path = ROOT / "data" / "tessituragrams.json"
-    out_dir = ROOT / "experiment_results"
-    out_dir.mkdir(exist_ok=True)
+    out_dir = ROOT / "previous_paper_and_experiments" / "previous_experiment_results"
+    out_dir.mkdir(parents=True, exist_ok=True)
 
-    print("Running RQ2 Ranking Stability Baselines (full vs cosine-only vs random)...")
+    print("Experiment 1 — RQ2 baselines")
     print(f"Library: {library_path}")
 
     results = run_rq2_baselines(library_path)
 
-    out_json = out_dir / "RQ2_baselines.json"
+    out_json = out_dir / "old_RQ2_baselines.json"
     with out_json.open("w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     print(f"Results saved to {out_json}")

@@ -1,5 +1,5 @@
 """
-Visualizations for Research Question 1: Self-Retrieval Accuracy.
+Visualizations for Research Question 1: Oracle self-retrieval (identifiability).
 
 Generates publication-ready figures for the methodology/results section.
 """
@@ -41,7 +41,7 @@ def fig_metrics_bar(results: dict) -> None:
     ax.set_xticklabels(labels, fontsize=12)
     ax.set_ylabel('Score', fontsize=12)
     ax.set_ylim(0, 1.15)
-    ax.set_title('RQ1: Self-Retrieval Accuracy Metrics (95% CI)', fontsize=14)
+    ax.set_title('RQ1: Oracle self-retrieval metrics (95% CI)', fontsize=14)
     ax.axhline(y=1.0, color='#ccc', linestyle='--', alpha=0.7)
     ax.grid(axis='y', alpha=0.3)
     for i, (v, lo, hi) in enumerate(zip(values, ci_lo, ci_hi)):
@@ -119,7 +119,7 @@ def fig_combined(results: dict) -> None:
     ax1.set_xticklabels(labels)
     ax1.set_ylabel('Score')
     ax1.set_ylim(0, 1.15)
-    ax1.set_title('(a) Accuracy Metrics (95% CI)')
+    ax1.set_title('(a) Hit-rates and MRR (95% CI)')
     ax1.grid(axis='y', alpha=0.3)
 
     # Right: rank distribution
@@ -132,7 +132,7 @@ def fig_combined(results: dict) -> None:
     ax2.set_xticks(range(1, max_rank + 1))
     ax2.grid(axis='y', alpha=0.3)
 
-    fig.suptitle('RQ1: Self-Retrieval Accuracy', fontsize=14, y=1.02)
+    fig.suptitle('RQ1: Oracle self-retrieval (identifiability)', fontsize=14, y=1.02)
     fig.tight_layout()
     fig.savefig(EXP_DIR / 'RQ1_visualizations.png', dpi=150, bbox_inches='tight')
     plt.close()

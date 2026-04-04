@@ -260,7 +260,7 @@ def fig_combined(rq1_results: dict, rq2_results: dict) -> None:
     ax1.set_xticklabels(labels, rotation=0)
     ax1.set_ylabel("Score")
     ax1.set_ylim(0.0, 1.15)
-    ax1.set_title("RQ1: self-retrieval baselines")
+    ax1.set_title("RQ1: Oracle self-retrieval baselines")
     ax1.grid(axis="y", alpha=0.3)
     ax1.legend()
 
