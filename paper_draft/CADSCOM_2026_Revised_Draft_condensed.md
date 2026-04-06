@@ -1,10 +1,13 @@
 <!-- CADSCOM 2026 — CONDENSED DRAFT (full version: CADSCOM_2026_Revised_Draft.md)
      Prose (Introduction–Conclusion): ~73% of the long draft by word count (~3300 vs ~4500 words).
-     RQ1 primary metrics (HR@1, MRR): Figure 1 (PNG in paper_draft/figures/); complementary HR@3/5: Table 2.
-     Tables 1, 3–5 unchanged (same numbers/CIs). Target: ~5.5 typeset pages for text+tables+figure, total ≤6 pages
+     RQ1: Figure 1 + prose; α: Figure 2 + prose (HR@3/5 ranges in caption); Tables 1–3. Target: ~5.5 typeset pages, ≤6 pages
      (excludes abstract + references per CADSCOM template). Verify in Word with the official template.
+     CADSCOM template: captions BELOW each figure and each table (Georgia 10 pt bold, centered). **Figure N.** / **Table N.** lines are the typeset captions; Markdown image [...] alt is not the printed caption.
+     Results order: RQ1 text -> Fig 1 PNG (caption under figure) -> RQ2 + Table 2 (caption under table) -> "Sensitivity to alpha" intro
+     -> Fig 2 PNG (caption under figure) -> alpha paragraph -> RQ3 + Table 3 (caption under table). Files: paper_draft/figures/rq1_oracle_hr1_mrr.png,
+     paper_draft/figures/alpha_sensitivity_hr1_mrr_tau.png
 -->
-<!-- Formatting: same as full draft — Georgia 10 pt body, 1 in margins, US Letter, refs MISQ-style -->
+<!-- Formatting: same as full draft — Georgia 10 pt body, 1 in margins, US Letter, refs MISQ-style; captions below figures/tables per CADSCOM_Submission_Template -->
 
 <!-- ============================== COVER (not in 6-page count) ============================== -->
 
@@ -32,9 +35,7 @@ We ask whether tessituragrams support **content-based ranking** from stated pitc
 
 **Contributions.** (1) Tessituragram ranker with favorites/avoids and cosine − α×avoid. (2) **Two-protocol** synthetic self-retrieval plus stability and implementation checks vs null and cosine-only. (3) Expanded-library protocol with **work-level bootstrap** (Cameron et al., 2008; Field and Welsh, 2007).
 
-**Roadmap.** *Results* presents **RQ1** (self-retrieval; **Figure 1** and **Table 2**), **RQ2** (stability), sensitivity to **α**, then **RQ3** (implementation checks).
-
-<!-- Figure 1: RQ1 HR@1/MRR — paper_draft/figures/rq1_oracle_hr1_mrr.png (300 dpi; experiment/visualize_rq1_table2_figure.py). Caption Georgia 10 pt bold, centered, below; spell out "Figure". -->
+**Roadmap.** *Results* presents **RQ1** (**Figure 1**), **RQ2** (stability), **α**-sensitivity (**Figure 2**), then **RQ3** (implementation checks).
 
 ## Related Work
 
@@ -70,6 +71,7 @@ All sources come from the **OpenScore Lieder Corpus** (CC0; Gotham and Jonas, 20
 | min\_midi, max\_midi | Derived | Written range. |
 | Composer, title, filename | Corpus | Identification. |
 
+<!-- CADSCOM: Table 1 caption below table (next line). -->
 **Table 1. Features per vocal line (MusicXML-derived).**
 
 ### *Ranking Framework and Scoring*
@@ -92,100 +94,84 @@ Main experiments: **α = 0.5**. Scores rounded to **four** decimals; ties broken
 
 **Experiment 1.** **50** queries uniformly without replacement from the valid pool (|C| ≥ 2; **seed 42**). **10,000** **i.i.d.** bootstrap resamples of query- (or baseline-) level outcomes.
 
-**Experiment 2.** Up to **200** queries uniformly without replacement from **eligible lines** (not compositions), **seed 42**; multi-part works are therefore **oversampled** relative to uniform-by-work. **Cluster** bootstrap: resample work IDs with replacement, then include all query lines from sampled works (**seed 43** for RQ1 bootstrap). Canonical JSON: `experiment_results/` (Experiment 2); `previous_paper_and_experiments/previous_experiment_results/old_*.json` (Experiment 1). Experiment 1 α-sensitivity for τ loads the **five** RQ2 `baseline_profiles` from `old_RQ2_results.json` (**130** perturbations, matching Table 3). Experiment 2 α-sensitivity uses SHA-256–derived bootstrap RNGs per cell where documented in `experiment/run_alpha_sensitivity.py`.
+**Experiment 2.** Up to **200** queries uniformly without replacement from **eligible lines** (not compositions), **seed 42**; multi-part works are therefore **oversampled** relative to uniform-by-work. **Cluster** bootstrap: resample work IDs with replacement, then include all query lines from sampled works (**seed 43** for RQ1 bootstrap). Canonical JSON: `experiment_results/` (Experiment 2); `previous_paper_and_experiments/previous_experiment_results/old_*.json` (Experiment 1). Experiment 1 α-sensitivity for τ loads the **five** RQ2 `baseline_profiles` from `old_RQ2_results.json` (**130** perturbations, matching Table 2). Experiment 2 α-sensitivity uses SHA-256–derived bootstrap RNGs per cell where documented in `experiment/run_alpha_sensitivity.py`.
 
 **Inference.** Bootstrap percentile intervals summarize uncertainty for the **mean** query-level metric on the **fixed** sampled queries; they are **not** intervals over redrawn query sets. RQ3 pools Spearman correlations via Fisher's **z** (Fisher, 1915). RQ1 main results and baselines use the **same** query draw. **HR@1** and **MRR** are primary oracle metrics; **HR@3/5** are complementary. Paired full vs cosine-only uses the same queries; we do **not** apply multiplicity correction across metrics—secondary contrasts are exploratory.
 
 ## Results
 
-We report **RQ1** (oracle self-retrieval), **RQ2** (stability), **α-sensitivity**, and **RQ3** (implementation). **Figure 1** and **Table 2** reproduce canonical JSON outputs for the stated seeds and paths (Method).
+We report **RQ1**–**RQ3** below; experimental setup and statistics are in **Method**.
 
 ### *RQ1: Self-Retrieval*
 
-**Question:** When preferences are synthesized from a vocal line's own tessituragram, **how often** does the system rank that **same line** first (or in the top 3 or 5) among range-filtered candidates?
+**Question:** If we **build** user preferences from a song’s own tessitura, does the recommender put **that same song** near the top of the list? This checks the **pipeline** on synthetic inputs—it is **not** a study of real singers (Herlocker et al., 2004; Urbano et al., 2013).
 
-The profile uses a **coarse** summary (top-4 favorite and bottom-2 avoid MIDI pitches). **RQ1** tests whether the scoring pipeline recovers the generating item among *other* range-filtered candidates under this fixed sparse encoding—a **pipeline identifiability** check, not human endorsement or supervised accuracy against external judgments (Herlocker et al., 2004; Urbano et al., 2013).
+**Figure 1** shows how often the correct song is ranked **first** (“hit rate at 1”) and **average rank quality** (higher = the correct song tends to appear closer to the top). Parentheses are **uncertainty ranges** for the average on this one batch of test queries.
 
-**Experiment 1.** Valid pool: **95**/101 lines with |C| ≥ 2; **50** queries (seed 42). Models: full (α = 0.5), cosine-only (α = 0), null (range filter + uniform random permutation over |C|). For this draw, |C| has median **28**, mean **34**, mean 1/|C| ≈ **0.071**. Under the null, expected mean HR@1 given observed |C| equals the sample mean of 1/|C|; the observed null HR@1 **6%** (Figure 1) is consistent with that benchmark given Monte Carlo variation.
+In the **smaller** song list, the full model ranks the true song first **76%** of the time, cosine-only **80%**, and random ordering **6%** (roughly what chance would give after filtering). On the **same** queries, cosine is a few points ahead of the full model on first place; that gap is modest. In the **larger** list, first-place rates are **about 55%** for both models—**effectively tied**—and still far above random (**2%**). The two tests **do not** isolate “big library versus small”: they use different song sets, different numbers of competitors after filtering, and different ways of picking test songs—so **do not read the drop from 76% to 55% as proof that a bigger catalog alone caused it.** Where many songs look alike, the true song will often land lower; in the larger test, it is not first about **45%** of the time.
 
-**Experiment 2.** **1,647** qualified lines; **200** queries (192 distinct compositions). |C|: median **263**, mean **374**, min **3**, max **1,386**; mean 1/|C| = **0.017**; **9%** of queries have |C| ≤ 20. **Descriptive** stratification (no CIs): among **18** queries with 2 ≤ |C| ≤ 20, full HR@1 **0.89**, null **0.17** (mean 1/|C| = 0.11); among **182** with |C| ≥ 21, full **0.52**, null **0.006** (mean 1/|C| = 0.008). Aggregate null HR@1 **2%** sits near mean 1/|C| (**1.7%**).
-
-**Summary.** **Figure 1** plots primary metrics **HR@1** and **MRR**; **Table 2** lists complementary **HR@3** and **HR@5**. Experiment 1: full HR@1 **0.76**, MRR **0.86**; cosine **0.80** / **0.88** on the same queries; paired ΔHR@1 = **−0.04**, 95% CI **[−0.10, 0.00]** (i.i.d. on per-query differences). Experiment 2: full **0.55** / **0.69**; cosine HR@1 **0.545**. Raw HR@1 is lower in Experiment 2, but the phases are **not** a controlled comparison: different corpus subsets, |C| distributions, null difficulty (mean 1/|C| ≈ **0.071** vs **0.017**), and Experiment 2's uniform draw over **lines** (not works). HR@5: **0.86** (Exp 2) vs **1.00** (Exp 1). Both strongly beat null (**6%** / **2%** HR@1). Experiment 2: paired ΔHR@1 **0.005**, CI **[−0.04, 0.05]**; ΔMRR **−0.002**, **[−0.03, 0.02]**; ΔHR@3 **+0.025**, **[0.00, 0.05]** (lower endpoint 0; not treated as primary); ΔHR@5 **+0.005** (CI includes zero; not tabulated). Among queries where the target is not first (**45%**), other lines can have similar duration-weighted profiles, producing ties or near-ties under cosine similarity.
-
+<!-- Word: Figure 1 — paper_draft/figures/rq1_oracle_hr1_mrr.png. CADSCOM: caption below figure only (next paragraph). -->
 ![Oracle self-retrieval: HR@1 and MRR (primary metrics), two experiments.](figures/rq1_oracle_hr1_mrr.png)
 
-**Figure 1.** Oracle self-retrieval for **HR@1** and **MRR** (95% bootstrap percentile CIs; fixed query draw—see Method). Experiment 1: i.i.d. bootstrap. Experiment 2: cluster bootstrap. Full vs cosine HR@1 in Experiment 2: **0.550** vs **0.545**.
-
-| Model | Exp 1 HR@3 | Exp 1 HR@5 | Exp 2 HR@3 | Exp 2 HR@5 |
-|---|---|---|---|---|
-| Null (random) | 0.18 [0.08, 0.30] | 0.30 [0.18, 0.42] | 0.06 [0.03, 0.09] | 0.07 [0.04, 0.11] |
-| Cosine-only (α = 0) | 1.00 [1.00, 1.00] | 1.00 [1.00, 1.00] | 0.78 [0.72, 0.83] | 0.86 [0.80, 0.90] |
-| Full (α = 0.5) | 0.98 [0.94, 1.00] | 1.00 [1.00, 1.00] | 0.80 [0.74, 0.86] | 0.86 [0.81, 0.91] |
-
-**Table 2.** Complementary **HR@3** and **HR@5** (95% bootstrap percentile CIs; same schemes as Figure 1).
+**Figure 1.** How often the target is ranked first (HR@1) and average rank quality (MRR), with 95% intervals for this sample (Method). **Left:** Experiment 1 (smaller library; i.i.d. bootstrap). **Right:** Experiment 2 (larger library; cluster bootstrap). The near-tie full vs cosine first-place rates in Experiment 2 are **55.0%** vs **54.5%**.
 
 ### *RQ2: Ranking Stability*
 
 **Question:** When we add or remove one favorite note or note to avoid, how similar is the new ranking to the original?
 
-**Design.** Experiment 1: **5** baseline profiles (|C| ≥ 10), **130** total perturbations. Experiment 2: **20** baselines (|C| ≥ 10), **580** perturbations, all **20** from distinct compositions. For each baseline we obtain the reference ranking and generate all one-note perturbations (add or remove one favorite or avoid). We compute Kendall's **τ** between the original and perturbed rankings (Kendall, 1948); τ ∈ [−1, 1], with values above **0.7** indicating strong agreement. Table 3 gives mean τ per baseline with 95% CI. **τ** measures how much the induced ranking moves under local edits to the **encoded** preference lists; it does not validate pedagogical acceptance or user satisfaction with such edits.
+**Design.** Experiment 1: **5** baseline profiles (|C| ≥ 10), **130** total perturbations. Experiment 2: **20** baselines (|C| ≥ 10), **580** perturbations, all **20** from distinct compositions. For each baseline we obtain the reference ranking and generate all one-note perturbations (add or remove one favorite or avoid). We compute Kendall's **τ** between the original and perturbed rankings (Kendall, 1948); τ ∈ [−1, 1], with values above **0.7** indicating strong agreement. Table 2 gives mean τ per baseline with 95% CI. **τ** measures how much the induced ranking moves under local edits to the **encoded** preference lists; it does not validate pedagogical acceptance or user satisfaction with such edits.
 
 Mean τ for the full model: **0.85** (Exp 1) and **0.84** (Exp 2); cosine-only slightly higher (**~0.87**), overlapping CIs; null near **0**. Both protocols show strong stability despite **16×** more lines and four times as many baselines in Experiment 2.
 
 | Model | Experiment 1 (5 baselines, 130 pert.) | Experiment 2 (20 baselines, 580 pert.) |
 |---|---|---|
 | | Mean τ (95% CI) | Mean τ (95% CI) |
-| Null (random) | −0.04 [−0.05, −0.02] | 0.00 [−0.00, 0.01] |
+| Null (random) | −0.04 [−0.05, −0.02] | 0.00 [−0.002, 0.007] |
 | Cosine-only (α = 0) | 0.87 [0.84, 0.91] | 0.87 [0.86, 0.88] |
 | Full (α = 0.5) | 0.85 [0.81, 0.88] | 0.84 [0.82, 0.85] |
 
-**Table 3.** Ranking stability: mean Kendall's τ per baseline (95% CI). τ = 1 means identical order; τ near 0 means unrelated rankings.
+<!-- CADSCOM: Table 2 caption below table (next line). -->
+**Table 2.** Ranking stability: mean Kendall's τ per baseline (95% CI). τ = 1 means identical order; τ near 0 means unrelated rankings.
 
 ### *Sensitivity to α*
 
-To assess sensitivity to the avoid-penalty weight, we repeated self-retrieval and stability for α ∈ {0.0, 0.25, 0.5, 0.75, 1.0} using the **same** random query draws and **same** RQ2 baseline sets as in Figure 1 and Tables 2–3 (Experiment 1: the five baselines tied to the Table 3 protocol and **130** perturbations; Experiment 2: twenty baselines and **580** perturbations). Table 4 reports HR@1, MRR, and mean τ per baseline for each α.
+**α** controls how strongly the scorer penalizes time spent on **notes to avoid** (α = 0 is cosine-only—the penalty is off). We repeat **RQ1** (self-retrieval) and **RQ2** (stability) at **α ∈ {0, 0.25, 0.5, 0.75, 1}**, using the **same** query draws and RQ2 baselines as **Figure 1** and **Table 2** (Method).
 
-| α | | Experiment 1 (101 lines) | | | Experiment 2 (1,655 lines) | | |
-|---|---|---|---|---|---|---|---|
-| | HR@1 (95% CI) | MRR (95% CI) | Mean τ (95% CI) | HR@1 (95% CI) | MRR (95% CI) | Mean τ (95% CI) |
-| 0.0 | 0.80 [0.68, 0.90] | 0.88 [0.81, 0.94] | 0.87 [0.84, 0.91] | 0.55 [0.48, 0.61] | 0.69 [0.64, 0.74] | 0.87 [0.86, 0.88] |
-| 0.25 | 0.78 [0.66, 0.88] | 0.87 [0.80, 0.94] | 0.86 [0.83, 0.88] | 0.56 [0.49, 0.62] | 0.69 [0.64, 0.74] | 0.85 [0.84, 0.86] |
-| 0.5 | 0.76 [0.64, 0.88] | 0.86 [0.79, 0.93] | 0.85 [0.81, 0.88] | 0.55 [0.48, 0.62] | 0.69 [0.64, 0.73] | 0.84 [0.82, 0.85] |
-| 0.75 | 0.76 [0.64, 0.88] | 0.86 [0.79, 0.93] | 0.83 [0.80, 0.87] | 0.54 [0.47, 0.61] | 0.68 [0.63, 0.73] | 0.83 [0.81, 0.84] |
-| 1.0 | 0.80 [0.68, 0.90] | 0.88 [0.81, 0.94] | 0.83 [0.78, 0.86] | 0.54 [0.47, 0.61] | 0.67 [0.62, 0.72] | 0.82 [0.80, 0.83] |
+<!-- Word: Figure 2 — after Table 2; paper_draft/figures/alpha_sensitivity_hr1_mrr_tau.png. CADSCOM: caption below figure only (next paragraph). -->
+![Alpha sensitivity: HR@1, MRR, and mean τ vs. α.](figures/alpha_sensitivity_hr1_mrr_tau.png)
 
-**Table 4.** Alpha sensitivity (same query draws and RQ2 baselines as Figure 1 and Tables 2–3): self-retrieval (HR@1, MRR) and stability (mean τ) across α (95% CI). Experiment 1: i.i.d. bootstrap. Experiment 2: cluster bootstrap for RQ1 metrics (see Method).
+**Figure 2.** **Lines** = mean metric on the fixed sample; **shaded bands** = **95% bootstrap** uncertainty. **Experiments:** **solid** = Experiment 1; **dashed** = Experiment 2. **Left:** self-retrieval—**HR@1** is how often the true line is ranked **first**; **MRR** summarizes how high it ranks on average. **Right:** stability—**τ** measures how similar the ranking stays after small edits to favorites/avoids (higher = more agreement; gray horizontal reference at **0.7** marks “strong” agreement). **HR@3** and **HR@5** are not plotted; point estimates vary little with α (Exp 1: HR@3 **0.96–1.00**, HR@5 **1.00**; Exp 2: HR@3 **0.78–0.81**, HR@5 **0.84–0.86**); full CIs in archived JSON (Method).
 
-Across α, HR@1 and MRR stay in a similar band within each experiment; HR@1 need not move monotonically with α on a fixed draw (e.g. Experiment 2). Mean τ **decreases monotonically** as α increases (**0.87→0.83** Exp 1; **0.87→0.82** Exp 2), yet τ remains ≥ **0.82** at α = 1. We report **α = 0.5** in the main tables as a fixed point between cosine-only and stronger penalty—we do **not** claim an optimal α from these offline metrics alone.
+**HR@1** and **MRR** stay roughly **flat** across α; **τ** **falls** as α rises (about **0.87** at α = 0 to **0.83** / **0.82** at α = 1 in Experiments 1 / 2) but remains ≥ **0.82** at α = 1. The main text uses **α = 0.5** as a middle setting between cosine-only and a stronger avoid penalty—we do **not** claim it is optimal from these offline metrics alone.
 
 ### *RQ3: Implementation*
 
-We verify (a) meaningful spread of scores, (b) numerical identity **final\_score = cos − 0.5×avoid**, and (c) Spearman correlations in the directions implied by the formula (Spearman, 1904), aggregated via Fisher's **z** (Fisher, 1915). Experiment 1: **25** profiles (|C| ≥ 10); Experiment 2: **50** profiles (49 distinct works). Table 5.
+We verify (a) meaningful spread of scores, (b) numerical identity **final\_score = cos − 0.5×avoid**, and (c) Spearman correlations in the directions implied by the formula (Spearman, 1904), aggregated via Fisher's **z** (Fisher, 1915). Experiment 1: **25** profiles (|C| ≥ 10); Experiment 2: **50** profiles (49 distinct works). Table 3.
 
 | Quantity | Experiment 1 (25 profiles) | Experiment 2 (50 profiles) |
 |---|---|---|
 | max \|final − (cos − 0.5×avoid)\| | 0 | 0 |
-| OLS (cos, avoid, R²) | 1.0, −0.5, 1.0 | 1.0, −0.5, 1.0 |
-| Mean range (final\_score) | 0.76 | 1.03 |
+| Mean range (final\_score) | 0.758 | 1.030 |
 | ρ(final, cos) | 0.987 | 0.989 |
-| ρ(final, avoid) | −0.35 | −0.32 |
+| ρ(final, avoid) | −0.350 | −0.318 |
 | ρ(cos, favorite\_overlap) | 0.935 | 0.921 |
 
-**Table 5.** RQ3 implementation checks. Regression uses final\_score, cosine similarity, and avoid penalty at α = 0.5. Spearman ρ aggregated across profiles via Fisher's z.
+<!-- CADSCOM: Table 3 caption below table (next line). -->
+**Table 3.** RQ3 implementation checks. Identity residual is pointwise \|final\_score − (cos − 0.5×avoid)\| at α = 0.5. Spearman ρ aggregated across profiles via Fisher's z.
 
 ## Discussion and Limitations
 
-Taken together, the offline evidence supports **internal consistency** of the representation and scoring: range filtering plus cosine similarity on duration-weighted pitch profiles **strongly beats** a range-filtered random ranker and remains **stable** under small, realistic perturbations to the encoded preference lists. The two protocols are **aligned in direction** (e.g. mean τ for the full model **0.85** vs **0.84**; RQ3 identity and regression checks at α = 0.5), but they are **not** statistically independent confirmations—the libraries overlap and answer different design questions (compact single-line-per-work vs flattened multi-line corpus). That alignment is nevertheless useful: it shows the same scorer behaves sensibly under both i.i.d. and cluster bootstrap schemes appropriate to each sampling frame.
+Taken together, the offline evidence supports **internal consistency** of the representation and scoring: range filtering plus cosine similarity on duration-weighted pitch profiles **strongly beats** a range-filtered random ranker and remains **stable** under small, realistic perturbations to the encoded preference lists. The two protocols are **aligned in direction** (e.g. mean τ for the full model **0.85** vs **0.84**; RQ3 identity check at α = 0.5), but they are **not** statistically independent confirmations—the libraries overlap and answer different design questions (compact single-line-per-work vs flattened multi-line corpus). That alignment is nevertheless useful: it shows the same scorer behaves sensibly under both i.i.d. and cluster bootstrap schemes appropriate to each sampling frame.
 
 **RQ1** demonstrates that, under synthetic self-retrieval, the system often places the generating line at the top of a large filtered pool—far above chance—while **RQ2** shows rankings are not brittle to single-note edits. **α-sensitivity** indicates that main conclusions are not artifacts of a single α: HR@1 and MRR remain in a similar band across α, while τ declines gradually as the avoid term gains weight—exactly the trade-off one would expect if the avoid penalty can reorder lists without destroying cosine structure. None of this substitutes for studies with human listeners; it establishes that the **implemented** pipeline matches the **stated** mathematics and behaves coherently on a substantial symbolic corpus.
 
-The drop in raw HR@1 from **0.76** to **0.55** (full model) **confounds** corpus composition, |C|, null difficulty, and line-level sampling weights; it is not identified with library size alone. In Experiment 2, HR@5 for the full model is **0.86** (Table 2). On primary RQ1 metrics (**HR@1**, **MRR**), paired intervals do **not** separate full vs cosine-only in Experiment 2; Experiment 1's paired ΔHR@1 favors cosine on this draw—choosing between them is **not** dictated by these offline results alone. The avoid term remains meaningful when users supply avoids; our oracle defines avoids from the **least-used** pitches of the target, which limits how much the penalty can separate the target from near-duplicate lines—**paired full-versus-cosine contrasts here mainly probe cosine similarity**, not a high-signal test of user-supplied avoids. Bootstrap schemes differ only where Experiment 2 requires cluster resampling (Method).
+The drop in raw HR@1 from **0.76** to **0.55** (full model) **confounds** corpus composition, |C|, null difficulty, and line-level sampling weights; it is not identified with library size alone. In Experiment 2, HR@5 for the full model is **0.86**. On primary RQ1 metrics (**HR@1**, **MRR**), paired intervals do **not** separate full vs cosine-only in Experiment 2; Experiment 1's paired ΔHR@1 favors cosine on this draw—choosing between them is **not** dictated by these offline results alone. The avoid term remains meaningful when users supply avoids; our oracle defines avoids from the **least-used** pitches of the target, which limits how much the penalty can separate the target from near-duplicate lines—**paired full-versus-cosine contrasts here mainly probe cosine similarity**, not a high-signal test of user-supplied avoids. Bootstrap schemes differ only where Experiment 2 requires cluster resampling (Method).
 
-**Limitations.** (1) **Scope of inference.** Results average over a **fixed** query sample (seed 42) from one corpus with a shared candidate pool; query outcomes need not be independent across lines from the same composition in Experiment 2. Bootstrap percentile intervals quantify resampling uncertainty for **that** sample under the stated scheme; they are not inference to all repertoire or to repeated query redraws. Full versus cosine-only in RQ1 uses marginal CIs plus paired bootstrap contrasts on the same queries, **without** multiplicity adjustment across metrics—secondary contrasts should be read as exploratory. (2) **No human judgments; synthetic self-retrieval.** Experiments use automatically generated profiles. RQ1 is a **controlled identifiability** check (whether the scorer recovers the generating item among distractors), not evidence that the system models unconstrained preferences or that users would be satisfied with the rankings. (3) **Cross-experiment numeric comparisons** are **descriptive** only: they mix different corpus subsets, overlapping repertoire, candidate-set sizes, null benchmarks (mean 1/|C|), and (in Experiment 2) uniform sampling over eligible **lines** rather than compositions. They do not support a causal claim about library size alone, nor do two columns amount to independent replication. (4) **Single corpus** (OpenScore Lieder), primarily nineteenth- and early-twentieth-century European art song. (5) **Pitch and duration only**—dynamics, tempo, text setting, and accompaniment difficulty are not modelled. (6) **Avoid penalty vs cosine-only.** Paired contrasts on HR@1 and MRR in Experiment 2 include zero; Experiment 1's paired ΔHR@1 interval lies below zero (cosine higher on this draw). HR@3 paired Δ in Experiment 2 has a lower bootstrap endpoint of zero (Table 2 narrative). We do not test user-supplied avoids separately from the oracle.
+**Limitations.** (1) **Scope.** One **fixed** query draw (seed 42) on one corpus; bootstrap bands are for **that** draw, not all repertoire or new draws. Experiment 2 can correlate lines within a work. Full vs cosine contrasts do **not** adjust for multiple metrics. (2) **Humans.** Synthetic profiles only; RQ1 tests recovery of a **hidden target** under a fixed rule—not user satisfaction or realistic preferences. (3) **Two experiments.** Side-by-side metrics mix pools and sampling frames; they are **descriptive**, not a causal “bigger library” claim or independent replication. (4) **Corpus.** OpenScore Lieder art song only; other genres untested. (5) **Features.** Pitch and duration-in-register only; no dynamics, tempo, text, or accompaniment. (6) **Avoid term.** Paired HR@1/MRR intervals often overlap (Exp 2 includes zero; Exp 1 favors cosine on ΔHR@1); oracle avoids come from the target line, so user-chosen avoids are not isolated—contrasts mainly reflect cosine similarity.
 
 ## Conclusion
 
-We presented a content-based framework that ranks vocal repertoire using duration-weighted tessituragrams and user-specified range, favorites, and avoids, scored as cosine similarity minus an avoid penalty. Across **two offline protocols**—compact single-line-per-work (101 lines) and expanded flattened (1,655 lines / 1,419 compositions)—the full model and cosine-only **strongly outperform** a null baseline on **synthetic self-retrieval**; rankings stay stable under small perturbations (mean τ ≥ **0.82** for the full model at every α in Table 4). RQ3 confirms **final = cos − α×avoid** exactly. Mean stability is similar across protocols (τ ≈ **0.85** vs **0.84**); Experiment 2 HR@5 is **0.86**. Paired contrasts on primary self-retrieval metrics do **not** support a systematic mean advantage for the avoid penalty over cosine-only under our oracle. Future work should add human preferences and judgments, diversify repertoire, and extend features beyond pitch and duration.
+We presented a content-based framework that ranks vocal repertoire using duration-weighted tessituragrams and user-specified range, favorites, and avoids, scored as cosine similarity minus an avoid penalty. Across **two offline protocols**—compact single-line-per-work (101 lines) and expanded flattened (1,655 lines / 1,419 compositions)—the full model and cosine-only **strongly outperform** a null baseline on **synthetic self-retrieval**; rankings stay stable under small perturbations (mean τ ≥ **0.82** for the full model at every α in **Figure 2**). RQ3 confirms **final = cos − α×avoid** exactly. Mean stability is similar across protocols (τ ≈ **0.85** vs **0.84**); Experiment 2 HR@5 is **0.86**. Paired contrasts on primary self-retrieval metrics do **not** support a systematic mean advantage for the avoid penalty over cosine-only under our oracle. Future work should add human preferences and judgments, diversify repertoire, and extend features beyond pitch and duration.
 
 <!-- ============================== REFERENCES (not in 6-page count) ============================== -->
 

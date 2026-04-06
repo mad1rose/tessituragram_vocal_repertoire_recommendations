@@ -1,7 +1,10 @@
 """
-Publication figure: RQ1 oracle self-retrieval for primary metrics HR@1 and MRR only.
+Publication figure: RQ1 synthetic self-retrieval for primary metrics HR@1 and MRR only.
 Two panels (Experiment 1 compact library, Experiment 2 expanded), grouped bars with
-95% bootstrap percentile CIs. Output: 300 dpi PNG for Word (CADSCOM template).
+95% bootstrap percentile CIs. Output: PNG sized for **6.5 in × ~3.05 in** at **300 dpi** (≈1950×915 px) with **300 dpi embedded**
+in the file so Microsoft Word uses the correct print width (Insert → Picture → From File; avoid
+resizing in Word, which bloats PDFs—see CADSCOM template). `bbox_inches="tight"` is **not** used,
+so pixel dimensions match figure size × dpi exactly.
 
 Run from repo root: python experiment/visualize_rq1_table2_figure.py
 """
@@ -18,7 +21,12 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "paper_draft" / "figures"
 OUT_PNG = OUT_DIR / "rq1_oracle_hr1_mrr.png"
 
-# Point estimate and 95% CI [lo, hi] from Table 2 (canonical JSON / paper).
+# CADSCOM body width is 6.5 in; match that so Word does not guess 96 dpi and blow up the layout.
+PRINT_DPI = 300
+FIG_W_IN = 6.5
+FIG_H_IN = 3.05
+
+# Point estimate and 95% CI [lo, hi] from canonical RQ1 JSON / paper.
 # Keys: model label -> metric -> (point, lo, hi)
 EXP1 = {
     "Null": {"HR@1": (0.06, 0.00, 0.14), "MRR": (0.18, 0.12, 0.26)},
@@ -72,7 +80,7 @@ def _panel(ax, data: dict, title: str) -> None:
     )
     ax.set_ylabel("Mean metric (95% bootstrap CI)", fontsize=10)
     ax.set_ylim(0, 1.05)
-    ax.set_title(title, fontsize=11, fontweight="bold", pad=10)
+    ax.set_title(title, fontsize=10, fontweight="bold", pad=8)
     ax.grid(axis="y", alpha=0.35, linestyle="--", linewidth=0.6)
 
 
@@ -89,23 +97,23 @@ def main() -> None:
             "xtick.labelsize": 9,
             "ytick.labelsize": 9,
             "legend.fontsize": 8,
-            "figure.dpi": 150,
-            "savefig.dpi": 300,
+            "figure.dpi": 100,
+            "savefig.dpi": PRINT_DPI,
         }
     )
 
-    # ~6.5 in wide (CADSCOM text block). Manual margins avoid suptitle/legend overlap
-    # with constrained_layout (shared legend below panels; no legend on axes).
-    fig, axes = plt.subplots(1, 2, figsize=(6.5, 3.75))
+    # Fixed figure size in inches → exact pixel size at PRINT_DPI (no bbox_inches="tight").
+    fig, axes = plt.subplots(1, 2, figsize=(FIG_W_IN, FIG_H_IN))
+    # Two-line titles keep each line short so the right panel title is not clipped at the figure edge.
     _panel(
         axes[0],
         EXP1,
-        "Experiment 1 (101 lines, 50 queries)",
+        "Experiment 1\n(101 lines, 50 queries)",
     )
     _panel(
         axes[1],
         EXP2,
-        "Experiment 2 (1,655 lines, 200 queries)",
+        "Experiment 2\n(1,655 lines, 200 queries)",
     )
 
     legend_handles = [
@@ -124,18 +132,36 @@ def main() -> None:
     )
 
     fig.suptitle(
-        "RQ1: Oracle self-retrieval (primary metrics)",
+        "RQ1: Synthetic self-retrieval (primary metrics)",
         fontsize=11,
         fontweight="bold",
         y=0.995,
     )
 
-    # top=0.72 leaves a clear band above panels for the suptitle (avoids overlap with Experiment titles)
-    fig.subplots_adjust(left=0.09, right=0.98, top=0.72, bottom=0.22, wspace=0.28)
+    # right < 1.0 leaves margin so long panel titles are not clipped; top for suptitle; bottom for legend
+    fig.subplots_adjust(left=0.10, right=0.95, top=0.72, bottom=0.24, wspace=0.30)
 
-    fig.savefig(OUT_PNG, dpi=300, bbox_inches="tight", facecolor="white", pad_inches=0.08)
+    fig.savefig(
+        OUT_PNG,
+        dpi=PRINT_DPI,
+        facecolor="white",
+        pad_inches=0.08,
+        metadata={"Software": "matplotlib; CADSCOM 300dpi"},
+    )
     plt.close()
-    print(f"Wrote {OUT_PNG} (300 dpi)")
+
+    # Word uses PNG resolution metadata; without 300 dpi embedded it may assume ~96 dpi → huge on page.
+    try:
+        from PIL import Image
+
+        with Image.open(OUT_PNG) as im:
+            im.save(OUT_PNG, dpi=(PRINT_DPI, PRINT_DPI), optimize=True)
+    except ImportError:
+        pass
+
+    w_px = int(round(FIG_W_IN * PRINT_DPI))
+    h_px = int(round(FIG_H_IN * PRINT_DPI))
+    print(f"Wrote {OUT_PNG} ({FIG_W_IN} in x {FIG_H_IN} in @ {PRINT_DPI} dpi ~= {w_px}x{h_px} px, dpi embedded)")
 
 
 if __name__ == "__main__":
