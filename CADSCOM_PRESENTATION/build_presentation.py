@@ -23,13 +23,15 @@ OUT = REPO / "CADSCOM_PRESENTATION" / "CADSCOM_2026_Presentation.pptx"
 # ---------------------------------------------------------------------------
 # Palette
 # ---------------------------------------------------------------------------
-BURGUNDY   = RGBColor(0x6B, 0x1D, 0x2A)
-CREAM      = RGBColor(0xFD, 0xF6, 0xEC)
-GOLD       = RGBColor(0xC5, 0x9B, 0x3F)
-CHARCOAL   = RGBColor(0x2D, 0x2D, 0x2D)
+# Updated to CADSCOM 2026 blue-teal-coral scheme.
+BURGUNDY   = RGBColor(0x0B, 0x1F, 0x3B)  # Deep Navy
+CREAM      = RGBColor(0xFF, 0xFF, 0xFF)  # White
+GOLD       = RGBColor(0xFF, 0x5D, 0x7A)  # Pink-toned coral accent
+CHARCOAL   = RGBColor(0x1A, 0x1A, 0x1A)
 WHITE      = RGBColor(0xFF, 0xFF, 0xFF)
-LIGHT_GOLD = RGBColor(0xF5, 0xE6, 0xC4)
-SOFT_GRAY  = RGBColor(0x88, 0x88, 0x88)
+LIGHT_GOLD = RGBColor(0xF4, 0xF6, 0xF8)  # Light Gray
+SOFT_GRAY  = RGBColor(0x2E, 0x4A, 0x7D)  # Slate Blue
+TEAL       = RGBColor(0x3F, 0xA7, 0xA3)  # Soft Teal
 
 SLIDE_W = Inches(13.333)
 SLIDE_H = Inches(7.5)
@@ -202,11 +204,15 @@ def slide_01_title(prs):
     _set_font(run4, Pt(20), bold=True, color=GOLD)
 
     _add_notes(slide, (
-        "[~15 seconds]\n\n"
+        "[~20 seconds]\n\n"
         "Good morning/afternoon, everyone. My name is Madeline Johnson, "
-        "and I'm here with my co-authors Flint Million and Rajeev Bukralia "
-        "from Minnesota State University, Mankato. Today I'm going to talk "
-        "about how we can use data from musical scores to help singers find "
+        "and I am currently pursuing a master's in data science here at "
+        "Minnesota State University, Mankato. My undergraduate background "
+        "is in vocal performance -- I hold a Bachelor of Music from "
+        "Illinois Wesleyan University -- so this project sits right at "
+        "the intersection of my two worlds. This work is co-authored with "
+        "Flint Million and Rajeev Bukralia, and today I want to show you "
+        "how we can use data from musical scores to help singers find "
         "repertoire that actually fits their voice."
     ))
 
@@ -225,9 +231,9 @@ def slide_02_hook(prs):
     tf = tb.text_frame
     tf.word_wrap = True
     lines = [
-        "For singers, choosing the wrong piece is not just an inconvenience.",
+        "The wrong piece is not just an inconvenience.",
         "It is an injury risk.",
-        "What if we could use data to help?",
+        "What if data could help?",
     ]
     for i, line in enumerate(lines):
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
@@ -242,126 +248,346 @@ def slide_02_hook(prs):
             _set_font(run, Pt(24), color=CHARCOAL)
         p.space_after = Pt(12)
 
+    # Subtle footnote citation
+    fn = _add_textbox(slide, Inches(0.5), Inches(6.9), Inches(12.333), Inches(0.4))
+    fn_p = fn.text_frame.paragraphs[0]
+    fn_p.alignment = PP_ALIGN.RIGHT
+    fn_run = fn_p.add_run()
+    fn_run.text = "Apfelbach, 2022; Phyland et al., 1999"
+    _set_font(fn_run, Pt(12), italic=True, color=SOFT_GRAY)
+
     _add_notes(slide, (
         "[~45 seconds]\n\n"
-        "Let me start with a question. Have you ever wondered how a singer "
-        "decides which songs are safe to sing? If you're not a singer, that "
-        "might sound like an odd question. But for singers, choosing the "
-        "wrong piece isn't just a matter of preference. It can lead to real "
-        "vocal injury. Research shows that misalignment between a piece's "
-        "demands and a singer's capabilities raises the risk of strain "
-        "(Apfelbach, 2022; Phyland et al., 1999). In practice, singers and "
-        "voice teachers rely on intuition, trial and error, or vocal "
-        "classification systems that aren't consistently defined. So what if "
-        "we could use data to make this process more objective and safer?"
+        "As a trained singer, one of the first things I learned is that "
+        "choosing the wrong piece is not just an inconvenience -- it can "
+        "lead to real vocal injury. For example, a singer with a naturally "
+        "lower voice will usually not feel as comfortable spending long "
+        "periods in a high range as a singer with a naturally higher voice. "
+        "Research shows that when a piece's demands do not match a singer's "
+        "capabilities, the risk of strain goes up significantly (Apfelbach, "
+        "2022; Phyland et al., 1999). In practice, singers and voice "
+        "teachers rely on intuition, trial and error, or vocal "
+        "classification systems that are not consistently defined. That is "
+        "what motivated this research: using data to make the process of "
+        "choosing repertoire more objective and safer."
     ))
 
 
-def slide_03_gap(prs):
-    notes = (
-        "[~45 seconds]\n\n"
-        "Here's the gap. Tools already exist that can analyze a song's "
-        "tessitura -- where the voice sits in a piece. For example, a "
-        "program called Tessa can extract a tessitura profile from a "
-        "digital score. But these tools only work AFTER you've already "
-        "picked a piece. They help you evaluate a choice you've made -- "
-        "they don't help you discover new pieces that are likely to fit. "
-        "And here's where my background matters. I was a vocal performance "
-        "major before pursuing my master's in data science. I lived this "
-        "problem as a singer. I know what it's like to pick a piece that "
-        "doesn't sit well in your voice. And as a data scientist, I asked: "
-        "can we build a system that recommends songs based on where they "
-        "actually sit, not just their highest and lowest notes?"
-    )
-    _standard_slide(prs, "The Gap", [
-        "Current tools (like Tessa) analyze a piece after you already picked it \u2014\n"
-        "they do not recommend new pieces likely to fit.",
-        "Filtering by range alone is misleading: it shows the extremes,\n"
-        "not where the voice spends most of its time.",
-        "As a former performance major, I lived this problem.\n"
-        "As a data scientist, I built a solution.",
-    ], notes)
-
-
-def slide_04_tessitura(prs):
+def slide_03_current_approach(prs):
+    """Slide 3: Range & Fach -- why current search filters fall short."""
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     _set_slide_bg(slide, CREAM)
     _add_burgundy_header(slide)
-    _add_title_in_header(slide, "What Is Tessitura?")
+    _add_title_in_header(slide, "The Current Approach")
     _add_gold_accent_line(slide, Inches(1.18))
 
-    lines_left = [
-        "Tessitura is NOT just the highest and lowest notes.",
-        "It is where the voice lives in a piece \u2014 the pitches\nthat receive the most singing time.",
-        "Duration matters: sustaining a high note for 8 beats\nis far more demanding than touching it briefly.",
-    ]
-    _add_body_text(slide, lines_left, top=Inches(1.5), width=Inches(6.5),
-                   height=Inches(3.5), size=Pt(22))
+    col_w = Inches(5.6)
+    col_h = Inches(4.5)
+    left_x = Inches(0.55)
+    right_x = Inches(6.95)
+    col_top = Inches(1.5)
 
-    # Analogy callout box
-    shp = slide.shapes.add_shape(
-        MSO_SHAPE.ROUNDED_RECTANGLE,
-        Inches(0.75), Inches(5.0), Inches(11.8), Inches(1.8),
+    # --- Left column: Range ---
+    box_l = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, left_x, col_top, col_w, col_h,
     )
-    shp.fill.solid()
-    shp.fill.fore_color.rgb = LIGHT_GOLD
-    shp.line.color.rgb = GOLD
-    shp.line.width = Pt(1.5)
-    tf = shp.text_frame
-    tf.word_wrap = True
-    tf.margin_left = Inches(0.3)
-    tf.margin_top = Inches(0.2)
-    p = tf.paragraphs[0]
+    box_l.fill.solid()
+    box_l.fill.fore_color.rgb = LIGHT_GOLD
+    box_l.line.color.rgb = SOFT_GRAY
+    box_l.line.width = Pt(1.2)
+    tf_l = box_l.text_frame
+    tf_l.word_wrap = True
+    tf_l.margin_left = Inches(0.25)
+    tf_l.margin_right = Inches(0.2)
+    tf_l.margin_top = Inches(0.18)
+
+    lh = tf_l.paragraphs[0]
+    lh.alignment = PP_ALIGN.LEFT
+    rh = lh.add_run()
+    rh.text = "Filtering by Range"
+    _set_font(rh, Pt(20), bold=True, color=SOFT_GRAY)
+
+    left_items = [
+        "Filter songs by minimum and\nmaximum pitch in the vocal line.",
+        "Shows the extremes \u2014 not how\nmuch time the voice spends there.",
+        "One high climax note looks the\nsame as sitting high the whole time.",
+    ]
+    for item in left_items:
+        p = tf_l.add_paragraph()
+        p.space_before = Pt(8)
+        run = p.add_run()
+        run.text = "  \u2022  " + item
+        _set_font(run, Pt(17), color=CHARCOAL)
+
+    # --- Right column: Fach ---
+    box_r = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, right_x, col_top, col_w, col_h,
+    )
+    box_r.fill.solid()
+    box_r.fill.fore_color.rgb = BURGUNDY
+    box_r.line.fill.background()
+    tf_r = box_r.text_frame
+    tf_r.word_wrap = True
+    tf_r.margin_left = Inches(0.25)
+    tf_r.margin_right = Inches(0.2)
+    tf_r.margin_top = Inches(0.18)
+
+    rh2 = tf_r.paragraphs[0]
+    rh2.alignment = PP_ALIGN.LEFT
+    rr = rh2.add_run()
+    rr.text = "Filtering by Fach"
+    _set_font(rr, Pt(20), bold=True, color=GOLD)
+
+    right_items = [
+        "Categorizes voices by range, weight,\nand color (e.g. lyric soprano).",
+        "Labels inconsistently defined across\nregions (Schloneger et al., 2024).",
+        "Many voices fall between categories.",
+        "Broad categories, not tailored to\nan individual singer.",
+    ]
+    for item in right_items:
+        p = tf_r.add_paragraph()
+        p.space_before = Pt(8)
+        run = p.add_run()
+        run.text = "  \u2022  " + item
+        _set_font(run, Pt(17), color=WHITE)
+
+    # --- Bottom: bridging question ---
+    tb = _add_textbox(slide, Inches(0.55), Inches(6.25), Inches(12.2), Inches(0.8))
+    p = tb.text_frame.paragraphs[0]
+    p.alignment = PP_ALIGN.CENTER
     run = p.add_run()
-    run.text = (
-        "Analogy for non-musicians:  Think of it like your daily commute vs. the farthest "
-        "you\u2019ve ever driven. What matters for wear-and-tear is the daily average, "
-        "not the one-time extreme."
-    )
-    _set_font(run, Pt(20), italic=True, color=CHARCOAL)
-    p.alignment = PP_ALIGN.LEFT
+    run.text = "Neither captures where the voice actually spends its time."
+    _set_font(run, Pt(22), italic=True, color=BURGUNDY)
 
     _add_notes(slide, (
-        "[~60 seconds]\n\n"
-        "Before we go further, let me explain a music concept that's "
-        "central to this research: tessitura. If you look at a piece of "
-        "vocal music, you can see the highest note and the lowest note -- "
-        "that's the range. But range alone doesn't tell you where the voice "
-        "SPENDS MOST OF ITS TIME. That's tessitura. A piece might have one "
-        "very high note at the climax, but if the rest of the piece sits "
-        "comfortably in the middle of the voice, it's very different from a "
-        "piece that lives up high the entire time. Duration matters too: "
-        "holding a high B-flat for eight beats is much more demanding than "
-        "touching it for a sixteenth note. For those of you who aren't "
-        "musicians, think of it like driving. What matters for the wear on "
-        "your car isn't the farthest you've ever driven -- it's your daily "
-        "commute. Tessitura is the voice's daily commute."
+        "[~55 seconds]\n\n"
+        "Today, singers mainly rely on two approaches. The first is "
+        "filtering by range. Some databases let you filter by the notes "
+        "in the vocal line -- you set a minimum and maximum pitch. That "
+        "is useful, but it only tells you the extremes. A piece with one "
+        "very high note at the climax looks the same as a piece that sits "
+        "up high the entire time. Range tells you the boundaries, not "
+        "where the voice actually lives.\n\n"
+        "The second approach is Fach -- the system opera uses to categorize "
+        "voices by range, weight, and color. Lyric soprano, dramatic mezzo, "
+        "and so on. But Fach labels are not consistently defined across "
+        "regions or pedagogical traditions (Schloneger et al., 2024), and "
+        "many voices fall between categories -- which makes it hard to "
+        "assign a single label. Fach gives you a broad category, not a "
+        "profile tailored to a specific singer's unique voice. Neither "
+        "approach captures where the voice actually spends its time -- "
+        "and that distinction matters."
     ))
 
 
-def slide_05_tessituragram(prs):
-    notes = (
-        "[~45 seconds]\n\n"
-        "So how do we capture tessitura computationally? With something "
-        "called a tessituragram. It's essentially a fingerprint of a song. "
-        "On one axis you have every pitch in the vocal line, and on the "
-        "other you have how much total singing time is spent on that pitch, "
-        "weighted by note duration. Longer notes count more because "
-        "sustaining a pitch is more demanding than a passing tone. We parse "
-        "digital sheet music -- MusicXML files -- using a toolkit called "
-        "music21, and we build one of these profiles for every vocal line "
-        "in our library. So the question becomes: can we use these "
-        "fingerprints to match songs to singers?"
+def slide_04_tessitura(prs):
+    """Slide 4: Tessitura + Tessituragram (combined education slide)."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _set_slide_bg(slide, CREAM)
+    _add_burgundy_header(slide)
+    _add_title_in_header(slide, "Tessitura & the Tessituragram")
+    _add_gold_accent_line(slide, Inches(1.18))
+
+    full_w = Inches(12.2)
+    card_x = Inches(0.55)
+
+    # ── Top card: Tessitura (compact definition) ──
+    top_h = Inches(1.65)
+    box_t = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, card_x, Inches(1.45), full_w, top_h,
     )
-    _standard_slide(prs, "What Is a Tessituragram?", [
-        "A tessituragram is a fingerprint of a song \u2014 a histogram\n"
-        "of how much singing time falls on each pitch.",
-        "Built from MusicXML scores using music21:\n"
-        "MIDI pitch \u2192 total duration in quarter-note beats.",
-        "Duration-weighted: longer notes count more, because\n"
-        "sustaining a pitch is more demanding than a passing tone.",
-        "Can we use these fingerprints to match songs to singers?",
-    ], notes)
+    box_t.fill.solid()
+    box_t.fill.fore_color.rgb = LIGHT_GOLD
+    box_t.line.color.rgb = SOFT_GRAY
+    box_t.line.width = Pt(1.2)
+    tf_t = box_t.text_frame
+    tf_t.word_wrap = True
+    tf_t.margin_left = Inches(0.35)
+    tf_t.margin_right = Inches(0.3)
+    tf_t.margin_top = Inches(0.18)
+
+    ht = tf_t.paragraphs[0]
+    ht.alignment = PP_ALIGN.LEFT
+    rt = ht.add_run()
+    rt.text = "Tessitura"
+    _set_font(rt, Pt(24), bold=True, color=SOFT_GRAY)
+
+    p_def = tf_t.add_paragraph()
+    p_def.space_before = Pt(10)
+    r_def = p_def.add_run()
+    r_def.text = (
+        "The pitches where the voice spends most of its time "
+        "\u2014 not just the highest and lowest notes."
+    )
+    _set_font(r_def, Pt(20), color=CHARCOAL)
+
+    # ── Bottom card: Tessituragram (larger, more detail) ──
+    bot_top = Inches(3.35)
+    bot_h = Inches(3.55)
+    box_b = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, card_x, bot_top, full_w, bot_h,
+    )
+    box_b.fill.solid()
+    box_b.fill.fore_color.rgb = BURGUNDY
+    box_b.line.fill.background()
+    tf_b = box_b.text_frame
+    tf_b.word_wrap = True
+    tf_b.margin_left = Inches(0.45)
+    tf_b.margin_right = Inches(0.45)
+    tf_b.margin_top = Inches(0.22)
+
+    hb = tf_b.paragraphs[0]
+    hb.alignment = PP_ALIGN.LEFT
+    rb = hb.add_run()
+    rb.text = "Tessituragram"
+    _set_font(rb, Pt(24), bold=True, color=GOLD)
+
+    bot_items = [
+        "Thurmer (1988): histogram of singing time\nper pitch \u2014 a song's fingerprint.",
+        "Duration-weighted: longer notes count more\n(Titze, 2008).",
+        "Range and Fach don't quantify a song's\ninternal pitch-duration distribution.",
+    ]
+    for item in bot_items:
+        p = tf_b.add_paragraph()
+        p.space_before = Pt(18)
+        run = p.add_run()
+        run.text = "\u2022   " + item
+        _set_font(run, Pt(19), color=WHITE)
+
+    _add_notes(slide, (
+        "[~65 seconds]\n\n"
+        "There is a concept that does capture where the voice spends its "
+        "time: tessitura. Range tells you the highest and lowest notes, "
+        "but tessitura tells you where the voice actually lives -- the "
+        "pitches where it spends most of its time. A piece might touch "
+        "its highest note once at the climax, but if it sits in the "
+        "middle of the range for most of its duration, that is where the "
+        "real demand is. What matters most is not the extremes -- it is "
+        "where you spend the bulk of your time.\n\n"
+        "A researcher named Stefan Thurmer formalized a way to represent "
+        "tessitura visually. In 1988 he introduced the tessituragram -- "
+        "a histogram of singing time per pitch. Titze, in 2008, refined "
+        "this with duration weighting, meaning longer notes count more "
+        "because sustaining a pitch is more demanding than a passing "
+        "tone. The result is a fingerprint of where the voice spends its "
+        "time in that piece. This is exactly what range and Fach miss -- "
+        "the internal distribution of vocal demand. That raises a natural "
+        "follow-up: whether any existing tools already use tessituragrams "
+        "this way."
+    ))
+
+
+def slide_05_gap(prs):
+    """Slide 5: Existing tessitura tools & the gap they leave."""
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _set_slide_bg(slide, CREAM)
+    _add_burgundy_header(slide)
+    _add_title_in_header(slide, "The Gap")
+    _add_gold_accent_line(slide, Inches(1.18))
+
+    col_w = Inches(5.6)
+    col_h = Inches(3.6)
+    left_x = Inches(0.55)
+    right_x = Inches(6.95)
+    col_top = Inches(1.5)
+
+    # --- Left: What exists ---
+    box_l = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, left_x, col_top, col_w, col_h,
+    )
+    box_l.fill.solid()
+    box_l.fill.fore_color.rgb = LIGHT_GOLD
+    box_l.line.color.rgb = SOFT_GRAY
+    box_l.line.width = Pt(1.2)
+    tf_l = box_l.text_frame
+    tf_l.word_wrap = True
+    tf_l.margin_left = Inches(0.25)
+    tf_l.margin_right = Inches(0.2)
+    tf_l.margin_top = Inches(0.18)
+
+    lh = tf_l.paragraphs[0]
+    lh.alignment = PP_ALIGN.LEFT
+    rh_run = lh.add_run()
+    rh_run.text = "Existing Tessitura Tools"
+    _set_font(rh_run, Pt(20), bold=True, color=SOFT_GRAY)
+
+    left_items = [
+        "Tessa (Apfelbach, 2022): extracts\ntessituragrams and summary statistics.",
+        "Kassia Database: human-assessed\ntessitura per art song entry.",
+        "Both evaluate a piece after it has\nalready been selected.",
+    ]
+    for item in left_items:
+        p = tf_l.add_paragraph()
+        p.space_before = Pt(8)
+        run = p.add_run()
+        run.text = "  \u2022  " + item
+        _set_font(run, Pt(17), color=CHARCOAL)
+
+    # --- Right: What's missing ---
+    box_r = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, right_x, col_top, col_w, col_h,
+    )
+    box_r.fill.solid()
+    box_r.fill.fore_color.rgb = BURGUNDY
+    box_r.line.fill.background()
+    tf_r = box_r.text_frame
+    tf_r.word_wrap = True
+    tf_r.margin_left = Inches(0.25)
+    tf_r.margin_right = Inches(0.2)
+    tf_r.margin_top = Inches(0.18)
+
+    rh2 = tf_r.paragraphs[0]
+    rh2.alignment = PP_ALIGN.LEFT
+    rr = rh2.add_run()
+    rr.text = "What\u2019s Missing"
+    _set_font(rr, Pt(20), bold=True, color=GOLD)
+
+    right_items = [
+        "No tool recommends pieces whose\npitch distribution fits a singer.",
+        "No pitch-level query: \u201cFind pieces\non THESE notes, avoid THOSE.\u201d",
+        "217,000+ cataloged settings\n(LiederNet) \u2014 manual search can\u2019t scale.",
+    ]
+    for item in right_items:
+        p = tf_r.add_paragraph()
+        p.space_before = Pt(8)
+        run = p.add_run()
+        run.text = "  \u2022  " + item
+        _set_font(run, Pt(17), color=WHITE)
+
+    # --- Bottom bridging line ---
+    tb = _add_textbox(slide, Inches(0.55), Inches(5.4), Inches(12.2), Inches(1.5))
+    tf_b = tb.text_frame
+    tf_b.word_wrap = True
+    p1 = tf_b.paragraphs[0]
+    p1.alignment = PP_ALIGN.CENTER
+    r1 = p1.add_run()
+    r1.text = "Tessituragrams capture vocal demand \u2014"
+    _set_font(r1, Pt(21), italic=True, color=CHARCOAL)
+    p2 = tf_b.add_paragraph()
+    p2.alignment = PP_ALIGN.CENTER
+    r2 = p2.add_run()
+    r2.text = "but no tool uses them to recommend new repertoire."
+    _set_font(r2, Pt(21), bold=True, italic=True, color=BURGUNDY)
+
+    _add_notes(slide, (
+        "[~55 seconds]\n\n"
+        "There are tools that work with tessituragrams, but they are "
+        "purely analytic. Tessa, developed by Apfelbach in 2022, extracts "
+        "a tessituragram from a digital score and produces summary "
+        "statistics. The Kassia Database -- a wonderful resource for art "
+        "song by women composers -- displays a human-assessed tessitura "
+        "for each entry. Both of these help you evaluate a piece after "
+        "you have already found it. But neither one lets you use a "
+        "tessituragram as a query -- to search for new pieces whose "
+        "pitch distribution is likely to fit.\n\n"
+        "The scale of the problem makes manual discovery impractical. "
+        "The LiederNet Archive alone catalogs over 217,000 art-song "
+        "settings. No voice teacher, no matter how experienced, can know "
+        "all of that literature. Tessituragrams carry detailed information "
+        "about a song's vocal demand -- but to our knowledge, no existing "
+        "system uses them on the query side to recommend repertoire. "
+        "That is the gap we wanted to explore."
+    ))
 
 
 def slide_06_pipeline(prs):
@@ -371,26 +597,46 @@ def slide_06_pipeline(prs):
     _add_title_in_header(slide, "The Pipeline")
     _add_gold_accent_line(slide, Inches(1.18))
 
+    # Data-source line above the flowchart
+    src_box = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE,
+        Inches(0.75), Inches(1.35), Inches(11.8), Inches(0.55),
+    )
+    src_box.fill.solid()
+    src_box.fill.fore_color.rgb = LIGHT_GOLD
+    src_box.line.color.rgb = TEAL
+    src_box.line.width = Pt(1.2)
+    tf_src = src_box.text_frame
+    tf_src.word_wrap = True
+    tf_src.margin_left = Inches(0.25)
+    tf_src.margin_top = Inches(0.08)
+    p_src = tf_src.paragraphs[0]
+    p_src.alignment = PP_ALIGN.CENTER
+    r_src = p_src.add_run()
+    r_src.text = (
+        "MusicXML scores parsed with music21: pitch \u2192 duration in quarter-note beats."
+    )
+    _set_font(r_src, Pt(17), italic=True, color=CHARCOAL)
+
     steps = [
-        ("Singer\nPreferences", "The singer provides\nrange, favorites,\nand avoids"),
-        ("Range\nFilter", "Remove songs\noutside the\nsinger\u2019s range"),
-        ("Ideal Profile\nConstruction", "Build a target\npitch-duration\nvector"),
-        ("Cosine\nSimilarity\nScoring", "Score each song\nby similarity\nminus avoid penalty"),
-        ("Ranked\nSong List", "Songs ordered\nfrom best match\nto worst"),
+        ("Singer\nPreferences", "Range, favorites,\nand avoids"),
+        ("Range\nFilter", "Drop songs\noutside range"),
+        ("Ideal Profile\nConstruction", "Target profile\nfrom preferences"),
+        ("Cosine\nSimilarity\nScoring", "Similarity minus\navoid penalty"),
+        ("Ranked\nSong List", "Best match\nto worst"),
     ]
 
     box_w = Inches(2.0)
-    box_h = Inches(2.2)
+    box_h = Inches(2.0)
     gap = Inches(0.45)
     total_w = len(steps) * box_w + (len(steps) - 1) * gap
     start_left = int((SLIDE_W - total_w) / 2)
-    top_box = Inches(2.0)
-    top_desc = Inches(4.4)
+    top_box = Inches(2.15)
+    top_desc = Inches(4.35)
 
     for i, (label, desc) in enumerate(steps):
         left = start_left + i * (box_w + gap)
 
-        # Box
         shp = slide.shapes.add_shape(
             MSO_SHAPE.ROUNDED_RECTANGLE, left, top_box, box_w, box_h,
         )
@@ -406,9 +652,8 @@ def slide_06_pipeline(prs):
         run = p.add_run()
         run.text = label
         _set_font(run, Pt(18), bold=True, color=WHITE)
-        shp.text_frame.paragraphs[0].space_before = Pt(24)
+        shp.text_frame.paragraphs[0].space_before = Pt(20)
 
-        # Description underneath
         tb = _add_textbox(slide, left, top_desc, box_w, Inches(1.6))
         tf2 = tb.text_frame
         tf2.word_wrap = True
@@ -418,7 +663,6 @@ def slide_06_pipeline(prs):
         run2.text = desc
         _set_font(run2, Pt(16), color=CHARCOAL)
 
-        # Arrow between boxes
         if i < len(steps) - 1:
             arrow_left = left + box_w
             arrow_top = top_box + box_h / 2 - Inches(0.15)
@@ -427,7 +671,7 @@ def slide_06_pipeline(prs):
                 gap, Inches(0.3),
             )
             arr.fill.solid()
-            arr.fill.fore_color.rgb = GOLD
+            arr.fill.fore_color.rgb = TEAL
             arr.line.fill.background()
 
     # Bottom summary
@@ -435,23 +679,28 @@ def slide_06_pipeline(prs):
     p = tb.text_frame.paragraphs[0]
     p.alignment = PP_ALIGN.CENTER
     run = p.add_run()
-    run.text = "The singer tells us three things: range, favorite pitches, and pitches to avoid. We do the rest."
+    run.text = "Three inputs: range, favorites, avoids. We do the rest."
     _set_font(run, Pt(22), italic=True, color=BURGUNDY)
 
     _add_notes(slide, (
-        "[~45 seconds]\n\n"
-        "Here's the big picture of how the system works. It's a pipeline "
-        "with five steps. First, the singer provides three inputs: their "
-        "comfortable vocal range -- the lowest and highest notes they can "
-        "sing -- their favorite pitches, and pitches they want to avoid. "
-        "Second, we filter out any song whose written range goes beyond "
-        "what the singer specified. Third, we construct an ideal pitch "
-        "profile from those preferences -- basically a target fingerprint "
-        "of what the perfect song would look like for this singer. Fourth, "
-        "we score every remaining song by how closely its tessituragram "
-        "matches that ideal, minus a penalty for time spent on avoided "
-        "pitches. And finally, we return a ranked list from best match to "
-        "worst. The singer tells us three things; we do the rest."
+        "[~50 seconds]\n\n"
+        "Let me walk you through the pipeline. First, a quick note on "
+        "the data. We parse digital sheet music -- MusicXML files -- "
+        "using a Python toolkit called music21, and for each vocal line "
+        "we build a tessituragram: every pitch maps to its total duration "
+        "in quarter-note beats. That is the input to the system.\n\n"
+        "The pipeline has five steps. The singer provides three inputs: "
+        "their comfortable vocal range, favorite pitches, and pitches to "
+        "avoid. We filter out any song whose written range goes beyond "
+        "what the singer specified. Then we construct an ideal pitch "
+        "profile from those preferences. Every pitch in the singer's "
+        "range starts with a small base weight, favorite pitches get a "
+        "large boost, and avoided pitches drop to zero. The result is a "
+        "target fingerprint of what the perfect song would look like for "
+        "that singer. We score every "
+        "remaining song by how closely its tessituragram matches that "
+        "ideal, minus a penalty for time on avoided pitches. Finally, "
+        "we return a ranked list from best match to worst."
     ))
 
 
@@ -462,95 +711,229 @@ def slide_07_formula(prs):
     _add_title_in_header(slide, "How Scoring Works")
     _add_gold_accent_line(slide, Inches(1.18))
 
-    # Formula box
-    shp = slide.shapes.add_shape(
+    # ── Formula banner ──
+    formula_box = slide.shapes.add_shape(
         MSO_SHAPE.ROUNDED_RECTANGLE,
-        Inches(1.5), Inches(1.7), Inches(10.333), Inches(1.2),
+        Inches(0.75), Inches(1.45), Inches(11.8), Inches(1.0),
     )
-    shp.fill.solid()
-    shp.fill.fore_color.rgb = BURGUNDY
-    shp.line.fill.background()
-    tf = shp.text_frame
-    tf.word_wrap = True
-    p = tf.paragraphs[0]
-    p.alignment = PP_ALIGN.CENTER
-    run = p.add_run()
-    run.text = "final_score  =  cosine_similarity(song, ideal)  \u2212  \u03B1  \u00D7  avoid_penalty"
-    _set_font(run, Pt(26), bold=True, color=WHITE, name="Consolas")
+    formula_box.fill.solid()
+    formula_box.fill.fore_color.rgb = BURGUNDY
+    formula_box.line.fill.background()
+    tf_f = formula_box.text_frame
+    tf_f.word_wrap = True
+    tf_f.margin_top = Inches(0.12)
+    pf = tf_f.paragraphs[0]
+    pf.alignment = PP_ALIGN.CENTER
+    rf = pf.add_run()
+    rf.text = "final_score  =  cosine_similarity(song, ideal)  \u2212  \u03B1  \u00D7  avoid_penalty"
+    _set_font(rf, Pt(24), bold=True, color=WHITE, name="Consolas")
 
-    bullets = [
-        "Cosine similarity: how closely does this song\u2019s pitch fingerprint\n"
-        "align with the singer\u2019s ideal profile? (1.0 = perfect match)",
-        "Avoid penalty: what proportion of the song\u2019s duration is spent\n"
-        "on notes the singer wants to avoid?",
-        "\u03B1 (alpha = 0.5): controls how heavily we penalize avoided notes.",
+    # ── Three explanation cards ──
+    card_w = Inches(3.7)
+    card_h = Inches(2.8)
+    card_top = Inches(2.7)
+    card_gap = Inches(0.35)
+    total_cards = 3 * card_w + 2 * card_gap
+    card_start = int((SLIDE_W - total_cards) / 2)
+
+    card_data = [
+        (
+            "Cosine Similarity",
+            TEAL,
+            "Same pitches, same proportions?\n\n"
+            "1.0 = perfect match",
+        ),
+        (
+            "Avoid Penalty",
+            GOLD,
+            "Share of singing time on\n"
+            "pitches the singer avoids.\n\n"
+            "Higher = worse fit",
+        ),
+        (
+            "\u03B1  (Alpha = 0.5)",
+            SOFT_GRAY,
+            "Balances rewarding good\n"
+            "pitches vs. penalizing\n"
+            "avoided ones.\n\n"
+            "0.5 = even split",
+        ),
     ]
-    _add_body_text(slide, bullets, top=Inches(3.2), height=Inches(2.5), size=Pt(22))
 
-    # Analogy callout
-    shp2 = slide.shapes.add_shape(
-        MSO_SHAPE.ROUNDED_RECTANGLE,
-        Inches(0.75), Inches(5.7), Inches(11.8), Inches(1.2),
-    )
-    shp2.fill.solid()
-    shp2.fill.fore_color.rgb = LIGHT_GOLD
-    shp2.line.color.rgb = GOLD
-    shp2.line.width = Pt(1.5)
-    tf2 = shp2.text_frame
-    tf2.word_wrap = True
-    tf2.margin_left = Inches(0.3)
-    tf2.margin_top = Inches(0.15)
-    p2 = tf2.paragraphs[0]
-    run2 = p2.add_run()
-    run2.text = (
-        "Analogy:  Like a restaurant recommender that matches your food preferences "
-        "and subtracts points for ingredients you dislike."
-    )
-    _set_font(run2, Pt(20), italic=True, color=CHARCOAL)
+    for i, (label, accent, desc) in enumerate(card_data):
+        left = card_start + i * (card_w + card_gap)
+
+        card = slide.shapes.add_shape(
+            MSO_SHAPE.ROUNDED_RECTANGLE, left, card_top, card_w, card_h,
+        )
+        card.fill.solid()
+        card.fill.fore_color.rgb = LIGHT_GOLD
+        card.line.color.rgb = accent
+        card.line.width = Pt(2.0)
+        tf_c = card.text_frame
+        tf_c.word_wrap = True
+        tf_c.margin_left = Inches(0.2)
+        tf_c.margin_right = Inches(0.2)
+        tf_c.margin_top = Inches(0.15)
+
+        ph = tf_c.paragraphs[0]
+        ph.alignment = PP_ALIGN.CENTER
+        rh = ph.add_run()
+        rh.text = label
+        _set_font(rh, Pt(18), bold=True, color=accent)
+
+        pd = tf_c.add_paragraph()
+        pd.space_before = Pt(10)
+        pd.alignment = PP_ALIGN.CENTER
+        rd = pd.add_run()
+        rd.text = desc
+        _set_font(rd, Pt(15), color=CHARCOAL)
 
     _add_notes(slide, (
-        "[~60 seconds]\n\n"
-        "So let's look at exactly how the scoring works. The final score "
-        "for each song is cosine similarity between that song's "
-        "tessituragram and the singer's ideal profile, minus alpha times "
-        "the avoid penalty. Let me break that down. Cosine similarity "
-        "measures how closely a song's pitch-duration fingerprint aligns "
-        "with what the singer wants. A score of 1.0 would be a perfect "
-        "match in proportional shape. The avoid penalty is the proportion "
-        "of the song's total singing duration that falls on notes the "
-        "singer wants to avoid. Alpha controls the trade-off -- at 0.5, "
-        "we're splitting the weight evenly. Think of it like a restaurant "
-        "recommender. It finds dishes that match your taste preferences and "
-        "then subtracts points for ingredients you don't like. Simple idea, "
-        "but the question is: does it actually work? How do we know this "
-        "produces good rankings?"
+        "[~70 seconds]\n\n"
+        "Here is how the scoring works. First, recall how the ideal "
+        "profile is built. We create a list of numbers -- one per pitch "
+        "in the singer's range. Every pitch starts with a small base "
+        "weight so it is not ignored entirely. Favorite pitches get a "
+        "large boost on top of that, and avoided pitches are dropped to "
+        "zero. The result is a profile that peaks at the singer's "
+        "preferred pitches and has nothing where they want to avoid.\n\n"
+        "Each song has its own list built the same way -- one number per "
+        "pitch -- but from the actual score, showing how much singing "
+        "time falls on each pitch. Cosine similarity then compares the "
+        "pattern of these two lists. If both concentrate time on the same "
+        "pitches in the same proportions, the score is high -- close to "
+        "1.0. It focuses on shape rather than total duration, so a short "
+        "song and a long song that distribute time across pitches the "
+        "same way score equally well. It is a standard tool for this kind "
+        "of comparison in information retrieval, which is why we chose "
+        "it.\n\n"
+        "The avoid penalty is the proportion of the song's total singing "
+        "duration that falls on notes the singer wants to avoid. Alpha "
+        "controls the trade-off between rewarding good-fit pitches and "
+        "penalizing avoided ones -- at 0.5, we split the weight evenly. "
+        "The scoring function is straightforward in structure. To find "
+        "out whether it actually produces good rankings, we ran two "
+        "experiments on real musical data."
     ))
 
 
 def slide_08_dataset(prs):
-    notes = (
-        "[~45 seconds]\n\n"
-        "To test this, we needed real musical data. We used the OpenScore "
-        "Lieder Corpus -- a freely available, openly licensed collection of "
-        "art songs. These are real scores by composers like Schubert, Clara "
-        "and Robert Schumann, Debussy, and Fauré. We ran two experiments. "
-        "The first used a compact library of 101 vocal lines, one per "
-        "composition. The second used a much larger expanded library: 1,655 "
-        "vocal lines drawn from 1,419 compositions -- about 16 times "
-        "larger. Some compositions have multiple voice parts, like duets, "
-        "so each vocal line is treated as its own item. These aren't made-up "
-        "examples. These are real art songs that singers perform every day "
-        "around the world."
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    _set_slide_bg(slide, CREAM)
+    _add_burgundy_header(slide)
+    _add_title_in_header(slide, "The Dataset")
+    _add_gold_accent_line(slide, Inches(1.18))
+
+    # ── Corpus banner ──
+    corpus_box = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE,
+        Inches(0.75), Inches(1.45), Inches(11.8), Inches(0.85),
     )
-    _standard_slide(prs, "The Dataset", [
-        "OpenScore Lieder Corpus (CC0, openly licensed)\n"
-        "Real published scores: Schubert, Schumann, Debussy, Faur\u00e9, and more.",
-        "Experiment 1:  101 vocal lines (one per composition) \u2014 compact library.",
-        "Experiment 2:  1,655 vocal lines from 1,419 compositions (~16\u00d7 larger).\n"
-        "342 lines from multi-part works, 1,313 from single-voice songs.",
-        "These are not made-up examples \u2014\n"
-        "these are real art songs that singers perform every day.",
-    ], notes)
+    corpus_box.fill.solid()
+    corpus_box.fill.fore_color.rgb = LIGHT_GOLD
+    corpus_box.line.color.rgb = TEAL
+    corpus_box.line.width = Pt(1.2)
+    tf_c = corpus_box.text_frame
+    tf_c.word_wrap = True
+    tf_c.margin_left = Inches(0.3)
+    tf_c.margin_top = Inches(0.1)
+    pc = tf_c.paragraphs[0]
+    pc.alignment = PP_ALIGN.CENTER
+    rc = pc.add_run()
+    rc.text = "OpenScore Lieder Corpus  \u2014  CC0-licensed art-song scores"
+    _set_font(rc, Pt(19), italic=True, color=CHARCOAL)
+
+    # ── Two experiment cards ──
+    card_w = Inches(5.6)
+    card_h = Inches(3.6)
+    left_x = Inches(0.55)
+    right_x = Inches(6.95)
+    card_top = Inches(2.6)
+
+    # --- Experiment 1 card ---
+    box_l = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, left_x, card_top, card_w, card_h,
+    )
+    box_l.fill.solid()
+    box_l.fill.fore_color.rgb = LIGHT_GOLD
+    box_l.line.color.rgb = SOFT_GRAY
+    box_l.line.width = Pt(1.2)
+    tf_l = box_l.text_frame
+    tf_l.word_wrap = True
+    tf_l.margin_left = Inches(0.3)
+    tf_l.margin_right = Inches(0.25)
+    tf_l.margin_top = Inches(0.2)
+
+    lh = tf_l.paragraphs[0]
+    lh.alignment = PP_ALIGN.LEFT
+    rl = lh.add_run()
+    rl.text = "Experiment 1  \u2014  Compact Library"
+    _set_font(rl, Pt(20), bold=True, color=SOFT_GRAY)
+
+    exp1_items = [
+        "101 vocal lines",
+        "One per composition",
+        "Initial validation baseline",
+    ]
+    for item in exp1_items:
+        p = tf_l.add_paragraph()
+        p.space_before = Pt(12)
+        run = p.add_run()
+        run.text = "  \u2022  " + item
+        _set_font(run, Pt(18), color=CHARCOAL)
+
+    # --- Experiment 2 card ---
+    box_r = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, right_x, card_top, card_w, card_h,
+    )
+    box_r.fill.solid()
+    box_r.fill.fore_color.rgb = BURGUNDY
+    box_r.line.fill.background()
+    tf_r = box_r.text_frame
+    tf_r.word_wrap = True
+    tf_r.margin_left = Inches(0.3)
+    tf_r.margin_right = Inches(0.25)
+    tf_r.margin_top = Inches(0.2)
+
+    rh2 = tf_r.paragraphs[0]
+    rh2.alignment = PP_ALIGN.LEFT
+    rr = rh2.add_run()
+    rr.text = "Experiment 2  \u2014  Expanded Library"
+    _set_font(rr, Pt(20), bold=True, color=GOLD)
+
+    exp2_items = [
+        "1,655 lines from 1,419 compositions",
+        "~16\u00d7 larger",
+        "342 multi-part, 1,313 single-voice",
+    ]
+    for item in exp2_items:
+        p = tf_r.add_paragraph()
+        p.space_before = Pt(12)
+        run = p.add_run()
+        run.text = "  \u2022  " + item
+        _set_font(run, Pt(18), color=WHITE)
+
+    # ── Bottom note ──
+    tb = _add_textbox(slide, Inches(0.55), Inches(6.5), Inches(12.2), Inches(0.6))
+    pb = tb.text_frame.paragraphs[0]
+    pb.alignment = PP_ALIGN.CENTER
+    rb = pb.add_run()
+    rb.text = "Multi-part works (e.g. duets): each vocal line is its own item."
+    _set_font(rb, Pt(17), italic=True, color=SOFT_GRAY)
+
+    _add_notes(slide, (
+        "[~35 seconds]\n\n"
+        "We used the OpenScore Lieder Corpus -- a freely available, "
+        "openly licensed collection of art songs. Conveniently, all of "
+        "the composers have been dead long enough that copyright is not "
+        "a concern. We ran two experiments. "
+        "The first used a compact library of 101 vocal lines, one per "
+        "composition. The second used a much larger expanded library: "
+        "1,655 vocal lines drawn from 1,419 compositions -- about 16 "
+        "times larger. Some compositions have multiple voice parts, like "
+        "duets, so each vocal line is treated as its own item."
+    ))
 
 
 def slide_09_testing(prs):
@@ -563,10 +946,9 @@ def slide_09_testing(prs):
     # Explanation steps
     steps_text = [
         "1.  Pick a vocal line from the library.",
-        "2.  Build a singer profile FROM that line\u2019s own fingerprint\n"
-        "     (range, top-4 favorite pitches, bottom-2 avoid pitches).",
-        "3.  Ask the system: can you find that same line among\n"
-        "     hundreds of candidates?",
+        "2.  Build a singer profile from that line\u2019s fingerprint\n"
+        "     (range, top-4 favorites, bottom-2 avoids).",
+        "3.  Can the system find that line among all candidates?",
     ]
     _add_body_text(slide, steps_text, top=Inches(1.5), height=Inches(3.0),
                    size=Pt(22), bullet=False)
@@ -586,12 +968,10 @@ def slide_09_testing(prs):
     tf.margin_top = Inches(0.2)
 
     baseline_lines = [
-        ("Three baselines compared:", True, False),
-        ("Full model:  cosine similarity + avoid penalty (\u03B1 = 0.5)", False, False),
-        ("Cosine-only:  similarity without the avoid penalty (\u03B1 = 0)", False, False),
-        ("Null (random):  range filter only, then random ordering", False, False),
-        ("", False, False),
-        ("So what did we find?", False, True),
+        ("Three models compared:", True, False),
+        ("Full model:  cosine + avoid penalty (\u03B1 = 0.5)", False, False),
+        ("Cosine-only:  no avoid penalty (\u03B1 = 0)", False, False),
+        ("Null:  range filter \u2192 random order", False, False),
     ]
     for i, (text, is_bold, is_italic) in enumerate(baseline_lines):
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
@@ -603,10 +983,10 @@ def slide_09_testing(prs):
 
     _add_notes(slide, (
         "[~60 seconds]\n\n"
-        "Now, we didn't have human judges rating songs for us. That's "
+        "We did not have human judges rating songs for us -- that is "
         "future work. Instead, we used a rigorous method called synthetic "
-        "self-retrieval. Here's how it works. We pick a vocal line from "
-        "the library. We build a singer profile directly from that line's "
+        "self-retrieval. Here is how it works. We pick a vocal line from "
+        "the library and build a singer profile directly from that line's "
         "own tessituragram: the range becomes the singer's range, the four "
         "pitches with the most singing time become the favorites, and the "
         "two pitches with the least become the avoids. Then we ask the "
@@ -615,7 +995,7 @@ def slide_09_testing(prs):
         "that line very highly -- ideally first. We compared three models: "
         "the full model with the avoid penalty, cosine-only without the "
         "penalty, and a null baseline that just filters by range and then "
-        "ranks randomly. So what did we find?"
+        "ranks randomly. Here is what we found."
     ))
 
 
@@ -642,8 +1022,8 @@ def slide_10_rq1(prs):
     tf.margin_left = Inches(0.3)
     tf.margin_top = Inches(0.12)
     lines_data = [
-        "Compact library:  HR@1 = 76%  vs. 6% random   |   Expanded library:  HR@1 = 55%  vs. 2% random",
-        "Expanded HR@5 = 86%  \u2014  the target song lands in the top 5 nearly 9 times out of 10.",
+        "Compact HR@1 = 76%  vs. 6% random   |   Expanded HR@1 = 55%  vs. 2% random",
+        "Expanded HR@5 = 86%  \u2014  target in top 5 nearly 9/10 times.",
     ]
     for i, text in enumerate(lines_data):
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
@@ -655,21 +1035,21 @@ def slide_10_rq1(prs):
 
     _add_notes(slide, (
         "[~60 seconds]\n\n"
-        "Here are the self-retrieval results. This figure shows Hit Rate "
-        "at 1 -- how often the target song is ranked first -- and Mean "
-        "Reciprocal Rank, which captures how high it ranks on average. "
-        "On the left is Experiment 1, the compact 101-line library. The "
-        "full model puts the right song first 76 percent of the time. "
-        "Random guessing after the same range filter? About 6 percent. "
-        "On the right is Experiment 2 with 1,655 lines. The full model "
-        "still finds the right song first 55 percent of the time -- versus "
-        "just 2 percent for random. And if we look at the top 5 instead of "
-        "just the top 1, the system finds the target song 86 percent of "
-        "the time. That's nearly 9 out of 10. These two experiments use "
-        "different protocols and different candidate pools, so the drop "
-        "from 76 to 55 percent is not purely a library-size effect. But the "
-        "key takeaway is clear: the system massively outperforms random "
-        "ordering in both cases."
+        "This figure shows the self-retrieval results. The metric on the "
+        "left of each panel is Hit Rate at 1 -- how often the target song "
+        "is ranked first -- and Mean Reciprocal Rank on the right, which "
+        "captures how high it ranks on average. In Experiment 1, the "
+        "compact 101-line library, the full model puts the right song "
+        "first 76 percent of the time. Random guessing after the same "
+        "range filter gets about 6 percent. In Experiment 2 with 1,655 "
+        "lines, the full model still finds the right song first 55 "
+        "percent of the time -- versus just 2 percent for random. And "
+        "if we look at the top 5 instead of just the top 1, the system "
+        "finds the target song 86 percent of the time -- nearly 9 out "
+        "of 10. These two experiments use different protocols and "
+        "different candidate pools, so the drop from 76 to 55 percent "
+        "is not purely a library-size effect. The key takeaway is clear: "
+        "the system massively outperforms random ordering in both cases."
     ))
 
 
@@ -684,26 +1064,27 @@ def slide_11_rq2(prs):
     _add_image_centered(slide, img, top=Inches(1.45), max_w=Inches(8.0), max_h=Inches(3.8))
 
     bullets = [
-        "Mean Kendall\u2019s \u03C4 = 0.84\u20130.85 (strong agreement; threshold = 0.7).",
-        "Small changes to preferences \u2192 small changes in rankings.",
-        "The system is stable and trustworthy.",
+        "Mean Kendall\u2019s \u03C4 = 0.84\u20130.85  (threshold = 0.7).",
+        "Small preference changes \u2192 small ranking changes.",
+        "Stable and trustworthy.",
     ]
     _add_body_text(slide, bullets, top=Inches(5.5), height=Inches(1.8), size=Pt(20))
 
     _add_notes(slide, (
         "[~45 seconds]\n\n"
-        "Next: is the system stable? If a singer makes a small change to "
-        "their preferences -- adds one favorite note or removes one avoid "
-        "note -- does the whole ranking fall apart? We tested this with 580 "
-        "one-note perturbations across 20 baseline profiles in the expanded "
-        "library. We measured Kendall's tau, which compares two ranked lists. "
-        "A tau of 1.0 means identical rankings; 0.0 means completely "
-        "unrelated. Anything above 0.7 is considered strong agreement. Our "
-        "full model achieved a mean tau of 0.84. The cosine-only model was "
-        "0.87, with overlapping confidence intervals. The random baseline "
-        "was essentially zero, as expected. This means when a singer tweaks "
-        "their preferences slightly, the recommendations stay largely the "
-        "same. The system is stable and trustworthy."
+        "The next thing we wanted to know was whether the system is "
+        "stable -- whether a small change to preferences causes the "
+        "rankings to shift dramatically. We tested this with 580 one-note "
+        "perturbations across 20 baseline profiles in the expanded "
+        "library. We measured stability using Kendall's tau, a statistic "
+        "that compares two ranked lists. A tau of 1.0 means identical "
+        "rankings; 0.0 means completely unrelated. Anything above 0.7 is "
+        "considered strong agreement. Our full model achieved a mean tau "
+        "of 0.84. The cosine-only model was 0.87, with overlapping "
+        "confidence intervals. The random baseline was essentially zero, "
+        "as expected. When a singer tweaks their preferences slightly, "
+        "the recommendations stay largely the same. The system is stable "
+        "and trustworthy."
     ))
 
 
@@ -718,9 +1099,9 @@ def slide_12_alpha(prs):
     _add_image_centered(slide, img, top=Inches(1.45), max_w=Inches(11.5), max_h=Inches(4.0))
 
     bullets = [
-        "Self-retrieval performance is largely flat across \u03B1 values (0 to 1).",
-        "Stability stays strong: \u03C4 \u2265 0.82 even at \u03B1 = 1.0.",
-        "\u03B1 = 0.5 is a balanced default \u2014 meaningful avoid control without instability.",
+        "Performance flat across \u03B1 = 0\u20131.",
+        "Stability holds: \u03C4 \u2265 0.82 even at \u03B1 = 1.0.",
+        "\u03B1 = 0.5 balances avoid control and stability.",
     ]
     _add_body_text(slide, bullets, top=Inches(5.5), height=Inches(1.8), size=Pt(20))
 
@@ -730,40 +1111,39 @@ def slide_12_alpha(prs):
         "alpha -- the parameter that controls how heavily we penalize "
         "avoided notes. We swept alpha from 0 to 1 in both experiments. "
         "As you can see, self-retrieval performance -- Hit Rate at 1 and "
-        "MRR -- is largely flat across the entire range. The system isn't "
-        "brittle to this choice. Stability does decrease slightly as alpha "
-        "increases, which makes sense: a stronger avoid penalty creates "
-        "more sensitivity to changes in avoid preferences. But even at "
-        "alpha equals 1, tau stays above 0.82 -- well above the strong "
-        "agreement threshold. We report alpha equals 0.5 as a balanced "
-        "default: it gives singers meaningful control over their avoid "
-        "preferences without making the rankings jittery."
+        "MRR -- is largely flat across the entire range. The system is "
+        "not brittle to this choice. Stability does decrease slightly as "
+        "alpha increases, which makes sense: a stronger avoid penalty "
+        "creates more sensitivity to changes in avoid preferences. But "
+        "even at alpha equals 1, tau stays above 0.82 -- well above the "
+        "strong agreement threshold. We report alpha equals 0.5 as a "
+        "balanced default: it gives singers meaningful control over their "
+        "avoid preferences without making the rankings jittery."
     ))
 
 
 def slide_13_rq3(prs):
     notes = (
         "[~30 seconds]\n\n"
-        "Finally, as an engineering sanity check, we verified that the "
-        "formula is implemented exactly as designed. The identity residual "
-        "-- the difference between the computed score and what the formula "
-        "predicts -- is exactly zero. An OLS regression recovers the exact "
-        "coefficients: cosine weight equals 1.0, avoid weight equals "
-        "negative 0.5, R-squared equals 1.0. And all correlations go in "
-        "the expected directions. Higher cosine similarity predicts a "
-        "higher final score. Higher avoid penalty predicts a lower score. "
-        "No hidden bugs, no rounding surprises. The math checks out."
+        "As an engineering sanity check, we verified that the formula is "
+        "implemented exactly as designed. The identity residual -- the "
+        "difference between the computed score and what the formula "
+        "predicts -- is exactly zero. An OLS regression recovers the "
+        "exact coefficients: cosine weight equals 1.0, avoid weight "
+        "equals negative 0.5, R-squared equals 1.0. All correlations go "
+        "in the expected directions: higher cosine similarity predicts a "
+        "higher final score, and higher avoid penalty predicts a lower "
+        "score. No hidden bugs, no rounding surprises. The math checks "
+        "out."
     )
     _standard_slide(prs,
         "Implementation Verification (RQ3)",
         [
-            "Identity check:  max |final \u2212 (cos \u2212 0.5 \u00d7 avoid)| = 0\n"
-            "The formula is implemented with zero numerical error.",
-            "OLS regression recovers exact coefficients:\n"
-            "cos weight = 1.0,  avoid weight = \u22120.5,  R\u00b2 = 1.0.",
-            "Spearman correlations all in expected directions:\n"
-            "\u03C1(final, cos) = +0.99   |   \u03C1(final, avoid) = \u22120.32   |   \u03C1(cos, fav_overlap) = +0.92",
-            "No hidden bugs.  No rounding surprises.  The math checks out.",
+            "Identity residual = 0  \u2014  zero numerical error.",
+            "OLS recovers exact coefficients:\ncos = 1.0,  avoid = \u22120.5,  R\u00b2 = 1.0.",
+            "Spearman \u03C1 in expected directions:\n"
+            "(final, cos) +0.99  |  (final, avoid) \u22120.32  |  (cos, fav) +0.92",
+            "The math checks out.",
         ],
         notes,
     )
@@ -777,36 +1157,37 @@ def slide_14_so_what(prs):
     _add_gold_accent_line(slide, Inches(1.18))
 
     bullets = [
-        "Proof-of-concept: data science can make vocal health decisions\n"
-        "safer and more objective.",
-        "Familiar techniques applied to a novel domain:\n"
-        "cosine similarity, cold-start recommendation, offline evaluation.",
-        "Content-based methods can work even without user-interaction data\n"
-        "(cold-start / no collaborative signal).",
+        "Data science can make vocal health\ndecisions safer and more objective.",
+        "Pitch-level queries surpass Fach \u2014\nsurface pieces a teacher may never find.",
+        "Familiar techniques, novel domain:\ncosine similarity, cold-start, offline eval.",
     ]
-    _add_body_text(slide, bullets, top=Inches(1.5), height=Inches(2.8), size=Pt(22))
+    _add_body_text(slide, bullets, top=Inches(1.5), height=Inches(3.0), size=Pt(22))
 
-    # Audience question
     _add_big_quote(slide,
-        "\u201cHow might content-based recommendation techniques\n"
-        "from your own work apply to creative domains like music?\u201d",
-        top=Inches(4.6),
+        "\u201cHow might content-based recommendations\napply to creative domains like music?\u201d",
+        top=Inches(4.8),
     )
 
     _add_notes(slide, (
-        "[~45 seconds]\n\n"
-        "So what does this all mean? This is a proof-of-concept that shows "
-        "data science can bring objectivity to a domain where decisions are "
-        "traditionally subjective -- and where bad decisions have real "
-        "health consequences. For those of you working in recommendation "
-        "systems or information retrieval, this demonstrates that familiar "
-        "techniques -- cosine similarity, content-based filtering, offline "
-        "evaluation metrics -- can work in a completely new domain. And "
-        "it works in a cold-start setting with no collaborative filtering "
-        "data, which is often the hardest case. I'd love for you to think "
-        "about this: how might content-based recommendation techniques from "
-        "YOUR work apply to creative domains like music, art, or design? "
-        "The tools are the same -- the application is what makes it novel."
+        "[~50 seconds]\n\n"
+        "Let me step back and talk about what this means in practice. "
+        "This is a proof-of-concept showing that data science can bring "
+        "objectivity to a domain where decisions are traditionally "
+        "subjective -- and where bad decisions have real health "
+        "consequences. Think about the practical impact for a voice "
+        "teacher. Right now, they recommend pieces from their own training "
+        "and experience. But a query based on specific pitches -- 'find me "
+        "pieces that live on these notes and avoid those' -- is far more "
+        "granular than Fach. It could surface a piece the teacher has "
+        "never encountered that turns out to be a perfect fit for their "
+        "student's unique voice. For those of you in CS and data science, "
+        "this also demonstrates that familiar tools -- cosine similarity, "
+        "content-based filtering, offline evaluation -- can work in a "
+        "completely new domain, and in a cold-start setting with no "
+        "collaborative signal. I think there is a broader takeaway here "
+        "for anyone working with content-based recommendation: these "
+        "familiar techniques can open up entirely new domains, and I "
+        "would welcome a conversation about where else they might apply."
     ))
 
 
@@ -815,10 +1196,10 @@ def slide_15_limitations(prs):
         "[~30 seconds]\n\n"
         "I want to be upfront about limitations, because honesty "
         "strengthens research. First, these are synthetic profiles, not "
-        "real singer preferences. We haven't done a human study yet. "
+        "real singer preferences -- we have not done a human study yet. "
         "Second, we only tested on one corpus of German and French art "
-        "song. Opera, musical theatre, and popular song are untested. "
-        "Third, we only model pitch and duration -- we don't account for "
+        "song; opera, musical theatre, and popular song are untested. "
+        "Third, we only model pitch and duration -- we do not account for "
         "dynamics, tempo, or text setting. For future work, we want to "
         "evaluate with real singers and their actual preferences, expand "
         "to more diverse repertoire, add richer musical features, and "
@@ -827,11 +1208,9 @@ def slide_15_limitations(prs):
     )
     _standard_slide(prs, "Limitations & Future Work", [
         "Synthetic profiles only \u2014 no human evaluation yet.",
-        "One corpus (German & French art song); opera, musical theatre,\n"
-        "and popular song are untested.",
-        "Pitch and duration only \u2014 dynamics, tempo, and text omitted.",
-        "Future:  real singer preferences  |  diverse repertoire\n"
-        "richer features  |  interactive recommendation tool.",
+        "One corpus (German & French art song);\nopera, theatre, pop untested.",
+        "Pitch + duration only \u2014 dynamics,\ntempo, text omitted.",
+        "Next: real singers, diverse repertoire,\nricher features, interactive tool.",
     ], notes)
 
 
@@ -900,7 +1279,7 @@ def slide_16_closing(prs):
         "To wrap up: duration-weighted tessituragrams can rank vocal "
         "repertoire by fit -- and this is just the beginning. Next time "
         "a singer asks 'What should I sing?', data might have an answer. "
-        "Thank you very much for your time. I'd be happy to take any "
+        "Thank you very much for your time. I would be happy to take any "
         "questions."
     ))
 
@@ -916,9 +1295,9 @@ def main():
 
     slide_01_title(prs)
     slide_02_hook(prs)
-    slide_03_gap(prs)
+    slide_03_current_approach(prs)
     slide_04_tessitura(prs)
-    slide_05_tessituragram(prs)
+    slide_05_gap(prs)
     slide_06_pipeline(prs)
     slide_07_formula(prs)
     slide_08_dataset(prs)
