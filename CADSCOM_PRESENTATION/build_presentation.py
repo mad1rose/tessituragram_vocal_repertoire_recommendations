@@ -141,6 +141,127 @@ def _add_notes(slide, text: str):
     notes_slide.notes_text_frame.text = text
 
 
+def _format_table_cell(cell, text, size, bold=False, color=CHARCOAL,
+                      align=PP_ALIGN.CENTER, bg=None):
+    """Apply text and font styling to a table cell (python-pptx)."""
+    cell.text = text
+    tf = cell.text_frame
+    tf.vertical_anchor = MSO_ANCHOR.MIDDLE
+    tf.word_wrap = True
+    tf.margin_left = Inches(0.06)
+    tf.margin_right = Inches(0.06)
+    tf.margin_top = Inches(0.05)
+    tf.margin_bottom = Inches(0.05)
+    for p in tf.paragraphs:
+        p.alignment = align
+        for run in p.runs:
+            _set_font(run, size, bold=bold, color=color)
+    if bg is not None:
+        cell.fill.solid()
+        cell.fill.fore_color.rgb = bg
+
+
+def _add_rq2_stability_table(slide):
+    """Table 2 from paper / PDF: mean Kendall's τ (95% CI) by model and experiment."""
+    rows, cols = 5, 3
+    left, top = Inches(0.65), Inches(1.4)
+    tbl_w, tbl_h = Inches(12.05), Inches(3.55)
+    tbl_shape = slide.shapes.add_table(rows, cols, left, top, tbl_w, tbl_h)
+    tbl = tbl_shape.table
+    tbl.columns[0].width = Inches(2.35)
+    tbl.columns[1].width = Inches(4.85)
+    tbl.columns[2].width = Inches(4.85)
+
+    c00 = tbl.cell(0, 0)
+    c10 = tbl.cell(1, 0)
+    c00.merge(c10)
+    _format_table_cell(
+        c00,
+        "Model",
+        Pt(13),
+        bold=True,
+        color=WHITE,
+        align=PP_ALIGN.CENTER,
+        bg=BURGUNDY,
+    )
+
+    exp1_h = "Experiment 1 (5 baselines, 130 perturbations)"
+    exp2_h = "Experiment 2 (20 baselines, 580 perturbations)"
+    _format_table_cell(
+        tbl.cell(0, 1), exp1_h, Pt(12), bold=True, color=WHITE,
+        align=PP_ALIGN.CENTER, bg=BURGUNDY,
+    )
+    _format_table_cell(
+        tbl.cell(0, 2), exp2_h, Pt(12), bold=True, color=WHITE,
+        align=PP_ALIGN.CENTER, bg=BURGUNDY,
+    )
+
+    sub = "Mean \u03C4 (95% CI)"
+    _format_table_cell(
+        tbl.cell(1, 1), sub, Pt(12), bold=True, color=SOFT_GRAY,
+        align=PP_ALIGN.CENTER, bg=LIGHT_GOLD,
+    )
+    _format_table_cell(
+        tbl.cell(1, 2), sub, Pt(12), bold=True, color=SOFT_GRAY,
+        align=PP_ALIGN.CENTER, bg=LIGHT_GOLD,
+    )
+
+    data_rows = [
+        (
+            "Null (random)",
+            "\u22120.04 [\u22120.05, \u22120.02]",
+            "0.00 [\u22120.002, 0.007]",
+            LIGHT_GOLD,
+        ),
+        (
+            "Cosine-only (\u03B1 = 0)",
+            "0.87 [0.84, 0.91]",
+            "0.87 [0.86, 0.88]",
+            None,
+        ),
+        (
+            "Full (\u03B1 = 0.5)",
+            "0.85 [0.81, 0.88]",
+            "0.84 [0.82, 0.85]",
+            LIGHT_GOLD,
+        ),
+    ]
+    for ri, (m, v1, v2, stripe) in enumerate(data_rows, start=2):
+        bg = stripe if stripe is not None else CREAM
+        _format_table_cell(
+            tbl.cell(ri, 0), m, Pt(13), bold=True, color=BURGUNDY,
+            align=PP_ALIGN.LEFT, bg=bg,
+        )
+        _format_table_cell(
+            tbl.cell(ri, 1), v1, Pt(13), bold=False, color=CHARCOAL,
+            align=PP_ALIGN.CENTER, bg=bg,
+        )
+        _format_table_cell(
+            tbl.cell(ri, 2), v2, Pt(13), bold=False, color=CHARCOAL,
+            align=PP_ALIGN.CENTER, bg=bg,
+        )
+
+    cap_tb = _add_textbox(
+        slide, Inches(0.55), Inches(5.08), Inches(12.25), Inches(1.15),
+    )
+    cap_tf = cap_tb.text_frame
+    cap_tf.word_wrap = True
+    p1 = cap_tf.paragraphs[0]
+    p1.alignment = PP_ALIGN.LEFT
+    r1 = p1.add_run()
+    r1.text = (
+        "Table 2. Ranking stability: mean Kendall\u2019s \u03C4 per baseline (95% CI). "
+        "\u03C4 = 1 means identical order; \u03C4 near 0 means unrelated rankings."
+    )
+    _set_font(r1, Pt(14), italic=True, color=SOFT_GRAY)
+    p2 = cap_tf.add_paragraph()
+    p2.space_before = Pt(8)
+    p2.alignment = PP_ALIGN.LEFT
+    r2 = p2.add_run()
+    r2.text = "\u03C4 > 0.7 indicates strong agreement (Kendall, 1948)."
+    _set_font(r2, Pt(15), bold=True, color=CHARCOAL)
+
+
 def _standard_slide(prs, title, bullets, notes, **kw):
     slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank
     _set_slide_bg(slide, CREAM)
@@ -692,12 +813,9 @@ def slide_06_pipeline(prs):
         "The pipeline has five steps. The singer provides three inputs: "
         "their comfortable vocal range, favorite pitches, and pitches to "
         "avoid. We filter out any song whose written range goes beyond "
-        "what the singer specified. Then we construct an ideal pitch "
-        "profile from those preferences. Every pitch in the singer's "
-        "range starts with a small base weight, favorite pitches get a "
-        "large boost, and avoided pitches drop to zero. The result is a "
-        "target fingerprint of what the perfect song would look like for "
-        "that singer. We score every "
+        "what the singer specified. Then we build an ideal pitch profile "
+        "from those inputs -- the next slide explains exactly how that "
+        "profile is formed. We score every "
         "remaining song by how closely its tessituragram matches that "
         "ideal, minus a penalty for time on avoided pitches. Finally, "
         "we return a ranked list from best match to worst."
@@ -791,12 +909,11 @@ def slide_07_formula(prs):
 
     _add_notes(slide, (
         "[~70 seconds]\n\n"
-        "Here is how the scoring works. First, recall how the ideal "
-        "profile is built. We create a list of numbers -- one per pitch "
-        "in the singer's range. Every pitch starts with a small base "
-        "weight so it is not ignored entirely. Favorite pitches get a "
-        "large boost on top of that, and avoided pitches are dropped to "
-        "zero. The result is a profile that peaks at the singer's "
+        "Here is how the scoring works. We create a list of numbers -- "
+        "one per pitch in the singer's range. Every pitch starts with a "
+        "small base weight so it is not ignored entirely. Favorite pitches "
+        "get a large boost on top of that, and avoided pitches are dropped "
+        "to zero. The result is a profile that peaks at the singer's "
         "preferred pitches and has nothing where they want to avoid.\n\n"
         "Each song has its own list built the same way -- one number per "
         "pitch -- but from the actual score, showing how much singing "
@@ -943,43 +1060,67 @@ def slide_09_testing(prs):
     _add_title_in_header(slide, "How We Tested It: Synthetic Self-Retrieval")
     _add_gold_accent_line(slide, Inches(1.18))
 
-    # Explanation steps
-    steps_text = [
-        "1.  Pick a vocal line from the library.",
-        "2.  Build a singer profile from that line\u2019s fingerprint\n"
-        "     (range, top-4 favorites, bottom-2 avoids).",
-        "3.  Can the system find that line among all candidates?",
-    ]
-    _add_body_text(slide, steps_text, top=Inches(1.5), height=Inches(3.0),
-                   size=Pt(22), bullet=False)
+    # ── Two side-by-side cards (less visual noise than 3+3 mini-cards) ──
+    gap = Inches(0.35)
+    card_w = (Inches(12.2) - gap) / 2
+    left_x = Inches(0.55)
+    right_x = left_x + card_w + gap
+    card_top = Inches(1.38)
+    card_h = Inches(5.55)
 
-    # Baselines box
-    shp = slide.shapes.add_shape(
-        MSO_SHAPE.ROUNDED_RECTANGLE,
-        Inches(0.75), Inches(4.4), Inches(11.8), Inches(2.0),
+    def _fill_two_column_card(box, border_rgb, title, lines, title_size=Pt(20)):
+        box.fill.solid()
+        box.fill.fore_color.rgb = LIGHT_GOLD
+        box.line.color.rgb = border_rgb
+        box.line.width = Pt(2.2)
+        tf = box.text_frame
+        tf.word_wrap = True
+        tf.margin_left = Inches(0.28)
+        tf.margin_right = Inches(0.26)
+        tf.margin_top = Inches(0.22)
+
+        ph = tf.paragraphs[0]
+        ph.alignment = PP_ALIGN.LEFT
+        rh = ph.add_run()
+        rh.text = title
+        _set_font(rh, title_size, bold=True, color=BURGUNDY)
+
+        for line in lines:
+            p = tf.add_paragraph()
+            p.space_before = Pt(14)
+            p.alignment = PP_ALIGN.LEFT
+            r = p.add_run()
+            r.text = "  \u2022  " + line
+            _set_font(r, Pt(17), color=CHARCOAL)
+
+    box_l = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, left_x, card_top, card_w, card_h,
     )
-    shp.fill.solid()
-    shp.fill.fore_color.rgb = LIGHT_GOLD
-    shp.line.color.rgb = GOLD
-    shp.line.width = Pt(1.5)
-    tf = shp.text_frame
-    tf.word_wrap = True
-    tf.margin_left = Inches(0.3)
-    tf.margin_top = Inches(0.2)
+    _fill_two_column_card(
+        box_l,
+        TEAL,
+        "Synthetic self-retrieval",
+        [
+            "Pick a vocal line from the library.",
+            "Build a singer profile from that line\u2019s tessituragram "
+            "(range, top-4 favorites, bottom-2 avoids).",
+            "Rank all other candidates \u2014 does the same line rank first?",
+        ],
+    )
 
-    baseline_lines = [
-        ("Three models compared:", True, False),
-        ("Full model:  cosine + avoid penalty (\u03B1 = 0.5)", False, False),
-        ("Cosine-only:  no avoid penalty (\u03B1 = 0)", False, False),
-        ("Null:  range filter \u2192 random order", False, False),
-    ]
-    for i, (text, is_bold, is_italic) in enumerate(baseline_lines):
-        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-        run = p.add_run()
-        run.text = text
-        _set_font(run, Pt(20), bold=is_bold, italic=is_italic, color=CHARCOAL)
-        if is_italic:
-            run.font.color.rgb = BURGUNDY
+    box_r = slide.shapes.add_shape(
+        MSO_SHAPE.ROUNDED_RECTANGLE, right_x, card_top, card_w, card_h,
+    )
+    _fill_two_column_card(
+        box_r,
+        SOFT_GRAY,
+        "Three models compared",
+        [
+            "Full:  cosine similarity + avoid penalty (\u03B1 = 0.5).",
+            "Cosine-only:  similarity without the avoid penalty (\u03B1 = 0).",
+            "Null:  range filter, then random ordering.",
+        ],
+    )
 
     _add_notes(slide, (
         "[~60 seconds]\n\n"
@@ -1017,21 +1158,45 @@ def slide_10_rq1(prs):
     shp.fill.solid()
     shp.fill.fore_color.rgb = BURGUNDY
     shp.line.fill.background()
-    tf = shp.text_frame
-    tf.word_wrap = True
-    tf.margin_left = Inches(0.3)
-    tf.margin_top = Inches(0.12)
-    lines_data = [
-        "Compact HR@1 = 76%  vs. 6% random   |   Expanded HR@1 = 55%  vs. 2% random",
-        "Expanded HR@5 = 86%  \u2014  target in top 5 nearly 9/10 times.",
-    ]
-    for i, text in enumerate(lines_data):
-        p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-        p.alignment = PP_ALIGN.CENTER
-        run = p.add_run()
-        run.text = text
-        _set_font(run, Pt(18), bold=(i == 1), color=WHITE)
-        p.space_after = Pt(4)
+    # Clear bar text and use an aligned mini-table for direct comparison.
+    shp.text_frame.clear()
+    tbl_shape = slide.shapes.add_table(
+        3, 4, Inches(1.15), Inches(5.93), Inches(10.95), Inches(1.02),
+    )
+    tbl = tbl_shape.table
+    tbl.columns[0].width = Inches(4.35)
+    tbl.columns[1].width = Inches(2.2)
+    tbl.columns[2].width = Inches(2.2)
+    tbl.columns[3].width = Inches(2.2)
+
+    # Header row
+    _format_table_cell(tbl.cell(0, 0), "Dataset", Pt(12), bold=True, color=WHITE,
+                       align=PP_ALIGN.CENTER, bg=BURGUNDY)
+    _format_table_cell(tbl.cell(0, 1), "HR@1", Pt(12), bold=True, color=WHITE,
+                       align=PP_ALIGN.CENTER, bg=BURGUNDY)
+    _format_table_cell(tbl.cell(0, 2), "HR@3", Pt(12), bold=True, color=WHITE,
+                       align=PP_ALIGN.CENTER, bg=BURGUNDY)
+    _format_table_cell(tbl.cell(0, 3), "HR@5", Pt(12), bold=True, color=WHITE,
+                       align=PP_ALIGN.CENTER, bg=BURGUNDY)
+
+    # Data rows
+    _format_table_cell(tbl.cell(1, 0), "Compact (101 lines)", Pt(14), bold=True, color=WHITE,
+                       align=PP_ALIGN.LEFT, bg=BURGUNDY)
+    _format_table_cell(tbl.cell(1, 1), "76%", Pt(14), bold=True, color=WHITE,
+                       align=PP_ALIGN.CENTER, bg=BURGUNDY)
+    _format_table_cell(tbl.cell(1, 2), "98%", Pt(14), bold=True, color=WHITE,
+                       align=PP_ALIGN.CENTER, bg=BURGUNDY)
+    _format_table_cell(tbl.cell(1, 3), "100%", Pt(14), bold=True, color=WHITE,
+                       align=PP_ALIGN.CENTER, bg=BURGUNDY)
+
+    _format_table_cell(tbl.cell(2, 0), "Expanded (1,655 lines)", Pt(14), bold=True, color=WHITE,
+                       align=PP_ALIGN.LEFT, bg=BURGUNDY)
+    _format_table_cell(tbl.cell(2, 1), "55%", Pt(14), bold=True, color=WHITE,
+                       align=PP_ALIGN.CENTER, bg=BURGUNDY)
+    _format_table_cell(tbl.cell(2, 2), "80%", Pt(14), bold=True, color=WHITE,
+                       align=PP_ALIGN.CENTER, bg=BURGUNDY)
+    _format_table_cell(tbl.cell(2, 3), "86%", Pt(14), bold=True, color=WHITE,
+                       align=PP_ALIGN.CENTER, bg=BURGUNDY)
 
     _add_notes(slide, (
         "[~60 seconds]\n\n"
@@ -1039,14 +1204,11 @@ def slide_10_rq1(prs):
         "left of each panel is Hit Rate at 1 -- how often the target song "
         "is ranked first -- and Mean Reciprocal Rank on the right, which "
         "captures how high it ranks on average. In Experiment 1, the "
-        "compact 101-line library, the full model puts the right song "
-        "first 76 percent of the time. Random guessing after the same "
-        "range filter gets about 6 percent. In Experiment 2 with 1,655 "
-        "lines, the full model still finds the right song first 55 "
-        "percent of the time -- versus just 2 percent for random. And "
-        "if we look at the top 5 instead of just the top 1, the system "
-        "finds the target song 86 percent of the time -- nearly 9 out "
-        "of 10. These two experiments use different protocols and "
+        "compact 101-line library, hit rates are 76 percent at top 1, "
+        "98 percent at top 3, and 100 percent at top 5. In Experiment 2 "
+        "with 1,655 lines, hit rates are 55 percent at top 1, 80 percent "
+        "at top 3, and 86 percent at top 5. These two experiments use "
+        "different protocols and "
         "different candidate pools, so the drop from 76 to 55 percent "
         "is not purely a library-size effect. The key takeaway is clear: "
         "the system massively outperforms random ordering in both cases."
@@ -1060,15 +1222,7 @@ def slide_11_rq2(prs):
     _add_title_in_header(slide, "Results: Ranking Stability (RQ2)")
     _add_gold_accent_line(slide, Inches(1.18))
 
-    img = str(REPO / "experiment_results" / "RQ2_baselines.png")
-    _add_image_centered(slide, img, top=Inches(1.45), max_w=Inches(8.0), max_h=Inches(3.8))
-
-    bullets = [
-        "Mean Kendall\u2019s \u03C4 = 0.84\u20130.85  (threshold = 0.7).",
-        "Small preference changes \u2192 small ranking changes.",
-        "Stable and trustworthy.",
-    ]
-    _add_body_text(slide, bullets, top=Inches(5.5), height=Inches(1.8), size=Pt(20))
+    _add_rq2_stability_table(slide)
 
     _add_notes(slide, (
         "[~45 seconds]\n\n"
@@ -1158,7 +1312,7 @@ def slide_14_so_what(prs):
 
     bullets = [
         "Data science can make vocal health\ndecisions safer and more objective.",
-        "Pitch-level queries surpass Fach \u2014\nsurface pieces a teacher may never find.",
+        "Pitch-level queries give different\ninformation than broad labels like Fach.",
         "Familiar techniques, novel domain:\ncosine similarity, cold-start, offline eval.",
     ]
     _add_body_text(slide, bullets, top=Inches(1.5), height=Inches(3.0), size=Pt(22))
@@ -1177,9 +1331,10 @@ def slide_14_so_what(prs):
         "consequences. Think about the practical impact for a voice "
         "teacher. Right now, they recommend pieces from their own training "
         "and experience. But a query based on specific pitches -- 'find me "
-        "pieces that live on these notes and avoid those' -- is far more "
-        "granular than Fach. It could surface a piece the teacher has "
-        "never encountered that turns out to be a perfect fit for their "
+        "pieces that live on these notes and avoid those' -- gives a "
+        "different kind of information than Fach labels. It could surface "
+        "a piece the teacher has never encountered that still looks like a "
+        "strong fit on these pitch patterns for their "
         "student's unique voice. For those of you in CS and data science, "
         "this also demonstrates that familiar tools -- cosine similarity, "
         "content-based filtering, offline evaluation -- can work in a "
